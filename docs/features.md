@@ -1,6 +1,6 @@
 # Guide fonctionnel
 
-Description complète de toutes les fonctionnalités de DJ Queue.
+Description complète de toutes les fonctionnalités de Music Live.
 
 ---
 
@@ -200,7 +200,7 @@ Bloc **« Tes demandes ce soir »** : liste des dernières propositions de **cet
 
 À chaque changement de statut :
 - **Vibration** du téléphone (`navigator.vibrate`)
-- **Titre de la page** clignote (`document.title` alterne entre le statut et "DJ Queue")
+- **Titre de la page** clignote (`document.title` alterne entre le statut et "Music Live")
 - **Notification système** (si permission accordée)
 
 ### Indicateur de rate limit

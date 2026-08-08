@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Écran Live — DJ Queue</title>
+  <title>Écran Live — Music Live</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/app.css" />
   <style>
@@ -617,7 +617,7 @@
 <div id="ambientFx"></div>
 <div id="voteFlashOverlay"></div>
 <div id="dvdBounce">
-  <span id="dvdBounceText" class="logo">DJ QUEUE</span>
+  <span id="dvdBounceText" class="logo">MUSIC LIVE</span>
   <img id="dvdBounceLogo" class="logo-img" alt="DVD Logo" />
 </div>
 
@@ -785,7 +785,7 @@
   const visualModes = ["aurora", "pulse", "strobe", "spectrum", "nebula", "laser", "vortex", "party", "dvd", "bpm-sync"];
   let dvdAnimId = null;
   let dvdHue = 0;
-  let dvdConfig = { mode: "text", text: "DJ QUEUE", logoUrl: "" };
+  let dvdConfig = { mode: "text", text: "MUSIC LIVE", logoUrl: "" };
   let currentEventName = "Soirée";
   let dvdForcedByQuery = false;
   let donationGoalAmount = 0;
@@ -895,7 +895,7 @@
     txt.style.display = "inline";
     txt.textContent = mode === "event"
       ? (currentEventName || "Soirée").slice(0, 26)
-      : (dvdConfig.text || "DJ QUEUE");
+      : (dvdConfig.text || "MUSIC LIVE");
   }
 
   function startDvdBounce() {

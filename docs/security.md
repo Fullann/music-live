@@ -1,6 +1,6 @@
 # Sécurité
 
-Ce document décrit toutes les mesures de sécurité implémentées dans DJ Queue.
+Ce document décrit toutes les mesures de sécurité implémentées dans Music Live.
 
 ---
 

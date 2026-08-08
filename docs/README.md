@@ -1,6 +1,6 @@
-# Documentation — DJ Queue
+# Documentation — Music Live
 
-Bienvenue dans la documentation complète du projet **DJ Queue**, une application web temps réel permettant aux invités d'une soirée de proposer des chansons à un DJ via leur smartphone.
+Bienvenue dans la documentation complète du projet **Music Live**, une application web temps réel permettant aux invités d'une soirée de proposer des chansons à un DJ via leur smartphone.
 
 ---
 
@@ -20,7 +20,7 @@ Bienvenue dans la documentation complète du projet **DJ Queue**, une applicatio
 
 ## Présentation du projet
 
-**DJ Queue** est une application Node.js/Express permettant :
+**Music Live** est une application Node.js/Express permettant :
 
 - Aux **DJ** de créer et gérer des soirées, accepter/refuser des demandes, contrôler la lecture Spotify, voir des statistiques en temps réel.
 - Aux **invités** de scanner un QR code, proposer des chansons Spotify, voter pour leurs préférées et être notifiés quand leur chanson est jouée.

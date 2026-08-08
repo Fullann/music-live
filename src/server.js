@@ -173,8 +173,8 @@ app.get("/manifest-user.json", (req, res) => {
     });
   }
   res.type("application/manifest+json").json({
-    name:             "DJ Queue",
-    short_name:       "DJ Queue",
+    name:             "Music Live",
+    short_name:       "Music Live",
     description:      "Proposer des morceaux à la soirée",
     start_url:        `/user/${e}`,
     scope:            "/",

@@ -1,6 +1,6 @@
 # Événements Socket.IO
 
-DJ Queue utilise Socket.IO 4 pour la communication temps réel. Tous les clients (DJ et invités) rejoignent une **room** identifiée par l'`eventId`.
+Music Live utilise Socket.IO 4 pour la communication temps réel. Tous les clients (DJ et invités) rejoignent une **room** identifiée par l'`eventId`.
 
 ---
 

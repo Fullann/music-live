@@ -1,4 +1,4 @@
-# 🎵 DJ Queue App
+# 🎵 Music Live App
 
 Une application web temps réel permettant aux participants d'une soirée de proposer des musiques au DJ via QR code, avec système de votes et lecture automatique Spotify.
 
@@ -71,8 +71,8 @@ Une application web temps réel permettant aux participants d'une soirée de pro
 
 ### 1. Cloner le repository
 ```bash
-git clone https://github.com/Fullann/dj-queue-app.git
-cd dj-queue-app
+git clone https://github.com/Fullann/music-live.git
+cd music-live
 ```
 
 ### 2. Installer les dépendances
@@ -86,13 +86,13 @@ npm install
 mysql -u root -p
 
 # Créer la base de données
-CREATE DATABASE dj_queue CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE music_live CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'djuser'@'localhost' IDENTIFIED BY 'votre_mot_de_passe';
-GRANT ALL PRIVILEGES ON dj_queue.* TO 'djuser'@'localhost';
+GRANT ALL PRIVILEGES ON music_live.* TO 'djuser'@'localhost';
 FLUSH PRIVILEGES;
 
 # Importer le schéma
-mysql -u djuser -p dj_queue < db/db.sql
+mysql -u djuser -p music_live < db/db.sql
 ```
 
 ### 4. Configuration Spotify
@@ -146,7 +146,7 @@ L'application sera accessible sur `http://localhost:3000`
 ## 📁 Structure du Projet
 
 ```
-dj-queue-app/
+music-live/
 ├── src/
 │   ├── config/          # Configuration (DB, Redis, Session)
 │   ├── controllers/     # Logique métier
@@ -300,7 +300,7 @@ docker-compose up -d
 5. Utiliser PM2 pour process management
 ```bash
 npm install -g pm2
-pm2 start src/server.js --name dj-queue
+pm2 start src/server.js --name music-live
 pm2 startup
 pm2 save
 ```
@@ -335,7 +335,7 @@ npm install -g pm2
 ```bash
 cd /chemin/vers/votre/app
 npm ci --omit=dev
-pm2 start src/server.js --name dj-queue
+pm2 start src/server.js --name music-live
 pm2 save
 ```
 

@@ -46,21 +46,21 @@ cd ..
 
 ```bash
 # Schéma de base
-mysql -u djuser -p dj_queue < db/db.sql
+mysql -u djuser -p music_live < db/db.sql
 
 # Migrations (dans l'ordre — voir docs/database.md pour la liste complète)
-mysql -u djuser -p dj_queue < db/migration_spotify_auth.sql
-mysql -u djuser -p dj_queue < db/migration_spotify_tokens_dj.sql
-mysql -u djuser -p dj_queue < db/migration_fallback_playlist.sql
-mysql -u djuser -p dj_queue < db/migration_donation.sql
-mysql -u djuser -p dj_queue < db/migration_user_bans.sql
-mysql -u djuser -p dj_queue < db/migration_request_client_id.sql
-mysql -u djuser -p dj_queue < db/migration_mod_token.sql
-mysql -u djuser -p dj_queue < db/migration_starts_at.sql
-mysql -u djuser -p dj_queue < db/migration_repeat_cooldown.sql
-mysql -u djuser -p dj_queue < db/migration_projection_visuals.sql
-mysql -u djuser -p dj_queue < db/migration_projection_visuals_auto.sql
-mysql -u djuser -p dj_queue < db/migration_abuse_and_analytics.sql
+mysql -u djuser -p music_live < db/migration_spotify_auth.sql
+mysql -u djuser -p music_live < db/migration_spotify_tokens_dj.sql
+mysql -u djuser -p music_live < db/migration_fallback_playlist.sql
+mysql -u djuser -p music_live < db/migration_donation.sql
+mysql -u djuser -p music_live < db/migration_user_bans.sql
+mysql -u djuser -p music_live < db/migration_request_client_id.sql
+mysql -u djuser -p music_live < db/migration_mod_token.sql
+mysql -u djuser -p music_live < db/migration_starts_at.sql
+mysql -u djuser -p music_live < db/migration_repeat_cooldown.sql
+mysql -u djuser -p music_live < db/migration_projection_visuals.sql
+mysql -u djuser -p music_live < db/migration_projection_visuals_auto.sql
+mysql -u djuser -p music_live < db/migration_abuse_and_analytics.sql
 ```
 
 ### 5. Lancer en développement
@@ -82,12 +82,12 @@ Copier `env.example` en `.env` à la racine du projet.
 | `NODE_ENV` | Oui | `development` | `development` ou `production` |
 | `PORT` | Non | `3000` | Port d'écoute (défaut : 3000) |
 | `HOST` | Non | `0.0.0.0` | Interface d'écoute |
-| `BASE_URL` | Production | `https://dj-queue.fullann.ch` | URL publique (pour QR codes) |
+| `BASE_URL` | Production | `https://music-live.fullann.ch` | URL publique (pour QR codes) |
 | `DB_HOST` | Oui | `localhost` | Hôte MySQL |
 | `DB_PORT` | Non | `3306` | Port MySQL |
 | `DB_USER` | Oui | `djuser` | Utilisateur MySQL |
 | `DB_PASSWORD` | Oui | `...` | Mot de passe MySQL |
-| `DB_NAME` | Oui | `dj_queue` | Nom de la base de données |
+| `DB_NAME` | Oui | `music_live` | Nom de la base de données |
 | `SESSION_SECRET` | Oui | `64-hex-chars` | Secret de signature des sessions (min 32 bytes) |
 | `REDIS_HOST` | Production | `localhost` | Hôte Redis |
 | `REDIS_PORT` | Production | `6379` | Port Redis |
@@ -160,7 +160,7 @@ Dans GitHub → **Settings → Secrets and variables → Actions**, ajoute (noms
 | `PROD_DB_HOST` | Oui | Hôte MySQL (ex. `mysql123.o2switch.net` ou IP) |
 | `PROD_DB_USER` | Oui | Utilisateur MySQL |
 | `PROD_DB_PASSWORD` | Souvent | Mot de passe (peut être vide pour un compte sans mot de passe — rare) |
-| `PROD_DB_NAME` | Oui | Nom de la base (ex. `xxx_dj_queue`) |
+| `PROD_DB_NAME` | Oui | Nom de la base (ex. `xxx_music_live`) |
 | `PROD_DB_PORT` | Non | Port (sinon **3306** ; laisser vide = 3306) |
 | `PROD_PUBLIC_URL` | Non | URL publique **sans** slash final (ex. `https://dj.example.com`) pour tester `/health` |
 
@@ -248,10 +248,10 @@ npm run start
 # → node --no-experimental-fetch app.js
 
 # Vérifier les logs (si PM2)
-pm2 logs dj-queue
+pm2 logs music-live
 
 # Redémarrer (si PM2)
-pm2 restart dj-queue
+pm2 restart music-live
 
 # Vérifier le statut des connexions DB
 mysql -u djuser -p -e "SHOW PROCESSLIST;"
@@ -263,10 +263,10 @@ mysql -u djuser -p -e "SHOW PROCESSLIST;"
 
 ```bash
 # Se connecter au container MySQL
-docker exec -it db_mysql_1 mysql -u djuser -pdjpassword dj_queue
+docker exec -it db_mysql_1 mysql -u djuser -pdjpassword music_live
 
 # Ou exécuter un fichier SQL directement
-docker exec -i db_mysql_1 mysql -u djuser -pdjpassword dj_queue < migration_donation.sql
+docker exec -i db_mysql_1 mysql -u djuser -pdjpassword music_live < migration_donation.sql
 ```
 
 ---
