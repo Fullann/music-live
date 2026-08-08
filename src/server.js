@@ -38,7 +38,7 @@ const setupSocketHandlers = require("./sockets/eventHandlers");
 // Services
 const rateLimitService = require("./services/rateLimit.service");
 
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = process.env.PORT || 3000;
 const HOST =
   process.env.HOST ||
   process.env.IP ||

@@ -52,9 +52,7 @@ async function connectRedis() {
       console.log("Connexion Redis établie");
     } catch (err) {
       console.error("Impossible de se connecter à Redis:", err);
-      if (process.env.NODE_ENV === "production") {
-        process.exit(1);
-      }
+      console.warn("L'application va continuer avec le store mémoire en mode dégradé.");
     }
   }
 }

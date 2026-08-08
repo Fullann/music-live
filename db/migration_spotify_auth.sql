@@ -11,5 +11,3 @@ ALTER TABLE `djs`
 -- Note: MySQL ne permet pas plusieurs NULL dans un UNIQUE index selon la version
 ALTER TABLE `djs` DROP INDEX `email`;
 
--- Recréer un index non-unique sur email pour les performances
-ALTER TABLE `djs` ADD INDEX `idx_email` (`email`);
