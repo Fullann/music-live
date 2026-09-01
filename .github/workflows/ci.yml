@@ -34,7 +34,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: ciroot
           MYSQL_DATABASE: dj_queue_ci
         ports:
-          3306:3306
+          - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -pciroot"
           --health-interval=5s
