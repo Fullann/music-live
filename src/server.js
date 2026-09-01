@@ -13,6 +13,7 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const crypto = require("crypto");
 const path = require("path");
+const compression = require("compression");
 
 // Config
 const { connectRedis } = require("./config/redis");
@@ -54,7 +55,8 @@ function renderErrorPage(res, _status, title, message, opts = {}) {
   return res.redirect(`/error?${qs.toString()}`);
 }
 
-// === Middlewares de sécurité ===
+// === Middlewares de performance et sécurité ===
+app.use(compression());
 app.use(helmetConfig);
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
@@ -186,8 +188,13 @@ app.get("/manifest-user.json", (req, res) => {
   });
 });
 
-// === Static files (pas de rate limit) ===
-app.use(express.static(path.join(__dirname, "/public")));
+// === Static files (cache 1 jour en prod, pas de rate limit) ===
+app.use(
+  express.static(path.join(__dirname, "/public"), {
+    maxAge: process.env.NODE_ENV === "production" ? "1d" : 0,
+    etag: true,
+  }),
+);
 // NOTE: /views n'est PAS exposé en static — les HTML sont servis uniquement via
 // les routes dédiées ci-dessous afin que les vérifications de session soient appliquées.
 

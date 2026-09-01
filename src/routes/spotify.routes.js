@@ -7,6 +7,33 @@ const { handleValidationErrors } = require("../middlewares/validation");
 const { getValidEventToken }     = require("../services/spotifyToken.service");
 const { requireAuth, requireEventOwnership } = require("../middlewares/auth");
 
+// Cache mémoire des recherches Spotify (TTL 15 minutes, max 500 entrées)
+const SPOTIFY_SEARCH_CACHE_TTL_MS = 15 * 60 * 1000;
+const MAX_SEARCH_CACHE_ENTRIES = 500;
+const searchCache = new Map(); // normalizedQuery -> { tracks, timestamp }
+
+function getCachedSearch(query) {
+  const key = query.trim().toLowerCase();
+  const cached = searchCache.get(key);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > SPOTIFY_SEARCH_CACHE_TTL_MS) {
+    searchCache.delete(key);
+    return null;
+  }
+  return cached.tracks;
+}
+
+function setCachedSearch(query, tracks) {
+  if (searchCache.size >= MAX_SEARCH_CACHE_ENTRIES) {
+    const oldestKey = searchCache.keys().next().value;
+    if (oldestKey) searchCache.delete(oldestKey);
+  }
+  searchCache.set(query.trim().toLowerCase(), {
+    tracks,
+    timestamp: Date.now(),
+  });
+}
+
 // Recherche Spotify
 router.get("/search", async (req, res) => {
   const { q, eventId } = req.query;
@@ -17,6 +44,12 @@ router.get("/search", async (req, res) => {
 
   if (!eventId) {
     return res.status(400).json({ error: "eventId manquant" });
+  }
+
+  // Vérifier d'abord le cache
+  const cachedTracks = getCachedSearch(q);
+  if (cachedTracks) {
+    return res.json({ tracks: cachedTracks, cached: true });
   }
 
   try {
@@ -52,6 +85,9 @@ router.get("/search", async (req, res) => {
       duration_ms: track.duration_ms,
       preview_url: track.preview_url,
     }));
+
+    // Sauvegarder dans le cache
+    setCachedSearch(q, tracks);
 
     res.json({ tracks });
   } catch (error) {

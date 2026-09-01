@@ -8,11 +8,13 @@
     "dev": "nodemon src/server.js",
     "ci:syntax": "node scripts/ci-syntax-check.js",
     "ci:db": "node scripts/check-database-schema.js",
-    "ci": "npm run ci:syntax && npm run ci:db"
+    "ci": "npm run ci:syntax && npm run ci:db",
+    "build:css": "tailwindcss -i src/public/css/tailwind-input.css -o src/public/css/tailwind.min.css --minify"
   },
   "dependencies": {
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
     "connect-redis": "^7.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
@@ -30,6 +32,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "tailwindcss": "^3.4.19"
   }
 }

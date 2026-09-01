@@ -140,6 +140,37 @@ const DJ_MESSAGE_TTL_MS = 5 * 60 * 1000;
 const recentRejectUndo = new Map(); // requestId → rejectedAt (ms)
 const UNDO_REJECT_WINDOW_MS = 8000;
 
+/** Throttle anti-flood sur les votes (max 6 votes par fenêtre de 2 secondes par participant) */
+const voteRateLimitMap = new Map(); // voterKey → number[]
+const VOTE_FLOOD_MAX = 6;
+const VOTE_FLOOD_WINDOW_MS = 2000;
+
+function isVoteFlooding(voterKey) {
+  const now = Date.now();
+  let timestamps = voteRateLimitMap.get(voterKey) || [];
+  timestamps = timestamps.filter((t) => now - t < VOTE_FLOOD_WINDOW_MS);
+  if (timestamps.length >= VOTE_FLOOD_MAX) {
+    voteRateLimitMap.set(voterKey, timestamps);
+    return true;
+  }
+  timestamps.push(now);
+  voteRateLimitMap.set(voterKey, timestamps);
+  return false;
+}
+
+// Nettoyage périodique des anciennes entrées du vote throttle (toutes les 10 minutes)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamps] of voteRateLimitMap.entries()) {
+    const fresh = timestamps.filter((t) => now - t < VOTE_FLOOD_WINDOW_MS);
+    if (fresh.length === 0) {
+      voteRateLimitMap.delete(key);
+    } else {
+      voteRateLimitMap.set(key, fresh);
+    }
+  }
+}, 10 * 60 * 1000).unref();
+
 function getRecentDjMessage(eventId) {
   const row = djMessageCache.get(eventId);
   if (!row) return null;
@@ -568,6 +599,12 @@ function setupSocketHandlers(io) {
         return;
       }
 
+      // Protection anti-flood sur les votes
+      if (isVoteFlooding(voterKey)) {
+        socket.emit("vote-error", { message: "Trop de votes rapides. Ralentis un peu !" });
+        return;
+      }
+
       try {
         // Vérifier que la chanson existe et est acceptée
         const [requestRows] = await db.query(
@@ -623,28 +660,29 @@ function setupSocketHandlers(io) {
           resolvedMyVote = voteType;
         }
 
-        // Récupérer les votes mis à jour
-        const [upvotes] = await db.query(
-          'SELECT COUNT(*) as count FROM votes WHERE request_id = ? AND vote_type = "up"',
+        // Récupérer les votes mis à jour en UNE SEULE requête optimisée
+        const [voteCounts] = await db.query(
+          `SELECT 
+             COALESCE(SUM(CASE WHEN vote_type = 'up' THEN 1 ELSE 0 END), 0) AS upvotes,
+             COALESCE(SUM(CASE WHEN vote_type = 'down' THEN 1 ELSE 0 END), 0) AS downvotes
+           FROM votes WHERE request_id = ?`,
           [requestId],
         );
 
-        const [downvotes] = await db.query(
-          'SELECT COUNT(*) as count FROM votes WHERE request_id = ? AND vote_type = "down"',
-          [requestId],
-        );
+        const upvotesCount = Number(voteCounts[0]?.upvotes || 0);
+        const downvotesCount = Number(voteCounts[0]?.downvotes || 0);
 
         // Notifier tous les clients
         io.to(eventId).emit("vote-updated", {
           requestId,
-          upvotes: upvotes[0].count,
-          downvotes: downvotes[0].count,
+          upvotes: upvotesCount,
+          downvotes: downvotesCount,
         });
         socket.emit("vote-confirmed", {
           requestId,
           myVote: resolvedMyVote,
-          upvotes: upvotes[0].count,
-          downvotes: downvotes[0].count,
+          upvotes: upvotesCount,
+          downvotes: downvotesCount,
         });
       } catch (error) {
         console.error("Erreur vote:", error);
@@ -1321,4 +1359,7 @@ function setupSocketHandlers(io) {
 }
 
 module.exports = setupSocketHandlers;
-module.exports.clearNowPlayingCache = (eventId) => nowPlayingCache.delete(eventId);
+module.exports.clearNowPlayingCache = (eventId) => {
+  nowPlayingCache.delete(eventId);
+  djMessageCache.delete(eventId);
+};
