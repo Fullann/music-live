@@ -170,6 +170,16 @@ body { background: var(--bg-base); color: var(--text-primary); }
 /* Visibility utility */
 .hidden { display: none !important; }
 
+@media (min-width: 640px) {
+  .sm\:hidden { display: none !important; }
+}
+@media (min-width: 768px) {
+  .md\:hidden { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .lg\:hidden { display: none !important; }
+}
+
 /* Modal backdrop */
 .modal-backdrop {
   position: fixed; inset: 0;
