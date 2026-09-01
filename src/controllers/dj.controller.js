@@ -86,9 +86,30 @@ class DjController {
         [djId],
       );
 
+      // Soirées passées récentes du DJ (avec stats pour affichage direct dans le dashboard)
+      const [pastEvents] = await db.query(
+        `SELECT 
+          e.id,
+          e.name,
+          e.created_at,
+          e.ended_at,
+          TIMESTAMPDIFF(MINUTE, e.created_at, e.ended_at) as duration_minutes,
+          COUNT(DISTINCT r.id) as total_songs,
+          COUNT(DISTINCT CASE WHEN r.status = 'played' THEN r.id END) as played_songs,
+          COUNT(DISTINCT CASE WHEN r.status = 'rejected' THEN r.id END) as rejected_songs
+        FROM events e
+        LEFT JOIN requests r ON e.id = r.event_id
+        WHERE e.dj_id = ? AND e.ended_at IS NOT NULL
+        GROUP BY e.id
+        ORDER BY e.ended_at DESC
+        LIMIT 10`,
+        [djId],
+      );
+
       res.json({
         dj,
         events,
+        pastEvents,
         stats: {
           totalEvents: stats.totalEvents || 0,
           totalSongs: stats.totalSongs || 0,

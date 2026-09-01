@@ -3,60 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — Music Live</title>
+  <title>Console DJ & Statistiques — Music Live</title>
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
 </head>
 <body style="background:var(--bg-base);color:var(--text-primary)">
 
-<!-- ─── Layout ─────────────────────────────────────────────── -->
 <div class="flex h-screen overflow-hidden">
 
-  <!-- ── Sidebar ─────────────────────────────────────────── -->
-  <aside id="sidebar" class="hidden lg:flex flex-col w-56 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-    <!-- Logo -->
+  <!-- ── Barre Latérale Navigation (Desktop) ─────────────────────────── -->
+  <aside id="sidebar" class="hidden lg:flex flex-col w-60 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
+    <!-- Logo App -->
     <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid var(--border)">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--accent)">
-        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/20" style="background:var(--accent)">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
           <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
           <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
         </svg>
       </div>
-      <span class="font-semibold text-sm" style="color:var(--text-primary)">Music Live</span>
+      <div>
+        <span class="font-bold text-sm tracking-tight" style="color:var(--text-primary)">Music Live</span>
+        <p class="text-[10px] uppercase font-bold tracking-widest" style="color:var(--accent)">Console DJ</p>
+      </div>
     </div>
 
-    <!-- DJ name -->
-    <div class="px-5 py-4" style="border-bottom:1px solid var(--border)">
-      <p class="text-xs font-medium uppercase tracking-widest mb-1" style="color:var(--text-muted)">Connecté</p>
-      <p id="sidebarDjName" class="text-sm font-semibold truncate" style="color:var(--text-primary)">—</p>
+    <!-- Profil DJ connecté -->
+    <div class="px-5 py-4 flex items-center gap-3" style="border-bottom:1px solid var(--border)">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase shrink-0" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)">
+        DJ
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-muted)">Connecté</p>
+        <p class="text-sm font-bold truncate dj-name-text" style="color:var(--text-primary)">Chargement...</p>
+      </div>
     </div>
 
-    <!-- Nav -->
-    <nav class="flex-1 p-3 space-y-0.5">
+    <!-- Liens de navigation -->
+    <nav class="flex-1 p-3 space-y-1 pt-4">
       <a href="/dashboard" class="nav-item active">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
           <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
         </svg>
-        Dashboard
+        Dashboard Live
       </a>
       <a href="/history" class="nav-item">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
-        Historique
+        Historique Soirées
       </a>
       <a href="/profile" class="nav-item">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
         </svg>
-        Profil
+        Mon Profil
       </a>
     </nav>
 
-    <!-- Footer -->
+    <!-- Déconnexion -->
     <div class="p-3" style="border-top:1px solid var(--border)">
       <button id="btnLogout" class="nav-item danger w-full">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -69,193 +76,306 @@
     </div>
   </aside>
 
-  <!-- ── Main ─────────────────────────────────────────────── -->
+  <!-- ── Contenu Principal ───────────────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
-    <!-- Topbar -->
-    <header class="flex items-center justify-between px-6 py-4 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
-      <!-- Mobile hamburger -->
-      <button id="mobileSidebarBtn" class="lg:hidden btn btn-ghost btn-icon mr-3">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div class="flex-1">
-        <h1 class="text-lg font-semibold" style="color:var(--text-primary)">Dashboard</h1>
-        <p id="djName" class="text-xs mt-0.5" style="color:var(--text-secondary)">Chargement...</p>
+    <!-- Topbar Mobile & Desktop -->
+    <header class="flex items-center justify-between px-5 sm:px-8 py-3.5 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
+      <div class="flex items-center gap-3">
+        <!-- Bouton hamburger (strictement masqué sur desktop) -->
+        <button id="mobileSidebarBtn" class="lg:hidden btn btn-ghost btn-icon mr-1">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight" style="color:var(--text-primary)">Console Régie & Analytics</h1>
+            <div id="liveStatusPill"></div>
+          </div>
+          <p class="text-xs text-muted">Vue d'ensemble de vos sets et historique de performance</p>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <a href="/history" class="btn btn-ghost btn-sm hidden sm:inline-flex">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
+
+      <div class="flex items-center gap-2.5">
+        <a href="/history" class="btn btn-ghost btn-sm hidden sm:inline-flex" title="Consulter l'historique complet">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Historique
         </a>
-        <button id="btnCreateEvent" class="btn btn-primary btn-sm">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          <span class="hidden sm:inline">Nouvelle soirée</span>
+        <button id="btnCreateEvent" class="btn btn-primary btn-sm font-semibold shadow-md shadow-purple-500/20">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="hidden sm:inline">Nouvelle Soirée</span>
           <span class="sm:hidden">Soirée</span>
         </button>
-        <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Passer en mode clair">
+        <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Alterner mode clair / sombre">
           <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button id="btnLogoutMobile" class="lg:hidden btn btn-ghost btn-icon">
+        <button id="btnLogoutMobile" class="lg:hidden btn btn-ghost btn-icon" title="Déconnexion">
           <svg class="w-4 h-4" style="color:var(--red)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
         </button>
       </div>
     </header>
 
-    <!-- Scrollable content -->
-    <main class="flex-1 overflow-y-auto p-5 lg:p-6 space-y-5 lg:space-y-6">
+    <!-- Zone de contenu avec scroll fluide -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
 
-      <!-- Stats -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card stat-card">
-          <p class="stat-label">Soirées totales</p>
-          <p id="totalEvents" class="stat-value mt-2" style="color:var(--accent)">—</p>
-        </div>
-        <div class="card stat-card">
-          <p class="stat-label">Chansons jouées</p>
-          <p id="totalSongs" class="stat-value mt-2" style="color:var(--green)">—</p>
-        </div>
-        <div class="card stat-card">
-          <p class="stat-label">Votes moyens</p>
-          <p id="avgVotes" class="stat-value mt-2" style="color:var(--cyan)">—</p>
-        </div>
-        <div class="card stat-card">
-          <p class="stat-label">Taux acceptation</p>
-          <p id="acceptRate" class="stat-value mt-2" style="color:var(--text-primary)">—</p>
+      <!-- ── Bannière Hero & Statut DJ ───────────────────────────────── -->
+      <div class="dash-card p-6 relative overflow-hidden" style="background:linear-gradient(135deg, rgba(124,92,252,0.12) 0%, rgba(6,182,212,0.06) 100%), var(--bg-surface);border:1px solid rgba(124,92,252,0.25)">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full" style="background:var(--accent);color:#fff">
+                Espace Régie DJ
+              </span>
+            </div>
+            <h2 id="welcomeDjTitle" class="text-2xl sm:text-3xl font-black tracking-tight" style="color:var(--text-primary)">
+              Bienvenue, DJ
+            </h2>
+            <p class="text-xs sm:text-sm mt-1 max-w-xl" style="color:var(--text-secondary)">
+              Pilotez les votes de votre public en temps réel, projetez le QR code sur grand écran et analysez l'impact de chacun de vos morceaux.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <button id="btnCreateEventHero" class="btn btn-primary font-semibold shadow-lg shadow-purple-500/25">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Lancer une Soirée
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Active events -->
-      <div class="card overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border)">
-          <div class="flex items-center gap-2.5">
-            <span class="w-2 h-2 rounded-full dot-pulse" style="background:var(--green)"></span>
-            <h2 class="text-sm font-semibold" style="color:var(--text-primary)">Soirées actives</h2>
+      <!-- ── 4 Cartes Métriques Audio Pro (KPIs) ─────────────────────── -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        <!-- KPI 1 : Soirées -->
+        <div class="dash-card p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Soirées Total</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--accent-dim);color:var(--accent)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </div>
           </div>
-          <button id="btnCreateEventInline" class="btn btn-ghost btn-sm" style="font-size:0.8rem">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Créer
+          <div>
+            <p id="statTotalEvents" class="text-2xl sm:text-3xl font-black" style="color:var(--text-primary)">0</p>
+            <p class="text-[11px] mt-1" style="color:var(--text-muted)">Sessions live & passées</p>
+          </div>
+        </div>
+
+        <!-- KPI 2 : Morceaux joués -->
+        <div class="dash-card p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Morceaux Joués</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--green-dim);color:var(--green)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </div>
+          </div>
+          <div>
+            <p id="statTotalSongs" class="text-2xl sm:text-3xl font-black" style="color:var(--green)">0</p>
+            <p class="text-[11px] mt-1" style="color:var(--text-muted)">Diffusés au public</p>
+          </div>
+        </div>
+
+        <!-- KPI 3 : Taux d'acceptation -->
+        <div class="dash-card p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Taux d'Acceptation</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:rgba(6,182,212,0.12);color:var(--cyan)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div>
+            <p id="statAcceptRate" class="text-2xl sm:text-3xl font-black" style="color:var(--cyan)">0%</p>
+            <p class="text-[11px] mt-1" style="color:var(--text-muted)">Validation des demandes</p>
+          </div>
+        </div>
+
+        <!-- KPI 4 : Votes moyens -->
+        <div class="dash-card p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Engagement Public</span>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:rgba(245,158,11,0.12);color:var(--amber)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-baseline gap-1">
+              <p id="statAvgVotes" class="text-2xl sm:text-3xl font-black" style="color:var(--amber)">0.0</p>
+              <span class="text-xs font-semibold" style="color:var(--amber)">votes / son</span>
+            </div>
+            <p class="text-[11px] mt-1" style="color:var(--text-muted)">Indice de ferveur</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Barre d'onglets de filtrage rapide ─────────────────────── -->
+      <div class="flex flex-wrap items-center justify-between gap-3 p-1.5 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+        <div class="flex flex-wrap items-center gap-1">
+          <button class="dash-tab-btn active" data-tab="all">
+            Toutes les sections
+          </button>
+          <button class="dash-tab-btn" data-tab="active">
+            🟢 En Direct & À Venir (<span id="activeBadgeCount">0</span>)
+          </button>
+          <button class="dash-tab-btn" data-tab="past">
+            📁 Soirées Passées & Stats (<span id="pastBadgeCount">0</span>)
+          </button>
+          <button class="dash-tab-btn" data-tab="top">
+            🔥 Top Morceaux
           </button>
         </div>
-        <div id="activeEventsList" class="divide-y" style="border-color:var(--border)">
-          <div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Chargement...</div>
-        </div>
       </div>
 
-      <!-- Top songs -->
-      <div class="card overflow-hidden">
-        <div class="flex items-center gap-2.5 px-5 py-4" style="border-bottom:1px solid var(--border)">
-          <svg class="w-4 h-4 shrink-0" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-            <polyline points="17 6 23 6 23 12"/>
-          </svg>
-          <h2 class="text-sm font-semibold" style="color:var(--text-primary)">Top chansons — toutes soirées</h2>
+      <!-- ── SECTION 1 : Ce qu'on fait (Soirées en direct & actives) ───── -->
+      <section id="sectionActiveEvents" class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-2">
+            <span class="live-pulse-dot"></span>
+            <h2 class="text-base font-bold tracking-tight" style="color:var(--text-primary)">
+              Ce qu'on fait — Soirées Actives & En Direct
+            </h2>
+          </div>
+          <span class="text-xs" style="color:var(--text-muted)">Sessions ouvertes aux invités</span>
         </div>
-        <div id="topSongs">
-          <div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Chargement...</div>
+
+        <div id="activeEventsList">
+          <div class="p-8 text-center text-sm" style="color:var(--text-muted)">Chargement de la console live...</div>
         </div>
-      </div>
+      </section>
+
+      <!-- ── SECTION 2 : Soirées Passées & Accès Direct aux Statistiques ── -->
+      <section id="sectionPastEvents" class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            <h2 class="text-base font-bold tracking-tight" style="color:var(--text-primary)">
+              Soirées Passées — Performances & Analytics
+            </h2>
+          </div>
+          <a href="/history" class="text-xs font-semibold hover:underline" style="color:var(--accent)">
+            Voir tout l'historique complet →
+          </a>
+        </div>
+
+        <div id="pastEventsList">
+          <div class="p-8 text-center text-sm" style="color:var(--text-muted)">Chargement des soirées passées...</div>
+        </div>
+      </section>
+
+      <!-- ── SECTION 3 : Top Chansons & Hits du Public ───────────────── -->
+      <section id="sectionTopSongs" class="dash-card overflow-hidden">
+        <div class="flex items-center justify-between p-5" style="border-bottom:1px solid var(--border)">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(245,158,11,0.12);color:var(--amber)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold" style="color:var(--text-primary)">Hit-Parade — Morceaux les plus demandés</h2>
+              <p class="text-[11px]" style="color:var(--text-muted)">Statistiques globales de popularité auprès de votre public</p>
+            </div>
+          </div>
+        </div>
+        <div id="topSongsList">
+          <div class="p-8 text-center text-sm" style="color:var(--text-muted)">Chargement des titres phares...</div>
+        </div>
+      </section>
 
     </main>
   </div>
 </div>
 
-<!-- ─── Mobile sidebar overlay ─────────────────────────────── -->
-<div id="mobileSidebarOverlay" class="hidden fixed inset-0 z-40 lg:hidden" style="background:rgba(0,0,0,0.6)" onclick="closeMobileSidebar()"></div>
+<!-- ─── Tiroir Navigation Mobile (Sidebar Drawer) ───────────────────── -->
+<div id="mobileSidebarOverlay" class="hidden fixed inset-0 z-40 lg:hidden" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)"></div>
 <aside id="mobileSidebar" class="hidden fixed left-0 top-0 bottom-0 z-50 flex flex-col w-64 lg:hidden" style="background:var(--bg-surface);border-right:1px solid var(--border)">
   <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border)">
     <div class="flex items-center gap-3">
       <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--accent)">
-        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
         </svg>
       </div>
-      <span class="font-semibold text-sm">Music Live</span>
+      <span class="font-bold text-sm">Music Live</span>
     </div>
-    <button onclick="closeMobileSidebar()" class="btn btn-ghost btn-icon btn-sm">
+    <button id="mobileSidebarCloseBtn" class="btn btn-ghost btn-icon btn-sm">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-  <nav class="flex-1 p-3 space-y-0.5">
+  <nav class="flex-1 p-3 space-y-1">
     <a href="/dashboard" class="nav-item active">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      Dashboard
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard Live
     </a>
     <a href="/history" class="nav-item">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Historique
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Historique Soirées
     </a>
     <a href="/profile" class="nav-item">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Profil
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Mon Profil
     </a>
   </nav>
   <div class="p-3" style="border-top:1px solid var(--border)">
     <button id="btnLogoutMobile2" class="nav-item danger w-full">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Déconnexion
     </button>
   </div>
 </aside>
 
-<!-- ─── Modal Créer soirée ──────────────────────────────────── -->
+<!-- ─── Modale Nouvelle Soirée ──────────────────────────────────────── -->
 <div id="createEventModal" class="hidden modal-backdrop">
   <div class="modal max-w-md p-6">
     <div class="flex items-center justify-between mb-5">
-      <h2 class="text-base font-semibold" style="color:var(--text-primary)">Nouvelle soirée</h2>
+      <div>
+        <h2 class="text-base font-bold" style="color:var(--text-primary)">Lancer une nouvelle soirée</h2>
+        <p class="text-xs" style="color:var(--text-muted)">Un QR code unique sera généré pour vos invités</p>
+      </div>
       <button id="btnCancelModal" class="btn btn-ghost btn-icon btn-sm">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <form id="createEventForm">
-      <label class="label">Nom de la soirée</label>
-      <input type="text" id="eventName" required class="input mb-4" placeholder="Soirée du 10 mars" />
+      <label class="label">Nom de la soirée ou du club</label>
+      <input type="text" id="eventName" required class="input mb-4" placeholder="Ex: Club Le Rex - Set Electro" />
 
-      <!-- Planification (optionnel) -->
-      <div class="mb-4">
-        <label class="flex items-center gap-2 cursor-pointer mb-2">
+      <!-- Planification optionnelle -->
+      <div class="mb-5 p-3 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+        <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" id="scheduleToggle" class="sr-only" />
           <span class="toggle-track"></span>
-          <span class="text-sm" style="color:var(--text-secondary)">Planifier une heure d'ouverture</span>
+          <span class="text-xs font-semibold" style="color:var(--text-secondary)">Planifier une heure de début</span>
         </label>
-        <div id="scheduleFields" class="hidden mt-2">
+        <div id="scheduleFields" class="hidden mt-3">
           <label class="label">Date et heure d'ouverture des demandes</label>
           <input type="datetime-local" id="startsAt" class="input" />
-          <p class="text-xs mt-1" style="color:var(--text-muted)">Les invités verront "Soirée à venir" jusqu'à cette heure.</p>
+          <p class="text-[11px] mt-1" style="color:var(--text-muted)">Le public verra « Soirée à venir » jusqu'à cette heure.</p>
         </div>
       </div>
 
       <div class="flex gap-3">
         <button type="button" id="btnCancelModal2" class="btn btn-ghost flex-1">Annuler</button>
-        <button type="submit" class="btn btn-primary flex-1">Créer</button>
+        <button type="submit" class="btn btn-primary flex-1 font-semibold">Créer la soirée</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ─── Modal QR Code ──────────────────────────────────────── -->
+<!-- ─── Modale QR Code ─────────────────────────────────────────────── -->
 <div id="qrModal" class="hidden modal-backdrop">
   <div class="modal max-w-sm">
     <div class="p-6 text-center">
-      <h2 class="text-base font-semibold mb-4" style="color:var(--text-primary)">QR Code — partager la soirée</h2>
-      <div class="inline-block p-3 rounded-xl mb-5" style="background:#fff">
-        <img id="qrModalImage" src="" alt="QR Code" class="w-52 h-52" />
+      <h2 id="qrModalTitle" class="text-base font-bold mb-4" style="color:var(--text-primary)">QR Code — Partager la soirée</h2>
+      <div class="inline-block p-4 rounded-2xl mb-4 shadow-md" style="background:#fff">
+        <img id="qrModalImage" src="" alt="QR Code Soirée" class="w-52 h-52 object-contain" />
       </div>
       <div class="mb-4 text-left">
-        <label class="label">Lien invités</label>
+        <label class="label">Lien direct pour vos invités</label>
         <div class="input-group">
-          <input type="text" id="qrModalLink" readonly class="input" />
-          <button id="qrModalCopy" class="btn btn-ghost btn-sm shrink-0">Copier</button>
+          <input type="text" id="qrModalLink" readonly class="input text-xs font-mono" />
+          <button id="qrModalCopy" class="btn btn-ghost btn-sm shrink-0 font-semibold">Copier</button>
         </div>
       </div>
       <button id="qrModalClose" class="btn btn-ghost btn-full">Fermer</button>
@@ -264,262 +384,6 @@
 </div>
 
 <script src="/js/csrf.js"></script>
-<script>
-  let djData = null;
-
-  // ── Mobile sidebar ──
-  function openMobileSidebar() {
-    document.getElementById("mobileSidebar").classList.remove("hidden");
-    document.getElementById("mobileSidebarOverlay").classList.remove("hidden");
-  }
-  function closeMobileSidebar() {
-    document.getElementById("mobileSidebar").classList.add("hidden");
-    document.getElementById("mobileSidebarOverlay").classList.add("hidden");
-  }
-  document.getElementById("mobileSidebarBtn").addEventListener("click", openMobileSidebar);
-
-  // ── Buttons ──
-  document.getElementById("btnCreateEvent").addEventListener("click", openCreateEventModal);
-  document.getElementById("btnCreateEventInline").addEventListener("click", openCreateEventModal);
-  document.getElementById("btnLogout").addEventListener("click", logout);
-  document.getElementById("btnLogoutMobile").addEventListener("click", logout);
-  document.getElementById("btnLogoutMobile2").addEventListener("click", logout);
-  document.getElementById("btnCancelModal").addEventListener("click", closeModal);
-  document.getElementById("btnCancelModal2").addEventListener("click", closeModal);
-  document.getElementById("createEventModal").addEventListener("click", (e) => {
-    if (e.target.id === "createEventModal") closeModal();
-  });
-  document.getElementById("createEventForm").addEventListener("submit", handleCreateEvent);
-
-  // ── Active events delegation ──
-  document.getElementById("activeEventsList").addEventListener("click", async (e) => {
-    const button = e.target.closest("button");
-    if (!button) return;
-    const { action, eventId, eventName } = button.dataset;
-    if (action === "show-qr")   showQRCode(eventId, eventName);
-    else if (action === "open-dj") goToDJ(eventId);
-    else if (action === "end-event") await endEvent(eventId, eventName);
-  });
-
-  // ── QR modal ──
-  document.getElementById("qrModalClose").addEventListener("click", () => {
-    document.getElementById("qrModal").classList.add("hidden");
-  });
-  document.getElementById("qrModalCopy").addEventListener("click", () => {
-    const input = document.getElementById("qrModalLink");
-    input.select();
-    document.execCommand("copy");
-    document.getElementById("qrModalCopy").textContent = "Copié";
-    setTimeout(() => document.getElementById("qrModalCopy").textContent = "Copier", 2000);
-  });
-
-  // ── Keyboard ──
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeModal();
-      document.getElementById("qrModal").classList.add("hidden");
-    }
-  });
-
-  // ── Load dashboard ──
-  async function loadDashboard() {
-    try {
-      const response = await fetch("/api/dj/dashboard");
-      if (response.status === 401) { window.location.href = "/login"; return; }
-      if (!response.ok) throw new Error("Erreur chargement dashboard");
-      djData = await response.json();
-
-      document.getElementById("djName").textContent = `Bienvenue, ${djData.dj.name}`;
-      document.getElementById("sidebarDjName").textContent = djData.dj.name;
-
-      document.getElementById("totalEvents").textContent = parseInt(djData.stats.totalEvents) || 0;
-      document.getElementById("totalSongs").textContent  = parseInt(djData.stats.totalSongs)  || 0;
-      document.getElementById("avgVotes").textContent    = (parseFloat(djData.stats.avgVotes) || 0).toFixed(1);
-      document.getElementById("acceptRate").textContent  = djData.stats.acceptRate || "0%";
-
-      const activeEvents = (djData.events || []).filter((e) => !e.ended_at);
-      renderActiveEvents(activeEvents);
-      renderTopSongs(djData.topSongs || []);
-    } catch (error) {
-      console.error("Erreur:", error);
-      document.getElementById("activeEventsList").innerHTML =
-        `<div class="px-5 py-8 text-center text-sm" style="color:var(--red)">Erreur de chargement</div>`;
-    }
-  }
-
-  function renderActiveEvents(events) {
-    const container = document.getElementById("activeEventsList");
-    if (!events || events.length === 0) {
-      container.innerHTML = `
-        <div class="px-5 py-12 text-center">
-          <p class="text-sm mb-3" style="color:var(--text-muted)">Aucune soirée en cours</p>
-          <button onclick="openCreateEventModal()" class="btn btn-primary btn-sm">Créer une soirée</button>
-        </div>`;
-      return;
-    }
-
-    container.innerHTML = events.map((event) => {
-      const date = new Date(event.created_at).toLocaleDateString("fr-FR", {
-        day: "numeric", month: "long", year: "numeric",
-        hour: "2-digit", minute: "2-digit",
-      });
-      const escapedName = event.name.replace(/'/g, "\\'");
-      const acceptedCount = event.accepted_count || 0;
-      const isScheduled = event.starts_at && new Date(event.starts_at) > new Date();
-      const badge = isScheduled
-        ? `<span class="badge shrink-0" style="background:rgba(245,158,11,0.12);color:var(--amber)">Planifiée</span>`
-        : `<span class="badge badge-green shrink-0">Live</span>`;
-      const scheduledInfo = isScheduled
-        ? `<p class="text-xs" style="color:var(--amber)">Ouvre le ${new Date(event.starts_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>`
-        : "";
-      return `
-      <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4" style="border-bottom:1px solid var(--border)">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-1">
-            <h3 class="font-semibold text-sm truncate" style="color:var(--text-primary)">${event.name}</h3>
-            ${badge}
-          </div>
-          <p class="text-xs mb-1" style="color:var(--text-muted)">${date}</p>
-          ${scheduledInfo}
-          <div class="flex flex-wrap gap-3 text-xs">
-            <span style="color:var(--green)">${event.played_songs || 0} jouées</span>
-            <span style="color:var(--amber)">${acceptedCount} en attente</span>
-            <span style="color:var(--red)">${event.rejected_songs || 0} refusées</span>
-            <span style="color:var(--text-muted)">${event.total_songs || 0} total</span>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 shrink-0">
-          <button
-            data-action="show-qr" data-event-id="${event.id}" data-event-name="${escapedName}"
-            class="btn btn-ghost btn-sm">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
-            QR Code
-          </button>
-          <button
-            data-action="open-dj" data-event-id="${event.id}"
-            class="btn btn-primary btn-sm">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-            Ouvrir
-          </button>
-          <button
-            data-action="end-event" data-event-id="${event.id}" data-event-name="${escapedName}"
-            class="btn btn-danger btn-sm">
-            Terminer
-          </button>
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  function renderTopSongs(songs) {
-    const container = document.getElementById("topSongs");
-    if (!songs || songs.length === 0) {
-      container.innerHTML = `<div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Aucune chanson jouée</div>`;
-      return;
-    }
-    container.innerHTML = `
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Chanson</th>
-              <th>Artiste</th>
-              <th class="text-center">Fois jouée</th>
-              <th class="text-center">Votes moy.</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${songs.slice(0, 10).map((song, i) => `
-            <tr>
-              <td class="font-bold" style="color:var(--accent)">${i + 1}</td>
-              <td class="font-medium" style="color:var(--text-primary)">${song.song_name}</td>
-              <td>${song.artist}</td>
-              <td class="text-center">${song.play_count}</td>
-              <td class="text-center font-medium" style="color:var(--green)">${(parseFloat(song.avg_upvotes) || 0).toFixed(1)}</td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>`;
-  }
-
-  function openCreateEventModal() {
-    document.getElementById("createEventModal").classList.remove("hidden");
-    setTimeout(() => document.getElementById("eventName").focus(), 50);
-  }
-
-  function closeModal() {
-    document.getElementById("createEventModal").classList.add("hidden");
-    document.getElementById("eventName").value = "";
-  }
-
-  // Toggle planification
-  document.getElementById("scheduleToggle").addEventListener("change", (e) => {
-    document.getElementById("scheduleFields").classList.toggle("hidden", !e.target.checked);
-  });
-
-  async function handleCreateEvent(e) {
-    e.preventDefault();
-    const name = document.getElementById("eventName").value.trim();
-    if (!name) return;
-    const startsAtInput = document.getElementById("startsAt").value;
-    const starts_at = document.getElementById("scheduleToggle").checked && startsAtInput
-      ? startsAtInput
-      : null;
-    try {
-      const response = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, starts_at }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        closeModal();
-        await loadDashboard();
-        showQRCode(data.eventId, name);
-      } else {
-        alert(data.error || "Erreur création soirée");
-      }
-    } catch {
-      alert("Erreur lors de la création");
-    }
-  }
-
-  async function showQRCode(eventId, eventName) {
-    try {
-      const response = await fetch(`/api/events/${eventId}/qrcode`);
-      const data = await response.json();
-      document.getElementById("qrModalImage").src = data.qrCode;
-      document.getElementById("qrModalLink").value = data.userUrl;
-      document.getElementById("qrModal").classList.remove("hidden");
-    } catch {
-      window.location.href = `/event/${eventId}/qr`;
-    }
-  }
-
-  function goToDJ(eventId) { window.location.href = `/dj/${eventId}`; }
-
-  async function endEvent(eventId, eventName) {
-    if (!confirm(`Terminer la soirée "${eventName}" ?\n\nCela va archiver la soirée et sauvegarder les statistiques.`)) return;
-    try {
-      const response = await fetch(`/api/events/${eventId}/end`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-cache",
-      });
-      const data = await response.json();
-      if (data.success) {
-        window.location.reload();
-      } else {
-        alert("Erreur: " + (data.error || "Erreur inconnue"));
-      }
-    } catch { alert("Erreur lors de la fin de la soirée"); }
-  }
-
-  async function logout() {
-    try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
-    window.location.href = "/login";
-  }
-
-  loadDashboard();
-</script>
+<script src="/js/dashboard.js" defer></script>
 </body>
 </html>
