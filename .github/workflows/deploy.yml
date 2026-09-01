@@ -43,8 +43,6 @@ jobs:
             --exclude ".env.*" \
             --exclude ".DS_Store" \
             ./ deploy-dist/
-          mkdir -p deploy-dist/tmp
-          touch deploy-dist/tmp/restart.txt
 
       - name: Deploy via FTP/FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
