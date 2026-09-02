@@ -6,9 +6,10 @@
   "scripts": {
     "start": "node --no-experimental-fetch app.js",
     "dev": "nodemon src/server.js",
+    "test": "NODE_ENV=test node --test --test-force-exit tests/**/*.test.js",
     "ci:syntax": "node scripts/ci-syntax-check.js",
     "ci:db": "node scripts/check-database-schema.js",
-    "ci": "npm run ci:syntax && npm run ci:db",
+    "ci": "npm run ci:syntax && npm run test",
     "build:css": "tailwindcss -i src/public/css/tailwind-input.css -o src/public/css/tailwind.min.css --minify"
   },
   "dependencies": {

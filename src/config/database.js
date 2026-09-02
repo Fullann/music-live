@@ -16,14 +16,16 @@ const pool = mysql.createPool({
 });
 
 // Test de connexion
-pool
-  .getConnection()
-  .then((connection) => {
-    connection.release();
-  })
-  .catch((err) => {
-    console.error("❌ Erreur connexion MySQL:", err.message);
-    process.exit(1);
-  });
+if (process.env.NODE_ENV !== "test") {
+  pool
+    .getConnection()
+    .then((connection) => {
+      connection.release();
+    })
+    .catch((err) => {
+      console.error("❌ Erreur connexion MySQL:", err.message);
+      process.exit(1);
+    });
+}
 
 module.exports = pool;

@@ -495,28 +495,8 @@ router.get(
 );
 
 // ── Cache mémoire des paroles (TTL 24h, max 500 chansons) ──
+const { parseLrc } = require("../utils/lyrics.utils");
 const lyricsCache = new Map();
-
-function parseLrc(lrcText) {
-  if (!lrcText) return [];
-  const lines = lrcText.split("\n");
-  const result = [];
-  const regex = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)$/;
-  for (const line of lines) {
-    const match = line.trim().match(regex);
-    if (match) {
-      const min = parseInt(match[1], 10);
-      const sec = parseInt(match[2], 10);
-      const ms = parseInt(match[3].padEnd(3, "0").slice(0, 3), 10);
-      const time = min * 60 + sec + ms / 1000;
-      const text = match[4].trim();
-      if (text) {
-        result.push({ time, text });
-      }
-    }
-  }
-  return result;
-}
 
 // ── Endpoint Paroles Synchronisées (Karaoké) ──
 router.get("/lyrics", async (req, res) => {
