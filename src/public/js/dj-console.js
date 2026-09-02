@@ -153,16 +153,52 @@
     panel.classList.toggle("hidden", !liveHealthPanelOpen);
   });
 
-  // ── Spotify SDK ──
+  // ── Spotify SDK & Auto-Recovery ──
   window.onSpotifyWebPlaybackSDKReady = () => {
     if (!spotifyToken) return;
     initializePlayer();
   };
 
+  let playerReconnectTimer = null;
+  function schedulePlayerReconnect(delayMs = 2500) {
+    clearTimeout(playerReconnectTimer);
+    playerReconnectTimer = setTimeout(() => {
+      console.log("Tentative automatique de reconnexion du Player Spotify...");
+      reconnectSpotifyPlayer(true);
+    }, delayMs);
+  }
+
+  async function reconnectSpotifyPlayer(isSilent = false) {
+    if (!isSilent) showToast("🔄 Reconnexion au lecteur Spotify…", "info");
+    try {
+      const res = await fetch(`/api/spotify/token/${eventId}`);
+      const data = await res.json();
+      if (data.access_token) {
+        spotifyToken = data.access_token;
+      }
+      if (spotifyPlayer) {
+        try { await spotifyPlayer.disconnect(); } catch {}
+        const connected = await spotifyPlayer.connect();
+        if (connected) {
+          if (!isSilent) showToast("✅ Lecteur Spotify reconnecté !", "success");
+          hideSpotifyError();
+        }
+      } else {
+        initializePlayer();
+      }
+    } catch (err) {
+      console.error("Erreur lors de la reconnexion Spotify:", err);
+      if (!isSilent) showToast("⚠️ Impossible de reconnecter Spotify — vérifiez votre réseau", "error");
+    }
+  }
+
   function initializePlayer() {
+    if (spotifyPlayer) {
+      try { spotifyPlayer.disconnect(); } catch {}
+    }
+
     spotifyPlayer = new Spotify.Player({
-      name: "Music Live Player",
-      // Toujours récupérer un token frais via le backend (qui rafraîchit automatiquement si expiré)
+      name: "Music Live Pro Console",
       getOAuthToken: async (cb) => {
         try {
           const res  = await fetch(`/api/spotify/token/${eventId}`);
@@ -171,7 +207,7 @@
             spotifyToken = data.access_token;
             cb(data.access_token);
           } else if (spotifyToken) {
-            cb(spotifyToken); // fallback sur le token en mémoire
+            cb(spotifyToken);
           }
         } catch (err) {
           console.error("Erreur refresh token SDK Spotify:", err);
@@ -180,23 +216,44 @@
       },
       volume: 0.8,
     });
+
     spotifyPlayer.addListener("ready", ({ device_id }) => {
       deviceId = device_id;
+      console.log("Spotify Web Playback SDK ready on device:", deviceId);
       document.getElementById("spotifyPlayer").classList.remove("hidden");
       document.getElementById("autoPlayToggle").classList.remove("hidden");
       document.getElementById("autoPlayToggle").style.display = "flex";
-      // Démarrer le fallback si la queue est déjà vide au moment où le player est prêt
+      hideSpotifyError();
+
+      // Transférer la lecture sur le web player pour s'assurer qu'il est actif
+      fetch(`/api/spotify/transfer/${eventId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ device_id: deviceId, play: false }),
+      }).catch(() => {});
+
       tryStartFallback();
     });
+
+    spotifyPlayer.addListener("not_ready", ({ device_id }) => {
+      console.warn("Spotify Player not ready / disconnected:", device_id);
+      showSpotifyError("Appareil Spotify déconnecté ou en veille. Reconnexion automatique…");
+      schedulePlayerReconnect(3000);
+    });
+
     spotifyPlayer.addListener("player_state_changed", (state) => {
       if (!state) return;
-      const track = state.track_window.current_track;
+      const track = state.track_window?.current_track;
+      if (!track) return;
+
       document.getElementById("currentTrackName").textContent   = track.name;
       document.getElementById("currentTrackArtist").textContent = track.artists.map((a) => a.name).join(", ");
       const img = document.getElementById("currentTrackImage");
-      img.src   = track.album.images[0].url;
-      img.classList.remove("hidden");
-      document.getElementById("currentTrackPlaceholder").classList.add("hidden");
+      if (track.album?.images?.[0]?.url) {
+        img.src = track.album.images[0].url;
+        img.classList.remove("hidden");
+        document.getElementById("currentTrackPlaceholder").classList.add("hidden");
+      }
 
       isPlaying = !state.paused;
       document.getElementById("playIcon").classList.toggle("hidden", isPlaying);
@@ -209,7 +266,7 @@
       if (isPlaying) startProgressUpdate();
       else stopProgressUpdate();
 
-      // Diffuser aux invités (debounce 300 ms pour éviter le spam pendant chargement)
+      // Diffuser aux invités
       clearTimeout(window._nowPlayingDebounce);
       window._nowPlayingDebounce = setTimeout(() => {
         const currentTrackUri = track?.uri || currentPlayingUri || null;
@@ -218,7 +275,7 @@
           track: {
             name:       track.name,
             artist:     track.artists.map((a) => a.name).join(", "),
-            albumArt:   track.album.images[0]?.url || "",
+            albumArt:   track.album?.images?.[0]?.url || "",
             durationMs: state.duration,
             uri:        currentTrackUri,
             bpm:        currentTrackUri ? audioFeatures[getTrackId(currentTrackUri)]?.bpm || null : null,
@@ -230,6 +287,7 @@
         });
       }, 300);
 
+      // Fin de piste -> Auto-play
       if (state.position === 0 && state.paused && autoPlayEnabled && !isAutoPlayLocked && !isCrossfading) {
         isAutoPlayLocked = true;
         setTimeout(() => { isAutoPlayLocked = false; }, 5000);
@@ -240,15 +298,86 @@
         }
       }
     });
-    spotifyPlayer.addListener("authentication_error", () => {
-      pushClientError("Spotify authentication_error");
-      alert("Erreur d'authentification Spotify. Reconnectez-vous.");
+
+    spotifyPlayer.addListener("initialization_error", ({ message }) => {
+      console.error("Spotify initialization_error:", message);
+      pushClientError("Spotify init error: " + message);
+      showSpotifyError("Erreur d'initialisation du lecteur Spotify : " + message);
     });
+
+    spotifyPlayer.addListener("authentication_error", async () => {
+      pushClientError("Spotify authentication_error");
+      showSpotifyError("Session Spotify expirée. Reconnexion automatique…");
+      reconnectSpotifyPlayer(true);
+    });
+
     spotifyPlayer.addListener("account_error", () => {
       pushClientError("Spotify account_error (Premium requis)");
-      alert("Compte Spotify Premium requis");
+      showSpotifyError("Un compte Spotify Premium est requis pour le contrôle régie.");
     });
+
+    spotifyPlayer.addListener("playback_error", ({ message }) => {
+      console.error("Spotify playback_error:", message);
+      pushClientError("Spotify playback_error: " + message);
+      showSpotifyError("Erreur de flux Spotify : " + message);
+      schedulePlayerReconnect(4000);
+    });
+
     spotifyPlayer.connect();
+  }
+
+  // ── Contrôle Lecture Résilient (Play / Pause / Resume) ──
+  async function togglePlayPause() {
+    if (!spotifyPlayer) {
+      if (queue.length > 0) return playNextInQueue();
+      if (fallbackPlaylistUri) return playFallbackTrack();
+      return;
+    }
+
+    try {
+      const state = await spotifyPlayer.getCurrentState();
+      if (!state) {
+        // Si aucun état actif (ex: première lecture ou réveil)
+        if (queue.length > 0) {
+          await playNextInQueue();
+        } else {
+          // Essayer de reprendre via l'API REST
+          const res = await fetch(`/api/spotify/resume/${eventId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_id: deviceId }),
+          });
+          if (!res.ok) {
+            await spotifyPlayer.resume();
+          }
+        }
+        return;
+      }
+
+      if (state.paused) {
+        await spotifyPlayer.resume().catch(async () => {
+          await fetch(`/api/spotify/resume/${eventId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_id: deviceId }),
+          });
+        });
+      } else {
+        await spotifyPlayer.pause().catch(async () => {
+          await fetch(`/api/spotify/pause/${eventId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_id: deviceId }),
+          });
+        });
+      }
+    } catch (err) {
+      console.error("Erreur togglePlayPause:", err);
+      // Dernier recours : tenter de relancer le prochain titre si la lecture est coupée
+      if (!isPlaying && queue.length > 0) {
+        playNextInQueue();
+      }
+    }
   }
 
   // ── Progress ──
@@ -400,9 +529,8 @@
     socket.emit("close-live-poll", { eventId, pollId: livePollState.id });
   });
   document.getElementById("btnSaveMessage")?.addEventListener("click", saveThankYouMessage);
-  document.getElementById("btnResetMessage")?.addEventListener("click", resetThankYouMessage);
-
-  document.getElementById("playPauseBtn")?.addEventListener("click", () => { if (spotifyPlayer) spotifyPlayer.togglePlay(); });
+  document.getElementById("playPauseBtn")?.addEventListener("click", togglePlayPause);
+  document.getElementById("btnReconnectPlayer")?.addEventListener("click", () => reconnectSpotifyPlayer(false));
   document.getElementById("btnPrevious")?.addEventListener("click", () => { if (spotifyPlayer) spotifyPlayer.previousTrack(); });
   document.getElementById("btnNext")?.addEventListener("click", () => {
     if (
@@ -1424,10 +1552,12 @@
 
   async function playTrack(uri, requestId) {
     if (!deviceId) {
-      if (confirm("Player Spotify en cours d'initialisation...\n\nVoulez-vous réessayer dans quelques secondes ?")) {
-        setTimeout(() => playTrack(uri, requestId), 3000);
+      showToast("🔄 Connexion au lecteur Spotify…", "info");
+      await reconnectSpotifyPlayer(true);
+      if (!deviceId) {
+        showToast("⚠️ Lecteur Spotify non prêt — réessayez dans 2 secondes", "error");
+        return;
       }
-      return;
     }
     if (crossfadeDuration > 0 && isPlaying && spotifyPlayer && !isCrossfading) {
       if (currentPlayingRequestId && currentDuration > 0 && currentPosition / currentDuration < 0.85) {
@@ -1446,7 +1576,22 @@
       currentPlayingRequestId = requestId || null;
       currentPlayingUri = uri || null;
       setTimeout(() => socket.emit("mark-played", { eventId, requestId }), 2000);
-    } catch (err) { alert("Erreur: " + err.message); }
+    } catch (err) {
+      console.warn("Erreur _startPlayback, tentative transfert actif:", err);
+      try {
+        await fetch(`/api/spotify/transfer/${eventId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_id: deviceId, play: true }),
+        });
+        await _startPlayback(uri);
+        currentPlayingRequestId = requestId || null;
+        currentPlayingUri = uri || null;
+        setTimeout(() => socket.emit("mark-played", { eventId, requestId }), 2000);
+      } catch (retryErr) {
+        showToast("Erreur lecture Spotify : " + retryErr.message, "error");
+      }
+    }
   }
 
   function playNextInQueue() {
@@ -2048,7 +2193,7 @@
 
     if (e.code === "Space") {
       e.preventDefault();
-      document.getElementById("btnPlayPause")?.click();
+      togglePlayPause();
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (pendingRequests.length > 0) {
@@ -2134,7 +2279,7 @@
 
           switch (padIndex) {
             case 0: // PAD 1: Play/Pause
-              document.getElementById("btnPlayPause")?.click();
+              togglePlayPause();
               showToast("🎛️ MIDI PAD 1 : Play/Pause");
               break;
             case 1: // PAD 2: Accepter 1er
@@ -2236,6 +2381,22 @@
   window.addEventListener("online", () => {
     setNetworkBanner("online");
     socket.emit("join-event", { eventId });
+  });
+
+  // Reconnexion intelligente lors du retour sur l'onglet
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      if (spotifyPlayer) {
+        spotifyPlayer.getCurrentState().then((state) => {
+          if (!state && isPlaying) {
+            console.log("Retour sur l'onglet : synchronisation du lecteur Spotify...");
+            reconnectSpotifyPlayer(true);
+          }
+        }).catch(() => {
+          reconnectSpotifyPlayer(true);
+        });
+      }
+    }
   });
 
   loadLocalDjCache();

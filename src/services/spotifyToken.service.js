@@ -32,25 +32,55 @@ async function getValidEventToken(eventId) {
     return await pendingRefreshes.get(eventId);
   }
 
-  const [rows] = await db.query(
+  let [rows] = await db.query(
     "SELECT access_token, refresh_token, expires_at FROM spotify_tokens WHERE event_id = ?",
     [eventId],
   );
 
-  if (rows.length === 0) return null;
+  let access_token, refresh_token, expires_at;
+  if (rows.length > 0) {
+    access_token = rows[0].access_token;
+    refresh_token = rows[0].refresh_token;
+    expires_at = rows[0].expires_at;
+  } else {
+    // Fallback automatique sur le compte DJ propriétaire si tokens non dupliqués sur l'event
+    const [djRows] = await db.query(
+      `SELECT d.sp_access_token, d.sp_refresh_token, d.sp_token_expires_at
+       FROM djs d
+       JOIN events e ON e.dj_id = d.id
+       WHERE e.id = ?`,
+      [eventId],
+    );
+    if (djRows.length === 0 || !djRows[0].sp_refresh_token) return null;
+    access_token  = djRows[0].sp_access_token;
+    refresh_token = djRows[0].sp_refresh_token;
+    expires_at    = djRows[0].sp_token_expires_at;
 
-  const { access_token, refresh_token, expires_at } = rows[0];
-  const expiresAtMs = parseInt(expires_at, 10);
+    // Dupliquer immédiatement dans spotify_tokens pour les prochains appels
+    try {
+      await db.query(
+        `INSERT INTO spotify_tokens (event_id, access_token, refresh_token, expires_at)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           access_token = VALUES(access_token),
+           refresh_token = VALUES(refresh_token),
+           expires_at = VALUES(expires_at)`,
+        [eventId, access_token, refresh_token, expires_at || Date.now()],
+      );
+    } catch {}
+  }
+
+  const expiresAtMs = parseInt(expires_at || 0, 10);
 
   // Token encore valide : on le retourne directement
-  if (expiresAtMs > Date.now() + REFRESH_MARGIN_MS) {
+  if (access_token && expiresAtMs > Date.now() + REFRESH_MARGIN_MS) {
     return access_token;
   }
 
   // Token expiré ou sur le point d'expirer : refresh
   if (!refresh_token) {
     console.warn(`[SpotifyToken] Event ${eventId} : token expiré sans refresh_token.`);
-    return null;
+    return access_token || null;
   }
 
   const refreshPromise = (async () => {

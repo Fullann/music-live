@@ -268,6 +268,117 @@ router.post(
   },
 );
 
+// ── Reprendre la lecture (Play / Resume) ──
+router.post(
+  "/resume/:eventId",
+  requireAuth,
+  requireEventOwnership,
+  eventIdValidator,
+  handleValidationErrors,
+  async (req, res) => {
+    const { eventId } = req.params;
+    const { device_id } = req.body;
+
+    try {
+      const token = await getValidEventToken(eventId);
+      if (!token) return res.status(401).json({ error: "Token Spotify non valide" });
+
+      const url = device_id
+        ? `https://api.spotify.com/v1/me/player/play?device_id=${device_id}`
+        : "https://api.spotify.com/v1/me/player/play";
+
+      await axios.put(url, {}, { headers: { Authorization: `Bearer ${token}` } });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(error.response?.status || 500).json({ error: "Impossible de relancer la lecture", details: error.response?.data });
+    }
+  },
+);
+
+// ── Mettre en pause (Pause) ──
+router.post(
+  "/pause/:eventId",
+  requireAuth,
+  requireEventOwnership,
+  eventIdValidator,
+  handleValidationErrors,
+  async (req, res) => {
+    const { eventId } = req.params;
+    const { device_id } = req.body;
+
+    try {
+      const token = await getValidEventToken(eventId);
+      if (!token) return res.status(401).json({ error: "Token Spotify non valide" });
+
+      const url = device_id
+        ? `https://api.spotify.com/v1/me/player/pause?device_id=${device_id}`
+        : "https://api.spotify.com/v1/me/player/pause";
+
+      await axios.put(url, {}, { headers: { Authorization: `Bearer ${token}` } });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(error.response?.status || 500).json({ error: "Impossible de mettre en pause", details: error.response?.data });
+    }
+  },
+);
+
+// ── Transférer la lecture sur un appareil (Transfer Playback) ──
+router.post(
+  "/transfer/:eventId",
+  requireAuth,
+  requireEventOwnership,
+  eventIdValidator,
+  handleValidationErrors,
+  async (req, res) => {
+    const { eventId } = req.params;
+    const { device_id, play = true } = req.body;
+
+    if (!device_id) return res.status(400).json({ error: "device_id requis" });
+
+    try {
+      const token = await getValidEventToken(eventId);
+      if (!token) return res.status(401).json({ error: "Token Spotify non valide" });
+
+      await axios.put(
+        "https://api.spotify.com/v1/me/player",
+        { device_ids: [device_id], play: !!play },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      res.json({ success: true, device_id });
+    } catch (error) {
+      res.status(error.response?.status || 500).json({ error: "Impossible de transférer la lecture", details: error.response?.data });
+    }
+  },
+);
+
+// ── Lister les appareils Spotify disponibles ──
+router.get(
+  "/devices/:eventId",
+  requireAuth,
+  requireEventOwnership,
+  eventIdValidator,
+  handleValidationErrors,
+  async (req, res) => {
+    const { eventId } = req.params;
+    try {
+      const token = await getValidEventToken(eventId);
+      if (!token) return res.status(401).json({ error: "Token Spotify non valide" });
+
+      const r = await axios.get("https://api.spotify.com/v1/me/player/devices", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      res.json({ devices: r.data?.devices || [] });
+    } catch (error) {
+      res.status(500).json({ error: "Impossible de récupérer les appareils", details: error.response?.data });
+    }
+  },
+);
+
 // Métadonnées enrichies des pistes (BPM si dispo, popularité en fallback — DJ uniquement)
 // Note: l'endpoint audio-features Spotify est restreint aux apps créées avant nov. 2024.
 // On essaie audio-features, sinon on utilise /v1/tracks (popularité comme proxy d'énergie).
