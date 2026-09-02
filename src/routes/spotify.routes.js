@@ -609,6 +609,16 @@ router.get(
 const { parseLrc } = require("../utils/lyrics.utils");
 const lyricsCache = new Map();
 
+function cleanLyricsSearchTitle(t) {
+  return String(t || "")
+    .replace(/\s*-\s*Remaster(ed)?(\s*\d*)?/gi, "")
+    .replace(/\s*-\s*Radio\s*Edit/gi, "")
+    .replace(/\s*-\s*Club\s*Mix/gi, "")
+    .replace(/\s*\(.*(feat|with|version|remaster|radio edit|deluxe|bonus).*\)/gi, "")
+    .replace(/\s*\[.*(feat|with|version|remaster|radio edit|deluxe|bonus).*\]/gi, "")
+    .trim();
+}
+
 // ── Endpoint Paroles Synchronisées (Karaoké) ──
 router.get("/lyrics", async (req, res) => {
   const { track, artist, duration } = req.query;
@@ -621,29 +631,59 @@ router.get("/lyrics", async (req, res) => {
     return res.json(lyricsCache.get(cacheKey));
   }
 
+  const cleanedTitle = cleanLyricsSearchTitle(track);
+  const headers = { "User-Agent": "MusicLiveApp/2.0 (https://music-live.fullann.ch)" };
+  const durNum = duration ? Math.round(Number(duration)) : null;
+
+  async function fetchLrclib(tName, aName, dSec) {
+    const params = { track_name: tName, artist_name: aName };
+    if (dSec) params.duration = dSec;
+    try {
+      const response = await axios.get("https://lrclib.net/api/get", { params, timeout: 3500, headers });
+      return response.data;
+    } catch {
+      return null;
+    }
+  }
+
   try {
-    const params = {
-      track_name: track,
-      artist_name: artist,
-    };
-    if (duration) params.duration = Math.round(Number(duration));
+    // 1. Essai exact avec durée
+    let data = await fetchLrclib(track, artist, durNum);
 
-    const response = await axios.get("https://lrclib.net/api/get", {
-      params,
-      timeout: 3500,
-      headers: {
-        "User-Agent": "MusicLiveApp/2.0 (https://music-live.fullann.ch)",
-      },
-    });
+    // 2. Essai exact sans durée
+    if (!data && durNum) {
+      data = await fetchLrclib(track, artist, null);
+    }
 
-    const data = response.data;
+    // 3. Essai avec titre nettoyé
+    if (!data && cleanedTitle && cleanedTitle !== track) {
+      data = await fetchLrclib(cleanedTitle, artist, durNum);
+      if (!data && durNum) {
+        data = await fetchLrclib(cleanedTitle, artist, null);
+      }
+    }
+
+    // 4. Recherche générique par mots-clés
+    if (!data || (!data.syncedLyrics && !data.plainLyrics)) {
+      try {
+        const searchRes = await axios.get("https://lrclib.net/api/search", {
+          params: { q: `${cleanedTitle || track} ${artist}` },
+          timeout: 3500,
+          headers,
+        });
+        const items = searchRes.data || [];
+        const syncedItem = items.find((x) => x.syncedLyrics) || items[0];
+        if (syncedItem) data = syncedItem;
+      } catch {}
+    }
+
     let payload = null;
-    if (data.syncedLyrics) {
+    if (data?.syncedLyrics) {
       payload = {
         synced: true,
         lines: parseLrc(data.syncedLyrics),
       };
-    } else if (data.plainLyrics) {
+    } else if (data?.plainLyrics) {
       payload = {
         synced: false,
         lines: data.plainLyrics.split("\n").map((t) => ({ time: 0, text: t.trim() })).filter((l) => l.text.length > 0),

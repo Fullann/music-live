@@ -702,12 +702,12 @@
   </div>
   
   <!-- Liste des paroles défilantes -->
-  <div id="karaokeLyricsScroll" class="flex-1 w-full max-w-4xl flex flex-col items-center justify-center overflow-hidden py-12 text-center select-none relative">
-    <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[rgba(8,8,16,0.98)] to-transparent pointer-events-none z-10"></div>
-    <div id="karaokeLines" class="flex flex-col items-center gap-6 transition-transform duration-300 ease-out my-auto">
+  <div id="karaokeLyricsScroll" class="flex-1 w-full max-w-4xl flex flex-col items-center justify-start overflow-hidden py-12 text-center select-none relative" style="height:65vh;min-height:360px">
+    <div class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[rgba(8,8,16,0.98)] to-transparent pointer-events-none z-10"></div>
+    <div id="karaokeLines" class="flex flex-col items-center gap-6 transition-transform duration-500 ease-out w-full" style="transform:translateY(0px);padding-top:25vh;padding-bottom:25vh">
       <p class="text-xl text-white/40 italic">Recherche des paroles synchronisées…</p>
     </div>
-    <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[rgba(8,8,16,0.98)] to-transparent pointer-events-none z-10"></div>
+    <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[rgba(8,8,16,0.98)] to-transparent pointer-events-none z-10"></div>
   </div>
 
   <!-- Footer Karaoké -->
@@ -1387,7 +1387,7 @@
       const event = await eventRes.json();
       const stats = await statsRes.json();
 
-      if (event.name && !currentEventName) {
+      if (event.name) {
         document.getElementById("eventName").textContent = event.name;
         currentEventName = event.name;
       }
@@ -1680,7 +1680,10 @@
     currentLyrics = null;
     activeLyricIdx = -1;
     const container = document.getElementById("karaokeLines");
-    if (container) container.innerHTML = `<p class="text-xl text-white/40 italic">Recherche des paroles pour ${trackName}…</p>`;
+    if (container) {
+      container.style.transform = "translateY(0px)";
+      container.innerHTML = `<p class="text-xl text-white/40 italic">Recherche des paroles pour ${trackName}…</p>`;
+    }
 
     try {
       const durSec = durationMs ? Math.round(durationMs / 1000) : 0;
@@ -1701,16 +1704,21 @@
     const container = document.getElementById("karaokeLines");
     if (!container || !currentLyrics) return;
     container.innerHTML = currentLyrics.lines.map((line, idx) => `
-      <p class="karaoke-line text-lg sm:text-2xl md:text-3xl font-bold max-w-2xl px-4 py-1.5 rounded-2xl cursor-pointer"
+      <p class="karaoke-line text-lg sm:text-2xl md:text-3xl font-bold max-w-2xl px-5 py-2 rounded-2xl cursor-pointer transition-all duration-300 select-none text-white/40"
          data-lyric-idx="${idx}" data-time="${line.time}">
         ${line.text}
       </p>
     `).join("");
+
+    const pos = npState && npState.isPlaying
+      ? Math.min((npState.positionMs || 0) + (Date.now() - (npState.ts || Date.now())), npState.durationMs || 0)
+      : (npState?.positionMs || 0);
+    syncLyricsPosition(pos, true);
   }
 
-  function syncLyricsPosition(posMs) {
-    if (!currentLyrics || !currentLyrics.synced || !currentLyrics.lines.length) return;
-    const curSec = posMs / 1000;
+  function syncLyricsPosition(posMs, forceUpdate = false) {
+    if (!currentLyrics || !currentLyrics.synced || !currentLyrics.lines || !currentLyrics.lines.length) return;
+    const curSec = (posMs || 0) / 1000;
     const lines = currentLyrics.lines;
     let foundIdx = -1;
 
@@ -1722,21 +1730,52 @@
       }
     }
 
-    if (foundIdx !== activeLyricIdx) {
+    if (foundIdx === -1 && lines.length > 0) {
+      foundIdx = 0;
+    }
+
+    if (foundIdx !== activeLyricIdx || forceUpdate) {
       activeLyricIdx = foundIdx;
       const allLines = document.querySelectorAll(".karaoke-line");
+      let activeEl = null;
+
       allLines.forEach((el, idx) => {
+        const diff = Math.abs(idx - activeLyricIdx);
         if (idx === activeLyricIdx) {
+          activeEl = el;
           el.classList.add("active");
-          el.style.background = "rgba(139, 92, 246, 0.25)";
-          el.style.border = "1px solid rgba(139, 92, 246, 0.4)";
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.style.opacity = "1";
+          el.style.transform = "scale(1.12)";
+          el.style.color = "#c084fc";
+          el.style.textShadow = "0 0 25px rgba(192, 132, 252, 0.65)";
+          el.style.fontWeight = "800";
+        } else if (diff <= 2) {
+          el.classList.remove("active");
+          el.style.opacity = diff === 1 ? "0.65" : "0.35";
+          el.style.transform = "scale(0.95)";
+          el.style.color = "rgba(255, 255, 255, 0.85)";
+          el.style.textShadow = "none";
+          el.style.fontWeight = "600";
         } else {
           el.classList.remove("active");
-          el.style.background = "transparent";
-          el.style.border = "1px solid transparent";
+          el.style.opacity = "0.18";
+          el.style.transform = "scale(0.9)";
+          el.style.color = "rgba(255, 255, 255, 0.5)";
+          el.style.textShadow = "none";
+          el.style.fontWeight = "500";
         }
       });
+
+      if (activeEl) {
+        const scrollContainer = document.getElementById("karaokeLyricsScroll");
+        const linesWrapper = document.getElementById("karaokeLines");
+        if (scrollContainer && linesWrapper) {
+          const containerHeight = scrollContainer.clientHeight;
+          const targetOffset = activeEl.offsetTop + (activeEl.clientHeight / 2);
+          const translateY = (containerHeight / 2) - targetOffset;
+          linesWrapper.style.transform = `translateY(${translateY}px)`;
+        }
+      }
     }
   }
 
@@ -1746,6 +1785,13 @@
     if (overlay) overlay.classList.toggle("hidden", !isKaraokeOpen);
     const btnLabel = document.getElementById("karaokeBtnLabel");
     if (btnLabel) btnLabel.textContent = isKaraokeOpen ? "Fermer (K)" : "Karaoké";
+
+    if (isKaraokeOpen) {
+      const pos = npState && npState.isPlaying
+        ? Math.min((npState.positionMs || 0) + (Date.now() - (npState.ts || Date.now())), npState.durationMs || 0)
+        : (npState?.positionMs || 0);
+      syncLyricsPosition(pos, true);
+    }
   }
 
   document.getElementById("karaokeToggleBtn")?.addEventListener("click", () => toggleKaraoke());
@@ -1825,6 +1871,12 @@
       spawnFloatingReaction(data.reaction, data.senderName, data.count);
     }
   });
+
+  // ── Initialisation immédiate des données au chargement ──
+  loadData();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadData);
+  }
 </script>
 </body>
 </html>
