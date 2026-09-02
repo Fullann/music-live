@@ -1278,7 +1278,7 @@
       const response = await fetch(`/api/spotify/status/${eventId}`);
       const data     = await response.json();
       if (data.connected) {
-        document.getElementById("spotifyStatus").classList.remove("hidden");
+        document.getElementById("spotifyStatus")?.classList.remove("hidden");
         initSpotifyPlayer();
       }
       // Si non connecté, rien à faire — les tokens ont été copiés à la création de l'événement.
