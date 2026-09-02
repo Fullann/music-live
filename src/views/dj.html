@@ -6,12 +6,12 @@
   <title>Régie Live DJ — Music Live</title>
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
-  <script src="/js/theme.js"></script>
+  <script src="/js/theme.js?v=2.2.0"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="https://sdk.scdn.co/spotify-player.js"></script>
-  <script src="/js/time-utils.js"></script>
-  <script src="/js/csrf.js"></script>
+  <script src="/js/time-utils.js?v=2.2.0"></script>
+  <script src="/js/csrf.js?v=2.2.0"></script>
 </head>
 <body style="background:var(--bg-base);color:var(--text-primary)">
 
@@ -872,6 +872,7 @@
   <button type="button" id="rejectUndoBtn" class="btn btn-ghost btn-sm font-bold" style="color:var(--accent)">Annuler</button>
 </div>
 
-<script src="/js/dj-console.js" defer></script>
+<span id="spotifyStatus" class="hidden"></span>
+<script src="/js/dj-console.js?v=2.2.0" defer></script>
 </body>
 </html>

@@ -198,11 +198,16 @@ app.get("/manifest-user.json", (req, res) => {
   });
 });
 
-// === Static files (cache 1 jour en prod, pas de rate limit) ===
+// === Static files (revalidation ETag immédiate pour JS et CSS) ===
 app.use(
   express.static(path.join(__dirname, "/public"), {
-    maxAge: process.env.NODE_ENV === "production" ? "1d" : 0,
+    maxAge: 0,
     etag: true,
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".js") || filePath.endsWith(".css")) {
+        res.setHeader("Cache-Control", "no-cache, must-revalidate");
+      }
+    },
   }),
 );
 // NOTE: /views n'est PAS exposé en static — les HTML sont servis uniquement via
