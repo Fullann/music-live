@@ -922,12 +922,15 @@
 
   function npAnimateProgress() {
     if (!npState || !npState.isPlaying) return;
-    const elapsed  = Date.now() - npState.timestamp;
-    const pos      = Math.min(npState.positionMs + elapsed, npState.durationMs);
-    const pct      = npState.durationMs > 0 ? (pos / npState.durationMs) * 100 : 0;
-    const remaining = npState.durationMs - pos;
-    document.getElementById("npProgressBar").style.width   = `${pct}%`;
-    document.getElementById("npTimeRemaining").textContent = `-${npFormatTime(remaining)}`;
+    const elapsed   = Date.now() - (npState.timestamp || Date.now());
+    const duration  = Number(npState.durationMs) || 0;
+    const pos       = duration > 0 ? Math.min((Number(npState.positionMs) || 0) + elapsed, duration) : 0;
+    const pct       = duration > 0 ? (pos / duration) * 100 : 0;
+    const remaining = Math.max(0, duration - pos);
+    const bar = document.getElementById("npProgressBar");
+    const rem = document.getElementById("npTimeRemaining");
+    if (bar) bar.style.width   = `${pct}%`;
+    if (rem) rem.textContent = `-${npFormatTime(remaining)}`;
     npRafId = requestAnimationFrame(npAnimateProgress);
   }
 
@@ -937,34 +940,43 @@
   }
 
   socket.on("now-playing", (data) => {
-    const { track, positionMs, durationMs, isPlaying, timestamp } = data;
+    const { track, positionMs, durationMs, isPlaying, timestamp } = data || {};
     if (!track) return;
 
-    npState = { positionMs, durationMs: track.durationMs, isPlaying, timestamp };
+    const finalDuration = Number(track.durationMs || durationMs) || 0;
+    const finalPosition = Number(positionMs) || 0;
+    npState = { positionMs: finalPosition, durationMs: finalDuration, isPlaying, timestamp: timestamp || Date.now() };
 
-    document.getElementById("npAlbumArt").src          = track.albumArt || "";
-    document.getElementById("npTrackName").textContent = track.name    || "";
-    document.getElementById("npArtist").textContent    = track.artist  || "";
+    const artEl = document.getElementById("npAlbumArt");
+    const nameEl = document.getElementById("npTrackName");
+    const artistEl = document.getElementById("npArtist");
+    if (artEl) artEl.src = track.albumArt || "";
+    if (nameEl) nameEl.textContent = track.name || "";
+    if (artistEl) artistEl.textContent = track.artist || "";
 
     // Snap progress bar immediately (no transition) then let RAF animate
     const bar = document.getElementById("npProgressBar");
-    bar.style.transition = "none";
-    const pct = npState.durationMs > 0 ? (positionMs / npState.durationMs) * 100 : 0;
-    bar.style.width = `${pct}%`;
-    // Force reflow then re-enable transition
-    bar.getBoundingClientRect();
-    bar.style.transition = "";
+    if (bar) {
+      bar.style.transition = "none";
+      const pct = finalDuration > 0 ? (finalPosition / finalDuration) * 100 : 0;
+      bar.style.width = `${pct}%`;
+      bar.getBoundingClientRect();
+      bar.style.transition = "";
+    }
 
     const strip = document.getElementById("nowPlayingStrip");
-    strip.classList.remove("hidden-strip");
-    strip.classList.add("visible-strip");
+    if (strip) {
+      strip.classList.remove("hidden-strip");
+      strip.classList.add("visible-strip");
+    }
 
     if (isPlaying) {
       npStartAnimation();
     } else {
       if (npRafId) { cancelAnimationFrame(npRafId); npRafId = null; }
-      const remaining = npState.durationMs - positionMs;
-      document.getElementById("npTimeRemaining").textContent = `-${npFormatTime(remaining)}`;
+      const remaining = Math.max(0, finalDuration - finalPosition);
+      const rem = document.getElementById("npTimeRemaining");
+      if (rem) rem.textContent = `-${npFormatTime(remaining)}`;
     }
   });
 

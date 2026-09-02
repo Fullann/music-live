@@ -2086,11 +2086,13 @@
 
   // ── Erreur Spotify ──
   function showSpotifyError(msg) {
-    document.getElementById("spotifyErrorText").textContent = msg;
-    document.getElementById("spotifyErrorBanner").classList.remove("hidden");
+    const textEl = document.getElementById("spotifyErrorText");
+    const bannerEl = document.getElementById("spotifyErrorBanner");
+    if (textEl) textEl.textContent = msg;
+    if (bannerEl) bannerEl.classList.remove("hidden");
   }
   function hideSpotifyError() {
-    document.getElementById("spotifyErrorBanner").classList.add("hidden");
+    document.getElementById("spotifyErrorBanner")?.classList.add("hidden");
   }
 
   function renderQueue() {
