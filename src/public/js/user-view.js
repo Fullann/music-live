@@ -868,6 +868,23 @@
     }
   });
 
+  socket.on("votes-batch-updated", (data) => {
+    if (!Array.isArray(data?.votes)) return;
+    let needsQueueUpdate = false;
+    let needsMyRequestUpdate = false;
+    for (const v of data.votes) {
+      const item = fullQueue.find((r) => r.id === v.requestId);
+      if (item) { item.upvotes = v.upvotes; item.downvotes = v.downvotes; needsQueueUpdate = true; }
+      if (v.requestId === myRequestId) {
+        myRequestData.upvotes   = v.upvotes;
+        myRequestData.downvotes = v.downvotes;
+        needsMyRequestUpdate = true;
+      }
+    }
+    if (needsMyRequestUpdate) updateMyRequestCard();
+    if (needsQueueUpdate) updateQueueDisplay();
+  });
+
   socket.on("vote-confirmed", (data) => {
     const rid = data?.requestId;
     if (!rid) return;

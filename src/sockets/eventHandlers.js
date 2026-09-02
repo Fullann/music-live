@@ -94,6 +94,82 @@ async function verifyDjOwnsEvent(socket, eventId) {
   return authorized;
 }
 
+// ── Buffer d'émissions de votes par événement pour 500+ utilisateurs ──
+const voteBatchBuffers = new Map(); // eventId -> Map<requestId, { upvotes, downvotes }>
+const voteBatchTimers  = new Map(); // eventId -> timer
+
+function scheduleVoteBatchBroadcast(io, eventId, requestId, upvotes, downvotes) {
+  if (!voteBatchBuffers.has(eventId)) {
+    voteBatchBuffers.set(eventId, new Map());
+  }
+  const eventMap = voteBatchBuffers.get(eventId);
+  eventMap.set(requestId, { upvotes, downvotes });
+
+  if (!voteBatchTimers.has(eventId)) {
+    const timer = setTimeout(() => {
+      voteBatchTimers.delete(eventId);
+      const updates = voteBatchBuffers.get(eventId);
+      voteBatchBuffers.delete(eventId);
+      if (!updates || updates.size === 0) return;
+
+      const votesList = [];
+      for (const [rId, counts] of updates.entries()) {
+        votesList.push({
+          requestId: rId,
+          upvotes: counts.upvotes,
+          downvotes: counts.downvotes,
+        });
+        // Émettre unitaire
+        io.to(eventId).emit("vote-updated", {
+          requestId: rId,
+          upvotes: counts.upvotes,
+          downvotes: counts.downvotes,
+        });
+      }
+
+      if (votesList.length > 1) {
+        io.to(eventId).emit("votes-batch-updated", { votes: votesList });
+      }
+    }, 75);
+    voteBatchTimers.set(eventId, timer);
+  }
+}
+
+// ── Buffer de réactions émojis en direct pour absorption des drops festifs ──
+const reactionBatchBuffers = new Map(); // eventId -> { reactions: Map<emoji, count>, senders: Set<string>, timer }
+
+function queueLiveReactionBatch(io, eventId, reaction, senderName, count) {
+  if (!reactionBatchBuffers.has(eventId)) {
+    reactionBatchBuffers.set(eventId, {
+      reactions: new Map(),
+      senders: new Set(),
+      timer: null,
+    });
+  }
+  const buf = reactionBatchBuffers.get(eventId);
+  const cur = buf.reactions.get(reaction) || 0;
+  buf.reactions.set(reaction, cur + count);
+  if (senderName) buf.senders.add(senderName);
+
+  if (!buf.timer) {
+    buf.timer = setTimeout(() => {
+      const currentBuf = reactionBatchBuffers.get(eventId);
+      reactionBatchBuffers.delete(eventId);
+      if (!currentBuf || currentBuf.reactions.size === 0) return;
+
+      for (const [rEmoji, rCount] of currentBuf.reactions.entries()) {
+        const sendersList = Array.from(currentBuf.senders).slice(-3).join(", ");
+        io.to(eventId).emit("live-reaction-broadcast", {
+          reaction: rEmoji,
+          count: rCount,
+          senderName: sendersList,
+          timestamp: Date.now(),
+        });
+      }
+    }, 100);
+  }
+}
+
 /**
  * Vérifie que le socket a accès à l'event auquel appartient la demande.
  * Retourne la row { event_id, socket_id } ou null.
@@ -836,86 +912,92 @@ function setupSocketHandlers(io) {
       }
     });
 
-    // Refuser toutes les demandes en attente (pas d’undo groupé)
+    // Tout refuser d'un coup (DJ)
     socket.on("reject-all-pending", async (data) => {
-      const { eventId } = data || {};
-      if (!eventId) return;
-      const perm = await verifyActionPermission(socket, eventId, "moderation");
-      if (!perm) return;
-
+      const { eventId } = data;
       try {
-        const [pending] = await db.query(
-          `SELECT id, socket_id, client_id FROM requests WHERE event_id = ? AND status = 'pending'`,
+        const perm = await verifyActionPermission(socket, eventId, "moderation");
+        if (!perm) return;
+
+        const [pendingRows] = await db.query(
+          "SELECT id, socket_id FROM requests WHERE event_id = ? AND status = 'pending'",
           [eventId],
         );
 
-        for (const row of pending) {
-          await db.query("UPDATE requests SET status = 'rejected' WHERE id = ?", [row.id]);
-          if (row.client_id) {
-            await abuseService.addStrike(eventId, row.client_id, 0.8);
-          }
-          io.to(eventId).emit("request-rejected", { requestId: row.id });
-          if (row.socket_id) {
-            io.to(row.socket_id).emit("your-request-rejected", { requestId: row.id });
-          }
-        }
-        await logEventAction(eventId, perm, "reject-all-pending", null, { count: pending.length });
+        if (pendingRows.length === 0) return;
+
+        await db.query(
+          "UPDATE requests SET status = 'rejected' WHERE event_id = ? AND status = 'pending'",
+          [eventId],
+        );
+
+        io.to(eventId).emit("pending-updated", []);
+
+        pendingRows.forEach((r) => {
+          io.to(r.socket_id).emit("request-rejected", { requestId: r.id });
+        });
+        await logEventAction(eventId, perm, "reject-all-pending", null, { count: pendingRows.length });
       } catch (error) {
         console.error("Erreur reject-all-pending:", error);
       }
     });
 
-    // Réorganiser la queue (DJ)
+    // Réordonner la file d'attente (drag & drop DJ)
     socket.on("reorder-queue", async (data) => {
       const { eventId, newQueue } = data;
-
       try {
         const perm = await verifyActionPermission(socket, eventId, "queue_message");
         if (!perm) return;
 
-        if (!Array.isArray(newQueue)) return;
-        for (let i = 0; i < newQueue.length; i++) {
-          await db.query(
-            "UPDATE requests SET queue_position = ? WHERE id = ? AND event_id = ?",
-            [i + 1, newQueue[i].id, eventId],
-          );
-        }
+        // Mettre à jour les positions dans la queue en mémoire
+        await queueService.reorderQueue(eventId, newQueue);
 
-        const queue = await queueService.getQueueWithVotes(eventId);
-        io.to(eventId).emit("queue-updated", { queue });
-        await logEventAction(eventId, perm, "reorder-queue", null, { size: newQueue.length });
+        // Notifier tous les clients du nouvel ordre
+        socket.to(eventId).emit("queue-updated", newQueue);
+        await logEventAction(eventId, perm, "reorder-queue", null, { count: Array.isArray(newQueue) ? newQueue.length : 0 });
       } catch (error) {
         console.error("Erreur reorder-queue:", error);
       }
     });
 
-    // Marquer comme jouée (DJ)
+    // Marquer un morceau comme joué (DJ)
     socket.on("mark-played", async (data) => {
-      const { eventId, requestId } = data;
-
+      const { requestId } = data;
       try {
+        const row = await verifyRequestEventAccess(socket, requestId);
+        if (!row) return;
+        const eventId = row.event_id;
         const perm = await verifyActionPermission(socket, eventId, "playback");
         if (!perm) return;
 
         await db.query(
-          "UPDATE requests SET status = ?, played_at = NOW(), play_started_at = NOW(), queue_position = NULL WHERE id = ? AND event_id = ?",
-          ["played", requestId, eventId],
+          "UPDATE requests SET status = 'played', played_at = NOW() WHERE id = ? AND event_id = ?",
+          [requestId, eventId],
         );
 
-        const queue = await queueService.getQueueWithVotes(eventId);
-        io.to(eventId).emit("queue-updated", { queue });
+        // Décrémenter le compteur de votes de l'utilisateur
+        await queueService.markSongPlayed(eventId, requestId);
+
+        const queue = await queueService.getQueue(eventId);
+        io.to(eventId).emit("queue-updated", queue);
+
+        io.to(row.socket_id).emit("request-played", { requestId });
         await logEventAction(eventId, perm, "mark-played", requestId, null);
       } catch (error) {
         console.error("Erreur mark-played:", error);
       }
     });
 
+    // Marquer un morceau comme zappé (DJ)
     socket.on("mark-skipped", async (data) => {
-      const { eventId, requestId } = data || {};
+      const { requestId } = data;
       try {
-        if (!eventId || !requestId) return;
+        const row = await verifyRequestEventAccess(socket, requestId);
+        if (!row) return;
+        const eventId = row.event_id;
         const perm = await verifyActionPermission(socket, eventId, "playback");
         if (!perm) return;
+
         await db.query(
           "UPDATE requests SET skipped_at = NOW() WHERE id = ? AND event_id = ? AND status = 'played'",
           [requestId, eventId],
@@ -932,23 +1014,51 @@ function setupSocketHandlers(io) {
       if (!eventId) return;
       const perm = await verifyActionPermission(socket, eventId, "playback");
       if (!perm) return;
-      if (data?.track?.uri && (!data.track.bpm || data.track.energy == null)) {
-        try {
-          const trackId = String(data.track.uri).split(":").pop();
-          if (trackId) {
-            const [rows] = await db.query(
-              "SELECT bpm, energy FROM track_audio_cache WHERE track_id = ?",
-              [trackId],
-            );
-            if (rows.length > 0) {
-              if (rows[0].bpm) data.track.bpm = Number(rows[0].bpm);
-              if (rows[0].energy != null) data.track.energy = Number(rows[0].energy);
+
+      if (data?.track?.uri) {
+        // 1. Enrichissement BPM/Énergie si manquant
+        if (!data.track.bpm || data.track.energy == null) {
+          try {
+            const trackId = String(data.track.uri).split(":").pop();
+            if (trackId) {
+              const [rows] = await db.query(
+                "SELECT bpm, energy FROM track_audio_cache WHERE track_id = ?",
+                [trackId],
+              );
+              if (rows.length > 0) {
+                if (rows[0].bpm) data.track.bpm = Number(rows[0].bpm);
+                if (rows[0].energy != null) data.track.energy = Number(rows[0].energy);
+              }
             }
+          } catch (err) {
+            console.error("Erreur enrichissement BPM now-playing:", err.message || err);
+          }
+        }
+
+        // 2. Enrichissement avec les métadonnées de la demande et des votes de la foule
+        try {
+          const [reqRows] = await db.query(
+            `SELECT r.user_name,
+               (COALESCE(SUM(CASE WHEN v.vote_type='up' THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN v.vote_type='down' THEN 1 ELSE 0 END), 0)) as score,
+               COUNT(v.id) as total_votes
+             FROM requests r
+             LEFT JOIN votes v ON r.id = v.request_id
+             WHERE r.event_id = ? AND r.spotify_uri = ?
+             GROUP BY r.id, r.user_name
+             ORDER BY r.played_at DESC, r.created_at DESC
+             LIMIT 1`,
+            [eventId, data.track.uri]
+          );
+          if (reqRows.length > 0 && reqRows[0].user_name) {
+            data.track.userName = reqRows[0].user_name;
+            data.track.votes = Number(reqRows[0].score || reqRows[0].total_votes || 0);
+            data.track.isCrowdPick = true;
           }
         } catch (err) {
-          console.error("Erreur enrichissement BPM now-playing:", err.message || err);
+          console.error("Erreur enrichissement crowd now-playing:", err.message || err);
         }
       }
+
       // Mettre en cache pour les nouveaux connectés
       if (data.track) {
         nowPlayingCache.set(eventId, data);
@@ -970,21 +1080,12 @@ function setupSocketHandlers(io) {
       await logEventAction(eventId, perm, "dj-message", null, { message: cleanMessage.slice(0, 120) });
     });
 
-    // ── Réaction émoji en direct du public (Mobile -> Grand Écran & DJ) ──
+    // ── Réaction émoji en direct du public avec Batching Haute Concurrence ──
     socket.on("live-reaction", async (data) => {
       const { eventId, reaction, senderName, count } = data || {};
       if (!eventId || !reaction) return;
       const allowedEmojis = ["🔥", "❤️", "🎉", "🚀", "👏", "⚡", "🤩", "💃", "🕺", "🍻", "💯"];
-      const cleanReaction = allowedEmojis.includes(reaction) ? reaction : "🔥";
-      const cleanCount = Math.max(1, Math.min(10, Number(count || 1)));
-      const cleanSender = String(senderName || "").slice(0, 30);
-
-      io.to(eventId).emit("live-reaction-broadcast", {
-        reaction: cleanReaction,
-        count: cleanCount,
-        senderName: cleanSender,
-        timestamp: Date.now(),
-      });
+      queueLiveReactionBatch(io, eventId, cleanReaction, cleanSender, cleanCount);
     });
 
     // ── Système de ban ──────────────────────────────────────────────────────

@@ -1550,6 +1550,20 @@
     if (pen) { pen.upvotes = data.upvotes; pen.downvotes = data.downvotes; renderPending(); }
   });
 
+  socket.on("votes-batch-updated", (data) => {
+    if (!Array.isArray(data?.votes)) return;
+    let needsQueue = false;
+    let needsPending = false;
+    for (const v of data.votes) {
+      const req = queue.find((r) => r.id === v.requestId);
+      if (req) { req.upvotes = v.upvotes; req.downvotes = v.downvotes; needsQueue = true; }
+      const pen = pendingRequests.find((r) => r.id === v.requestId);
+      if (pen) { pen.upvotes = v.upvotes; pen.downvotes = v.downvotes; needsPending = true; }
+    }
+    if (needsQueue) renderQueue();
+    if (needsPending) renderPending();
+  });
+
   socket.on("requests-freeze-updated", (data) => {
     requestsFrozenUntil = data?.frozen ? Number(data?.frozenUntil || 0) : null;
     renderRequestsFreezeBadge();

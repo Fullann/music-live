@@ -635,6 +635,40 @@
 <!-- ── Visualiseur Audio Canvas ─────────────────────────────── -->
 <canvas id="audioVisualizerCanvas" class="fixed inset-0 pointer-events-none" style="z-index:0"></canvas>
 
+<!-- ── OVERLAY PROCHAIN MORCEAU CHOISI PAR LE PUBLIC ──────── -->
+<div id="crowdChoiceOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-8 pointer-events-none" style="background:radial-gradient(circle at center, rgba(15,10,30,0.85) 0%, rgba(5,5,12,0.95) 100%);backdrop-filter:blur(16px)">
+  <!-- Sparkles Canvas -->
+  <canvas id="crowdChoiceSparksCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+  
+  <div id="crowdChoiceCard" class="relative max-w-2xl w-full rounded-3xl p-8 sm:p-12 text-center flex flex-col items-center gap-6 shadow-2xl border border-yellow-400/30 overflow-hidden transform scale-90 opacity-0 transition-all duration-700 ease-out"
+       style="background: linear-gradient(145deg, rgba(30, 20, 50, 0.92), rgba(15, 10, 25, 0.98)); box-shadow: 0 0 100px rgba(234, 179, 8, 0.35), 0 0 40px rgba(139, 92, 246, 0.3);">
+    
+    <!-- Top badge -->
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase tracking-widest text-yellow-300"
+         style="background: rgba(234, 179, 8, 0.15); border: 1.5px solid rgba(234, 179, 8, 0.5); box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);">
+      <span>👑</span> Morceau Choisi par le Public
+    </div>
+
+    <!-- Album Art with glowing ring -->
+    <div class="relative group">
+      <div class="absolute -inset-4 rounded-3xl bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 opacity-75 blur-xl animate-pulse"></div>
+      <img id="crowdChoiceImg" src="" alt="" class="relative w-40 h-40 sm:w-52 sm:h-52 rounded-2xl object-cover shadow-2xl border-2 border-white/20" />
+    </div>
+
+    <!-- Song Info -->
+    <div class="space-y-1.5 max-w-lg">
+      <h2 id="crowdChoiceSongName" class="text-2xl sm:text-4xl font-black text-white truncate drop-shadow-md">Titre</h2>
+      <p id="crowdChoiceArtist" class="text-base sm:text-xl font-bold text-white/70 truncate">Artiste</p>
+    </div>
+
+    <!-- Requester pill -->
+    <div class="px-5 py-2.5 rounded-2xl text-sm sm:text-base font-extrabold flex items-center gap-2"
+         style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid rgba(16, 185, 129, 0.5); color: #34d399;">
+      <span>✨</span> <span id="crowdChoiceRequesterText">Demandé par Thomas avec 24 votes !</span>
+    </div>
+  </div>
+</div>
+
 <!-- ── Layer Réactions Émojis Flottantes ────────────────────── -->
 <div id="floatingReactionsLayer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
 
@@ -1031,6 +1065,100 @@
     npRaf = requestAnimationFrame(npDraw);
   }
 
+  let lastCelebratedTrackKey = "";
+  let crowdChoiceTimer = null;
+  let sparksAnimId = null;
+
+  function celebrateCrowdChoice(track) {
+    const overlay = document.getElementById("crowdChoiceOverlay");
+    const card = document.getElementById("crowdChoiceCard");
+    const img = document.getElementById("crowdChoiceImg");
+    const songName = document.getElementById("crowdChoiceSongName");
+    const artist = document.getElementById("crowdChoiceArtist");
+    const requester = document.getElementById("crowdChoiceRequesterText");
+    if (!overlay || !card) return;
+
+    img.src = track.albumArt || "";
+    songName.textContent = track.name || "Morceau";
+    artist.textContent = track.artist || "";
+    const userName = track.userName || track.user_name || "Un invité";
+    const votes = track.votes ? `${track.votes} votes` : "les votes de la salle";
+    requester.textContent = `Demandé par ${userName} avec ${votes} ! 🔥`;
+
+    overlay.classList.remove("hidden");
+    requestAnimationFrame(() => {
+      card.style.transform = "scale(1)";
+      card.style.opacity = "1";
+    });
+
+    startSparksAnimation();
+
+    clearTimeout(crowdChoiceTimer);
+    crowdChoiceTimer = setTimeout(() => {
+      card.style.transform = "scale(0.9)";
+      card.style.opacity = "0";
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+        stopSparksAnimation();
+      }, 700);
+    }, 6000);
+  }
+
+  function startSparksAnimation() {
+    const canvas = document.getElementById("crowdChoiceSparksCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const sparks = Array.from({ length: 70 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 16,
+      vy: (Math.random() - 0.5) * 16 - 3,
+      size: Math.random() * 5 + 2,
+      color: ["#f59e0b", "#ec4899", "#8b5cf6", "#10b981", "#38bdf8", "#fbbf24"][Math.floor(Math.random() * 6)],
+      life: 1,
+      decay: Math.random() * 0.015 + 0.008,
+    }));
+
+    function frame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      sparks.forEach((s) => {
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.15;
+        s.life -= s.decay;
+        if (s.life > 0) {
+          ctx.save();
+          ctx.globalAlpha = s.life;
+          ctx.fillStyle = s.color;
+          ctx.shadowColor = s.color;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+      if (sparks.some((s) => s.life > 0)) {
+        sparksAnimId = requestAnimationFrame(frame);
+      }
+    }
+    cancelAnimationFrame(sparksAnimId);
+    sparksAnimId = requestAnimationFrame(frame);
+  }
+
+  function stopSparksAnimation() {
+    cancelAnimationFrame(sparksAnimId);
+    sparksAnimId = null;
+    const canvas = document.getElementById("crowdChoiceSparksCanvas");
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
   function showNowPlaying(data) {
     const { track, positionMs, isPlaying, timestamp } = data;
     const trackKey = `${track?.name || ""}::${track?.artist || ""}::${track?.durationMs || ""}`;
@@ -1053,6 +1181,12 @@
       if (kArt) kArt.src = track.albumArt || "";
       if (kTitle) kTitle.textContent = track.name || "";
       if (kArtist) kArtist.textContent = track.artist || "";
+
+      // Si le morceau a été demandé par un invité / vote du public
+      if ((track.isCrowdPick || track.userName || track.user_name) && trackKey !== lastCelebratedTrackKey) {
+        lastCelebratedTrackKey = trackKey;
+        celebrateCrowdChoice(track);
+      }
     }
 
     lastProjectedTrackKey = trackKey || lastProjectedTrackKey;
@@ -1262,10 +1396,16 @@
   socket.on("connect", () => socket.emit("join-event", eventId));
   if (socket.connected) socket.emit("join-event", eventId);
 
-  socket.on("queue-updated",    loadData);
-  socket.on("new-request",      loadData);
-  socket.on("request-accepted", loadData);
-  socket.on("request-rejected", loadData);
+  let loadDataDebounceTimer = null;
+  function debouncedLoadData() {
+    clearTimeout(loadDataDebounceTimer);
+    loadDataDebounceTimer = setTimeout(loadData, 200);
+  }
+
+  socket.on("queue-updated",    debouncedLoadData);
+  socket.on("new-request",      debouncedLoadData);
+  socket.on("request-accepted", debouncedLoadData);
+  socket.on("request-rejected", debouncedLoadData);
   socket.on("vote-updated", (data) => {
     const requestId = data?.requestId;
     const upvotes = Number(data?.upvotes || 0);
@@ -1284,7 +1424,19 @@
         downvotes: Number(data?.downvotes || 0),
       });
     }
-    loadData();
+    debouncedLoadData();
+  });
+  socket.on("votes-batch-updated", (data) => {
+    if (!Array.isArray(data?.votes)) return;
+    for (const v of data.votes) {
+      if (v.requestId) {
+        queueVoteState.set(v.requestId, {
+          upvotes: Number(v.upvotes || 0),
+          downvotes: Number(v.downvotes || 0),
+        });
+      }
+    }
+    debouncedLoadData();
   });
   socket.on("event-settings-updated", (data) => {
     if (data.projectionVisualsEnabled !== undefined || data.projectionVisualsMode !== undefined) {
