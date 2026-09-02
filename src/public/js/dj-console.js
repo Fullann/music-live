@@ -946,6 +946,30 @@
 
   document.getElementById("btnRefreshActionLogs")?.addEventListener("click", loadActionLogs);
 
+  // ── Réactions Public en Direct (Régie DJ) ─────────────────
+  let djReactionTimer = null;
+  let djReactionTotal = 0;
+  socket.on("live-reaction-broadcast", (data) => {
+    if (!data?.reaction) return;
+    djReactionTotal += data.count || 1;
+    const wrap = document.getElementById("djCrowdReactionsWrap");
+    const emojiEl = document.getElementById("djCrowdReactionEmoji");
+    const textEl = document.getElementById("djCrowdReactionText");
+    if (wrap && emojiEl && textEl) {
+      emojiEl.textContent = data.reaction;
+      textEl.textContent = `${data.senderName ? data.senderName + " • " : ""}+${djReactionTotal}`;
+      wrap.classList.remove("hidden");
+      wrap.style.transform = "scale(1.15)";
+      setTimeout(() => { wrap.style.transform = ""; }, 180);
+
+      clearTimeout(djReactionTimer);
+      djReactionTimer = setTimeout(() => {
+        wrap.classList.add("hidden");
+        djReactionTotal = 0;
+      }, 4000);
+    }
+  });
+
   // ── Init ──
   // Rejoindre la room à chaque connexion/reconnexion Socket.IO
   socket.on("connect", () => {

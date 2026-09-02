@@ -1120,3 +1120,266 @@
     }
     renderRequestsFreeze();
   }, 1000);
+
+  // ── Moteur de Réactions Émojis en Direct ─────────────────
+  const userReactionsLayer = document.getElementById("userFloatingReactionsLayer");
+  function spawnUserFloatingReaction(emoji) {
+    if (!userReactionsLayer) return;
+    const el = document.createElement("div");
+    el.className = "floating-reaction-item";
+    const startX = Math.floor(Math.random() * (window.innerWidth * 0.7) + window.innerWidth * 0.15);
+    const swayX  = Math.floor((Math.random() - 0.5) * 40) + "px";
+    const rot1   = (Math.random() * 30 - 15) + "deg";
+    const rot2   = (Math.random() * 30 - 15) + "deg";
+    const dur    = (2.4 + Math.random() * 0.8).toFixed(2) + "s";
+    el.style.setProperty("--start-x", `${startX}px`);
+    el.style.setProperty("--sway-x", swayX);
+    el.style.setProperty("--rot-1", rot1);
+    el.style.setProperty("--rot-2", rot2);
+    el.style.setProperty("--float-duration", dur);
+    el.style.fontSize = "32px";
+    el.style.left = "0px";
+    el.style.top = "0px";
+    el.innerHTML = `<span class="drop-shadow-lg">${emoji}</span>`;
+    userReactionsLayer.appendChild(el);
+    setTimeout(() => el.remove(), 3400);
+  }
+
+  document.getElementById("liveReactionsBar")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-reaction]");
+    if (!btn) return;
+    const emoji = btn.dataset.reaction;
+    if (navigator.vibrate) {
+      try { navigator.vibrate(15); } catch {}
+    }
+    btn.style.transform = "scale(1.35)";
+    setTimeout(() => { btn.style.transform = ""; }, 200);
+    spawnUserFloatingReaction(emoji);
+    const senderName = localStorage.getItem("djq-user-name") || "";
+    socket.emit("live-reaction", { eventId, reaction: emoji, senderName, count: 1 });
+  });
+
+  socket.on("live-reaction-broadcast", (data) => {
+    if (data?.reaction) {
+      spawnUserFloatingReaction(data.reaction);
+    }
+  });
+
+  // ── Générateur de Story Instagram / TikTok 9:16 ───────────
+  const storyModal = document.getElementById("storyShareModal");
+  const storyCanvas = document.getElementById("storyCanvas");
+
+  async function generateStoryCanvas(track) {
+    if (!storyCanvas) return;
+    const ctx = storyCanvas.getContext("2d");
+    const W = 1080;
+    const H = 1920;
+    storyCanvas.width = W;
+    storyCanvas.height = H;
+
+    // 1. Fond dégradé sombre néon
+    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+    bgGrad.addColorStop(0, "#0a0a14");
+    bgGrad.addColorStop(0.35, "#170f2b");
+    bgGrad.addColorStop(0.7, "#0f172a");
+    bgGrad.addColorStop(1, "#07070c");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Halos lumineux d'ambiance
+    const radial1 = ctx.createRadialGradient(200, 400, 10, 200, 400, 500);
+    radial1.addColorStop(0, "rgba(139, 92, 246, 0.45)");
+    radial1.addColorStop(1, "rgba(139, 92, 246, 0)");
+    ctx.fillStyle = radial1;
+    ctx.fillRect(0, 0, W, H);
+
+    const radial2 = ctx.createRadialGradient(880, 1400, 10, 880, 1400, 600);
+    radial2.addColorStop(0, "rgba(236, 72, 153, 0.4)");
+    radial2.addColorStop(1, "rgba(236, 72, 153, 0)");
+    ctx.fillStyle = radial2;
+    ctx.fillRect(0, 0, W, H);
+
+    // 3. Top Header Capsule "MUSIC LIVE"
+    ctx.save();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 200, 140, 400, 70, [35]);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 28px 'Plus Jakarta Sans', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🎵  MUSIC LIVE", W / 2, 175);
+    ctx.restore();
+
+    // 4. Titre de célébration
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 52px 'Plus Jakarta Sans', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("J'AI FAIT JOUER MA MUSIQUE !", W / 2, 290);
+
+    const eventTitle = document.getElementById("eventName")?.textContent || "Soirée Live";
+    ctx.fillStyle = "#a78bfa";
+    ctx.font = "600 34px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText(`Ce soir à la ${eventTitle} 🔥`, W / 2, 350);
+
+    // 5. Pochette Album avec coins arrondis et ombre
+    const artSize = 620;
+    const artX = (W - artSize) / 2;
+    const artY = 440;
+
+    // Ombre portée
+    ctx.save();
+    ctx.shadowColor = "rgba(139, 92, 246, 0.55)";
+    ctx.shadowBlur = 80;
+    ctx.shadowOffsetY = 25;
+    ctx.fillStyle = "#1e1b4b";
+    ctx.beginPath();
+    ctx.roundRect(artX, artY, artSize, artSize, [48]);
+    ctx.fill();
+    ctx.restore();
+
+    // Charger l'image
+    const imgUrl = track.image_url || track.albumArt || myRequestData.image_url || "";
+    if (imgUrl) {
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve; // Continue même si échec image
+          img.src = imgUrl;
+        });
+        if (img.complete && img.naturalWidth > 0) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.roundRect(artX, artY, artSize, artSize, [48]);
+          ctx.clip();
+          ctx.drawImage(img, artX, artY, artSize, artSize);
+          ctx.restore();
+        }
+      } catch {}
+    }
+
+    // Bordure néon de la pochette
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(artX, artY, artSize, artSize, [48]);
+    ctx.stroke();
+    ctx.restore();
+
+    // 6. Titre & Artiste du morceau
+    const songTitle = track.song_name || track.name || myRequestData.song_name || "Morceau";
+    const songArtist = track.artist || myRequestData.artist || "Artiste";
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 54px 'Plus Jakarta Sans', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(songTitle.length > 24 ? songTitle.slice(0, 22) + "…" : songTitle, W / 2, 1150);
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.font = "600 38px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillText(songArtist.length > 30 ? songArtist.slice(0, 28) + "…" : songArtist, W / 2, 1215);
+
+    // 7. Badge "Demandé par [Nom]"
+    const userName = myRequestData.user_name || localStorage.getItem("djq-user-name") || "Un invité";
+    ctx.save();
+    ctx.fillStyle = "rgba(16, 185, 129, 0.15)";
+    ctx.strokeStyle = "rgba(16, 185, 129, 0.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 240, 1290, 480, 64, [32]);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#10b981";
+    ctx.font = "bold 26px 'Plus Jakarta Sans', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`✨ Demandé par ${userName}`, W / 2, 1322);
+    ctx.restore();
+
+    // 8. Onde sonore égaliseur décorative
+    ctx.save();
+    const bars = 32;
+    const totalBarW = 600;
+    const barW = 10;
+    const barGap = (totalBarW - bars * barW) / (bars - 1);
+    const startBX = (W - totalBarW) / 2;
+    const baseBY = 1480;
+
+    for (let b = 0; b < bars; b++) {
+      const h = 20 + Math.sin(b * 0.4) * 35 + Math.cos(b * 0.8) * 20;
+      const gradB = ctx.createLinearGradient(0, baseBY - h, 0, baseBY + h);
+      gradB.addColorStop(0, "#ec4899");
+      gradB.addColorStop(1, "#8b5cf6");
+      ctx.fillStyle = gradB;
+      ctx.beginPath();
+      ctx.roundRect(startBX + b * (barW + barGap), baseBY - h / 2, barW, h, [5]);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 9. Footer CTA
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.font = "600 28px 'Plus Jakarta Sans', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Choisis tes sons en direct sur music-live.fullann.ch", W / 2, 1720);
+  }
+
+  function openStoryShareModal() {
+    const track = {
+      song_name: myRequestData.song_name || document.getElementById("myRequestName")?.textContent || "Morceau",
+      artist: myRequestData.artist || document.getElementById("myRequestArtist")?.textContent || "Artiste",
+      image_url: myRequestData.image_url || document.getElementById("myRequestImg")?.src || "",
+    };
+    generateStoryCanvas(track);
+    if (storyModal) storyModal.classList.remove("hidden");
+  }
+
+  document.getElementById("btnOpenStoryShare")?.addEventListener("click", openStoryShareModal);
+  document.getElementById("closeStoryModal")?.addEventListener("click", () => {
+    if (storyModal) storyModal.classList.add("hidden");
+  });
+
+  document.getElementById("btnNativeShareStory")?.addEventListener("click", async () => {
+    if (!storyCanvas) return;
+    storyCanvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "music-live-story.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: "Ma musique sur Music Live",
+            text: "J'ai fait jouer ma musique ce soir sur Music Live ! 🎵",
+            files: [file],
+          });
+          return;
+        } catch {}
+      }
+      // Fallback direct download
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "story-music-live.png";
+      a.click();
+      showToast("Image enregistrée pour ta Story !");
+    }, "image/png");
+  });
+
+  document.getElementById("btnDownloadStory")?.addEventListener("click", () => {
+    if (!storyCanvas) return;
+    storyCanvas.toBlob((blob) => {
+      if (!blob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "story-music-live.png";
+      a.click();
+      showToast("Image téléchargée !");
+    }, "image/png");
+  });

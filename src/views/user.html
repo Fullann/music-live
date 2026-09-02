@@ -171,6 +171,13 @@
           </button>
         </div>
       </div>
+      <!-- Story button -->
+      <div id="myRequestStoryBtnWrap" class="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between">
+        <span class="text-[11px]" style="color:var(--text-muted)">Partage ta musique avec tes amis</span>
+        <button id="btnOpenStoryShare" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition hover:opacity-90 cursor-pointer" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">
+          <span>📸</span> Story Instagram / TikTok
+        </button>
+      </div>
     </div>
 
     <div id="guestHistoryWrap" class="shrink-0 rounded-2xl p-4 mb-3 hidden" style="background:var(--bg-surface);border:1px solid var(--border)">
@@ -397,6 +404,50 @@
       <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Proposer cette chanson
     </button>
+  </div>
+</div>
+
+<!-- ── LAYER RÉACTIONS ÉMOJIS FLOTTANTES LOCALES ─────────────── -->
+<div id="userFloatingReactionsLayer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+<!-- ── FLOATING LIVE REACTIONS BAR ──────────────────────────── -->
+<div id="liveReactionsBar" class="fixed bottom-16 left-0 right-0 z-30 flex items-center justify-center px-4 pointer-events-none">
+  <div class="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-full shadow-2xl backdrop-blur-xl border border-white/10"
+       style="background: rgba(15, 17, 26, 0.88); box-shadow: 0 10px 30px rgba(0,0,0,0.55);">
+    <button type="button" class="reaction-btn" data-reaction="🔥" title="Feu">🔥</button>
+    <button type="button" class="reaction-btn" data-reaction="❤️" title="Amour">❤️</button>
+    <button type="button" class="reaction-btn" data-reaction="🎉" title="Fête">🎉</button>
+    <button type="button" class="reaction-btn" data-reaction="🚀" title="Fusée">🚀</button>
+    <button type="button" class="reaction-btn" data-reaction="👏" title="Bravo">👏</button>
+    <button type="button" class="reaction-btn" data-reaction="⚡" title="Énergie">⚡</button>
+  </div>
+</div>
+
+<!-- ── MODAL PARTAGE STORY INSTAGRAM / TIKTOK ────────────────── -->
+<div id="storyShareModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.82);backdrop-filter:blur(10px)">
+  <div class="w-full max-w-sm rounded-3xl p-5 flex flex-col items-center gap-4 text-center" style="background:var(--bg-surface);border:1px solid var(--border)">
+    <div class="flex items-center justify-between w-full">
+      <p class="text-sm font-bold text-gradient-purple">📸 Partager en Story</p>
+      <button id="closeStoryModal" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 text-white/70 hover:text-white cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    
+    <!-- Story Canvas Preview -->
+    <div class="relative w-full max-w-[220px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border border-white/20">
+      <canvas id="storyCanvas" width="1080" height="1920" class="w-full h-full object-cover"></canvas>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="w-full space-y-2">
+      <button id="btnNativeShareStory" class="btn btn-primary btn-full py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        Partager (Instagram / TikTok)
+      </button>
+      <button id="btnDownloadStory" class="btn btn-ghost btn-full py-2.5 rounded-xl font-semibold text-xs text-white/80">
+        Télécharger l'image HD
+      </button>
+    </div>
   </div>
 </div>
 

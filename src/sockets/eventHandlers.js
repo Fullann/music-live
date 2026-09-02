@@ -960,6 +960,23 @@ function setupSocketHandlers(io) {
       await logEventAction(eventId, perm, "dj-message", null, { message: cleanMessage.slice(0, 120) });
     });
 
+    // ── Réaction émoji en direct du public (Mobile -> Grand Écran & DJ) ──
+    socket.on("live-reaction", async (data) => {
+      const { eventId, reaction, senderName, count } = data || {};
+      if (!eventId || !reaction) return;
+      const allowedEmojis = ["🔥", "❤️", "🎉", "🚀", "👏", "⚡", "🤩", "💃", "🕺", "🍻", "💯"];
+      const cleanReaction = allowedEmojis.includes(reaction) ? reaction : "🔥";
+      const cleanCount = Math.max(1, Math.min(10, Number(count || 1)));
+      const cleanSender = String(senderName || "").slice(0, 30);
+
+      io.to(eventId).emit("live-reaction-broadcast", {
+        reaction: cleanReaction,
+        count: cleanCount,
+        senderName: cleanSender,
+        timestamp: Date.now(),
+      });
+    });
+
     // ── Système de ban ──────────────────────────────────────────────────────
 
     // Bannir un utilisateur (DJ)

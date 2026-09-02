@@ -493,4 +493,80 @@ router.get(
   },
 );
 
+// ── Cache mémoire des paroles (TTL 24h, max 500 chansons) ──
+const lyricsCache = new Map();
+
+function parseLrc(lrcText) {
+  if (!lrcText) return [];
+  const lines = lrcText.split("\n");
+  const result = [];
+  const regex = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)$/;
+  for (const line of lines) {
+    const match = line.trim().match(regex);
+    if (match) {
+      const min = parseInt(match[1], 10);
+      const sec = parseInt(match[2], 10);
+      const ms = parseInt(match[3].padEnd(3, "0").slice(0, 3), 10);
+      const time = min * 60 + sec + ms / 1000;
+      const text = match[4].trim();
+      if (text) {
+        result.push({ time, text });
+      }
+    }
+  }
+  return result;
+}
+
+// ── Endpoint Paroles Synchronisées (Karaoké) ──
+router.get("/lyrics", async (req, res) => {
+  const { track, artist, duration } = req.query;
+  if (!track || !artist) {
+    return res.status(400).json({ error: "Paramètres 'track' et 'artist' requis" });
+  }
+
+  const cacheKey = `${track.toLowerCase().trim()}:::${artist.toLowerCase().trim()}`;
+  if (lyricsCache.has(cacheKey)) {
+    return res.json(lyricsCache.get(cacheKey));
+  }
+
+  try {
+    const params = {
+      track_name: track,
+      artist_name: artist,
+    };
+    if (duration) params.duration = Math.round(Number(duration));
+
+    const response = await axios.get("https://lrclib.net/api/get", {
+      params,
+      timeout: 3500,
+      headers: {
+        "User-Agent": "MusicLiveApp/2.0 (https://music-live.fullann.ch)",
+      },
+    });
+
+    const data = response.data;
+    let payload = null;
+    if (data.syncedLyrics) {
+      payload = {
+        synced: true,
+        lines: parseLrc(data.syncedLyrics),
+      };
+    } else if (data.plainLyrics) {
+      payload = {
+        synced: false,
+        lines: data.plainLyrics.split("\n").map((t) => ({ time: 0, text: t.trim() })).filter((l) => l.text.length > 0),
+      };
+    }
+
+    if (payload && payload.lines.length > 0) {
+      if (lyricsCache.size >= 500) lyricsCache.delete(lyricsCache.keys().next().value);
+      lyricsCache.set(cacheKey, payload);
+      return res.json(payload);
+    }
+    return res.status(404).json({ error: "Paroles introuvables" });
+  } catch {
+    return res.status(404).json({ error: "Paroles non disponibles" });
+  }
+});
+
 module.exports = router;

@@ -574,6 +574,80 @@ html.light ::-webkit-scrollbar-thumb {
 
 .icon-sun, .icon-moon { display: inline-block; }
 
+/* ── Floating Live Reactions ── */
+.reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.reaction-btn:hover {
+  transform: translateY(-3px) scale(1.15);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+}
+.reaction-btn:active {
+  transform: translateY(1px) scale(0.92);
+}
+
+.floating-reaction-item {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform, opacity;
+  animation: floatUpAndFade var(--float-duration, 3.2s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes floatUpAndFade {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--start-x, 0px), 100vh, 0) scale(0.4) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translate3d(calc(var(--start-x, 0px) + var(--sway-x, 15px)), 80vh, 0) scale(1.15) rotate(var(--rot-1, 10deg));
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate3d(calc(var(--start-x, 0px) - var(--sway-x, 15px)), 45vh, 0) scale(1) rotate(var(--rot-2, -12deg));
+  }
+  85% {
+    opacity: 0.7;
+    transform: translate3d(calc(var(--start-x, 0px) + var(--sway-x, 15px)), 15vh, 0) scale(0.9) rotate(var(--rot-1, 10deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--start-x, 0px), -10vh, 0) scale(0.6) rotate(0deg);
+  }
+}
+
+/* ── Synchronized Karaoke Lyrics ── */
+.karaoke-panel {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.karaoke-line {
+  transition: all 0.28s ease;
+  opacity: 0.4;
+  transform: scale(0.96);
+  transform-origin: center;
+}
+.karaoke-line.active {
+  opacity: 1;
+  transform: scale(1.08);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 0 40px rgba(236, 72, 153, 0.5);
+}
+
 @media print {
   body { background: #fff; color: #000; }
   .no-print { display: none !important; }
