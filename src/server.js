@@ -5,8 +5,9 @@ app.set('trust proxy', 1);
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, {
   // Désactivé : perMessageDeflate utilise des bits réservés WebSocket
-  // que certains proxies (nginx o2switch) ne gèrent pas, causant des déconnexions.
+  // que certains proxies (nginx / Cloudflare) ne gèrent pas, causant des erreurs 'reserved bits are on'.
   perMessageDeflate: false,
+  httpCompression: false,
 });
 app.set("io", io);
 const cookieParser = require("cookie-parser");
@@ -56,7 +57,16 @@ function renderErrorPage(res, _status, title, message, opts = {}) {
 }
 
 // === Middlewares de performance et sécurité ===
-app.use(compression());
+app.use(
+  compression({
+    filter: (req, res) => {
+      if (req.path && req.path.startsWith("/socket.io")) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+  })
+);
 app.use(helmetConfig);
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));

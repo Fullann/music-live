@@ -287,76 +287,78 @@
     }
   }
 
-  document.getElementById("showMessagePanel").addEventListener("click", () => toggleMessagePanel());
-  document.getElementById("closeMessagePanel").addEventListener("click", () => toggleMessagePanel(true));
-  document.getElementById("messagePanel").addEventListener("click", (e) => { if (e.target.id === "messagePanel") toggleMessagePanel(true); });
+  document.getElementById("showMessagePanel")?.addEventListener("click", () => toggleMessagePanel());
+  document.getElementById("closeMessagePanel")?.addEventListener("click", () => toggleMessagePanel(true));
+  document.getElementById("messagePanel")?.addEventListener("click", (e) => { if (e.target.id === "messagePanel") toggleMessagePanel(true); });
 
   const djMsgInput = document.getElementById("djMessageInput");
   const djMsgCount = document.getElementById("djMessageCount");
-  djMsgInput.addEventListener("input", () => {
-    djMsgCount.textContent = `${djMsgInput.value.length} / 200`;
+  djMsgInput?.addEventListener("input", () => {
+    if (djMsgCount) djMsgCount.textContent = `${djMsgInput.value.length} / 200`;
   });
 
-  document.getElementById("sendDjMessage").addEventListener("click", () => {
+  document.getElementById("sendDjMessage")?.addEventListener("click", () => {
+    if (!djMsgInput) return;
     const msg = djMsgInput.value.trim();
     if (!msg) return;
     socket.emit("dj-message", { eventId, message: msg });
     const feedback = document.getElementById("djMessageFeedback");
-    feedback.classList.remove("hidden");
+    if (feedback) feedback.classList.remove("hidden");
     djMsgInput.value = "";
-    djMsgCount.textContent = "0 / 200";
-    setTimeout(() => feedback.classList.add("hidden"), 3000);
+    if (djMsgCount) djMsgCount.textContent = "0 / 200";
+    if (feedback) setTimeout(() => feedback.classList.add("hidden"), 3000);
   });
 
-  djMsgInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) document.getElementById("sendDjMessage").click();
+  djMsgInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) document.getElementById("sendDjMessage")?.click();
   });
 
   // ── Event listeners ──
-  document.getElementById("showSettings").addEventListener("click", () => toggleSettings());
-  document.getElementById("closeSettings").addEventListener("click", () => toggleSettings());
-  document.getElementById("closeSettingsBottom").addEventListener("click", () => toggleSettings());
-  document.getElementById("settingsPanel").addEventListener("click", (e) => { if (e.target.id === "settingsPanel") toggleSettings(); });
+  document.getElementById("showSettings")?.addEventListener("click", () => toggleSettings());
+  document.getElementById("closeSettings")?.addEventListener("click", () => toggleSettings());
+  document.getElementById("closeSettingsBottom")?.addEventListener("click", () => toggleSettings());
+  document.getElementById("settingsPanel")?.addEventListener("click", (e) => { if (e.target.id === "settingsPanel") toggleSettings(); });
 
-  document.getElementById("showQRCode").addEventListener("click", showQRCodePanel);
-  document.getElementById("closeQRCode").addEventListener("click", closeQRCodePanel);
-  document.getElementById("closeQRCodeBottom").addEventListener("click", closeQRCodePanel);
-  document.getElementById("qrCodePanel").addEventListener("click", (e) => { if (e.target.id === "qrCodePanel") closeQRCodePanel(); });
-  document.getElementById("copyLinkBtn").addEventListener("click", copyUserLink);
-  document.getElementById("liveStatsBtn").href = `/event/${eventId}/stats`;
-  document.getElementById("openPublicDisplay").addEventListener("click", openPublicDisplay);
-  document.getElementById("openPublicDisplayFromQR").addEventListener("click", openPublicDisplay);
+  document.getElementById("showQRCode")?.addEventListener("click", showQRCodePanel);
+  document.getElementById("closeQRCode")?.addEventListener("click", closeQRCodePanel);
+  document.getElementById("closeQRCodeBottom")?.addEventListener("click", closeQRCodePanel);
+  document.getElementById("qrCodePanel")?.addEventListener("click", (e) => { if (e.target.id === "qrCodePanel") closeQRCodePanel(); });
+  document.getElementById("copyLinkBtn")?.addEventListener("click", copyUserLink);
+  const liveStatsBtnEl = document.getElementById("liveStatsBtn");
+  if (liveStatsBtnEl) liveStatsBtnEl.href = `/event/${eventId}/stats`;
+  document.getElementById("openPublicDisplay")?.addEventListener("click", openPublicDisplay);
+  document.getElementById("openPublicDisplayFromQR")?.addEventListener("click", openPublicDisplay);
 
-  document.getElementById("addSongBtn").addEventListener("click", showAddSongPanel);
-  document.getElementById("closeAddSong").addEventListener("click", closeAddSongPanel);
-  document.getElementById("closeAddSongBottom").addEventListener("click", closeAddSongPanel);
-  document.getElementById("addSongPanel").addEventListener("click", (e) => { if (e.target.id === "addSongPanel") closeAddSongPanel(); });
+  document.getElementById("addSongBtn")?.addEventListener("click", showAddSongPanel);
+  document.getElementById("closeAddSong")?.addEventListener("click", closeAddSongPanel);
+  document.getElementById("closeAddSongBottom")?.addEventListener("click", closeAddSongPanel);
+  document.getElementById("addSongPanel")?.addEventListener("click", (e) => { if (e.target.id === "addSongPanel") closeAddSongPanel(); });
 
   // Pas de bouton connectSpotify — connexion automatique au chargement
-  document.getElementById("votesToggle").addEventListener("change", toggleVotes);
-  document.getElementById("duplicatesToggle").addEventListener("change", toggleDuplicates);
-  document.getElementById("autoAcceptToggle").addEventListener("change", toggleAutoAccept);
-  document.getElementById("btnUpdateRateLimit").addEventListener("click", updateRateLimit);
-  document.getElementById("btnFreeze5").addEventListener("click", () => {
+  document.getElementById("votesToggle")?.addEventListener("change", toggleVotes);
+  document.getElementById("duplicatesToggle")?.addEventListener("change", toggleDuplicates);
+  document.getElementById("autoAcceptToggle")?.addEventListener("change", toggleAutoAccept);
+  document.getElementById("btnUpdateRateLimit")?.addEventListener("click", updateRateLimit);
+  document.getElementById("btnFreeze5")?.addEventListener("click", () => {
     socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 5 });
     showToast("Demandes gelées 5 min", "info");
   });
-  document.getElementById("btnFreeze10").addEventListener("click", () => {
+  document.getElementById("btnFreeze10")?.addEventListener("click", () => {
     socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 10 });
     showToast("Demandes gelées 10 min", "info");
   });
-  document.getElementById("btnFreezeOff").addEventListener("click", () => {
+  document.getElementById("btnFreezeOff")?.addEventListener("click", () => {
     socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 0 });
     showToast("Gel des demandes désactivé", "info");
   });
 
-  document.getElementById("btnLaunchPoll").addEventListener("click", () => {
-    const question = (document.getElementById("pollQuestionInput").value || "").trim();
+  document.getElementById("btnLaunchPoll")?.addEventListener("click", () => {
+    const question = (document.getElementById("pollQuestionInput")?.value || "").trim();
     const options = [
-      document.getElementById("pollOption1").value,
-      document.getElementById("pollOption2").value,
-      document.getElementById("pollOption3").value,
-      document.getElementById("pollOption4").value,
+      document.getElementById("pollOption1")?.value,
+      document.getElementById("pollOption2")?.value,
+      document.getElementById("pollOption3")?.value,
+      document.getElementById("pollOption4")?.value,
     ].map((v) => String(v || "").trim()).filter(Boolean);
     if (!question || options.length < 2) {
       showToast("Question + 2 options minimum", "error");
@@ -365,16 +367,16 @@
     socket.emit("create-live-poll", { eventId, question, options });
     showToast("Sondage lancé", "info");
   });
-  document.getElementById("btnClosePoll").addEventListener("click", () => {
+  document.getElementById("btnClosePoll")?.addEventListener("click", () => {
     if (!livePollState?.id) return;
     socket.emit("close-live-poll", { eventId, pollId: livePollState.id });
   });
-  document.getElementById("btnSaveMessage").addEventListener("click", saveThankYouMessage);
-  document.getElementById("btnResetMessage").addEventListener("click", resetThankYouMessage);
+  document.getElementById("btnSaveMessage")?.addEventListener("click", saveThankYouMessage);
+  document.getElementById("btnResetMessage")?.addEventListener("click", resetThankYouMessage);
 
-  document.getElementById("playPauseBtn").addEventListener("click", () => { if (spotifyPlayer) spotifyPlayer.togglePlay(); });
-  document.getElementById("btnPrevious").addEventListener("click", () => { if (spotifyPlayer) spotifyPlayer.previousTrack(); });
-  document.getElementById("btnNext").addEventListener("click", () => {
+  document.getElementById("playPauseBtn")?.addEventListener("click", () => { if (spotifyPlayer) spotifyPlayer.togglePlay(); });
+  document.getElementById("btnPrevious")?.addEventListener("click", () => { if (spotifyPlayer) spotifyPlayer.previousTrack(); });
+  document.getElementById("btnNext")?.addEventListener("click", () => {
     if (
       spotifyPlayer &&
       currentPlayingRequestId &&
@@ -386,37 +388,43 @@
     if (spotifyPlayer) spotifyPlayer.nextTrack();
   });
   document.getElementById("autoPlay")?.addEventListener("change", (e) => { autoPlayEnabled = e.target.checked; });
-  document.getElementById("sortByVotes").addEventListener("click", sortQueueByVotes);
-  document.getElementById("endEvent").addEventListener("click", endEventConfirm);
+  document.getElementById("sortByVotes")?.addEventListener("click", sortQueueByVotes);
+  document.getElementById("endEvent")?.addEventListener("click", endEventConfirm);
 
-  document.getElementById("progressBar").addEventListener("click", (e) => {
+  const progressBarEl = document.getElementById("progressBar");
+  progressBarEl?.addEventListener("click", (e) => {
     const bar  = e.currentTarget;
     const rect = bar.getBoundingClientRect();
     seekToPosition(Math.floor((e.clientX - rect.left) / rect.width * currentDuration));
   });
-  document.getElementById("progressBar").addEventListener("mousemove", (e) => {
+  progressBarEl?.addEventListener("mousemove", (e) => {
     const bar  = e.currentTarget;
     const rect = bar.getBoundingClientRect();
     const hover= document.getElementById("progressHover");
-    hover.style.width = ((e.clientX - rect.left) / rect.width * 100) + "%";
+    if (hover) hover.style.width = ((e.clientX - rect.left) / rect.width * 100) + "%";
   });
-  document.getElementById("progressBar").addEventListener("mouseleave", () => {
-    document.getElementById("progressHover").style.width = "0%";
+  progressBarEl?.addEventListener("mouseleave", () => {
+    const hover = document.getElementById("progressHover");
+    if (hover) hover.style.width = "0%";
   });
 
-  document.getElementById("djSearchInput").addEventListener("input", (e) => {
+  document.getElementById("djSearchInput")?.addEventListener("input", (e) => {
     const query = e.target.value.trim();
     clearTimeout(searchTimeout);
-    if (query.length < 2) { document.getElementById("djSearchResults").innerHTML = ""; return; }
+    if (query.length < 2) { 
+      const res = document.getElementById("djSearchResults");
+      if (res) res.innerHTML = ""; 
+      return; 
+    }
     searchTimeout = setTimeout(() => searchSpotifyForDJ(query), 500);
   });
 
-  document.getElementById("djSearchResults").addEventListener("click", (e) => {
+  document.getElementById("djSearchResults")?.addEventListener("click", (e) => {
     const trackDiv = e.target.closest("[data-dj-track]");
     if (trackDiv) addSongDirectlyToQueue(JSON.parse(trackDiv.dataset.djTrack));
   });
 
-  document.getElementById("pendingRequests").addEventListener("click", (e) => {
+  document.getElementById("pendingRequests")?.addEventListener("click", (e) => {
     const button = e.target.closest("button");
     if (!button) return;
     const { action, requestId, previewUrl, trackName, artist, img, userName } = button.dataset;
@@ -426,7 +434,7 @@
     else if (action === "ban")     openBanModal(requestId, userName);
   });
 
-  document.getElementById("queue").addEventListener("click", (e) => {
+  document.getElementById("queue")?.addEventListener("click", (e) => {
     const button = e.target.closest("button");
     if (!button) return;
     const { action, requestId, spotifyUri, previewUrl, trackName, artist, img } = button.dataset;
@@ -443,33 +451,37 @@
     }
   });
 
-  document.getElementById("sortByBPM").addEventListener("click", sortPendingByBPM);
+  document.getElementById("sortByBPM")?.addEventListener("click", sortPendingByBPM);
 
-  document.getElementById("btnAcceptAllPending").addEventListener("click", () => {
+  document.getElementById("btnAcceptAllPending")?.addEventListener("click", () => {
     if (pendingRequests.length === 0) return;
     if (!confirm(`Accepter les ${pendingRequests.length} demande(s) en attente ?`)) return;
     socket.emit("accept-all-pending", { eventId });
   });
-  document.getElementById("btnRejectAllPending").addEventListener("click", () => {
+  document.getElementById("btnRejectAllPending")?.addEventListener("click", () => {
     if (pendingRequests.length === 0) return;
     if (!confirm(`Refuser les ${pendingRequests.length} demande(s) en attente ?`)) return;
     socket.emit("reject-all-pending", { eventId });
   });
 
-  document.getElementById("btnSaveRepeatCooldown").addEventListener("click", () => {
-    let n = parseInt(document.getElementById("repeatCooldownMinutes").value, 10);
+  document.getElementById("btnSaveRepeatCooldown")?.addEventListener("click", () => {
+    const input = document.getElementById("repeatCooldownMinutes");
+    if (!input) return;
+    let n = parseInt(input.value, 10);
     if (Number.isNaN(n)) n = 0;
     n = Math.max(0, Math.min(240, n));
-    document.getElementById("repeatCooldownMinutes").value = n;
+    input.value = n;
     socket.emit("update-event-settings", { eventId, repeatCooldownMinutes: n });
     showToast("Anti-répétition enregistrée", "info");
   });
 
-  document.getElementById("btnSaveProjectionVisuals").addEventListener("click", () => {
-    projectionVisualsEnabled = document.getElementById("projectionVisualsToggle").checked;
-    projectionVisualsMode    = document.getElementById("projectionVisualsMode").value || "aurora";
-    projectionVisualsAutoPerTrack =
-      document.getElementById("projectionVisualsAutoPerTrack").checked;
+  document.getElementById("btnSaveProjectionVisuals")?.addEventListener("click", () => {
+    const toggle = document.getElementById("projectionVisualsToggle");
+    const mode = document.getElementById("projectionVisualsMode");
+    const autoPerTrack = document.getElementById("projectionVisualsAutoPerTrack");
+    projectionVisualsEnabled = toggle ? toggle.checked : false;
+    projectionVisualsMode    = mode ? (mode.value || "aurora") : "aurora";
+    projectionVisualsAutoPerTrack = autoPerTrack ? autoPerTrack.checked : false;
     socket.emit("update-event-settings", {
       eventId,
       projectionVisualsEnabled,
@@ -481,22 +493,24 @@
 
   let undoRejectRequestId = null;
   let undoRejectTimer     = null;
-  document.getElementById("rejectUndoBtn").addEventListener("click", () => {
+  document.getElementById("rejectUndoBtn")?.addEventListener("click", () => {
     if (undoRejectRequestId) {
       socket.emit("undo-reject-request", { requestId: undoRejectRequestId });
     }
-    document.getElementById("rejectUndoBar").classList.add("hidden");
+    document.getElementById("rejectUndoBar")?.classList.add("hidden");
     undoRejectRequestId = null;
     clearTimeout(undoRejectTimer);
   });
 
-  document.getElementById("btnSaveFallbackPlaylist").addEventListener("click", saveFallbackPlaylist);
-  document.getElementById("btnClearFallbackPlaylist").addEventListener("click", () => {
-    document.getElementById("fallbackPlaylistInput").value = "";
+  document.getElementById("btnSaveFallbackPlaylist")?.addEventListener("click", saveFallbackPlaylist);
+  document.getElementById("btnClearFallbackPlaylist")?.addEventListener("click", () => {
+    const input = document.getElementById("fallbackPlaylistInput");
+    if (input) input.value = "";
     saveFallbackPlaylist();
   });
-  document.getElementById("fallbackPlaylistInput").addEventListener("blur", async () => {
-    const val = document.getElementById("fallbackPlaylistInput").value.trim();
+  document.getElementById("fallbackPlaylistInput")?.addEventListener("blur", async () => {
+    const input = document.getElementById("fallbackPlaylistInput");
+    const val = input ? input.value.trim() : "";
     fallbackPlaylistUri = val || null;
     updateFallbackPlaylistUI();
     await loadFallbackPlaylistPreview();
@@ -506,12 +520,13 @@
   (function initCrossfadeSlider() {
     const slider = document.getElementById("crossfadeSlider");
     const label  = document.getElementById("crossfadeValue");
+    if (!slider) return;
     slider.value = crossfadeDuration;
-    label.textContent = crossfadeDuration === 0 ? "Désactivé" : `${crossfadeDuration} s`;
+    if (label) label.textContent = crossfadeDuration === 0 ? "Désactivé" : `${crossfadeDuration} s`;
     slider.addEventListener("input", () => {
       crossfadeDuration = parseInt(slider.value);
       localStorage.setItem("djq-crossfade", crossfadeDuration);
-      label.textContent = crossfadeDuration === 0 ? "Désactivé" : `${crossfadeDuration} s`;
+      if (label) label.textContent = crossfadeDuration === 0 ? "Désactivé" : `${crossfadeDuration} s`;
     });
   })();
 
@@ -566,34 +581,36 @@
     document.getElementById("previewPauseIcon").classList.add("hidden");
   }
 
-  previewAudio.addEventListener("play", () => {
-    document.getElementById("previewPlayIcon").classList.add("hidden");
-    document.getElementById("previewPauseIcon").classList.remove("hidden");
+  previewAudio?.addEventListener("play", () => {
+    document.getElementById("previewPlayIcon")?.classList.add("hidden");
+    document.getElementById("previewPauseIcon")?.classList.remove("hidden");
   });
-  previewAudio.addEventListener("pause", () => {
-    document.getElementById("previewPlayIcon").classList.remove("hidden");
-    document.getElementById("previewPauseIcon").classList.add("hidden");
+  previewAudio?.addEventListener("pause", () => {
+    document.getElementById("previewPlayIcon")?.classList.remove("hidden");
+    document.getElementById("previewPauseIcon")?.classList.add("hidden");
   });
-  previewAudio.addEventListener("ended", () => {
+  previewAudio?.addEventListener("ended", () => {
     previewCurrent = null;
-    previewBar.classList.add("hidden");
-    document.getElementById("previewProgressBar").style.width = "0%";
+    if (previewBar) previewBar.classList.add("hidden");
+    const pBar = document.getElementById("previewProgressBar");
+    if (pBar) pBar.style.width = "0%";
   });
-  previewAudio.addEventListener("timeupdate", () => {
+  previewAudio?.addEventListener("timeupdate", () => {
     if (!previewAudio.duration) return;
     const pct = (previewAudio.currentTime / previewAudio.duration) * 100;
-    document.getElementById("previewProgressBar").style.width = `${pct}%`;
+    const pBar = document.getElementById("previewProgressBar");
+    if (pBar) pBar.style.width = `${pct}%`;
   });
 
-  document.getElementById("previewPlayPauseBtn").addEventListener("click", () => {
+  document.getElementById("previewPlayPauseBtn")?.addEventListener("click", () => {
     if (previewAudio.paused) previewAudio.play().catch(console.warn);
     else previewAudio.pause();
   });
-  document.getElementById("previewCloseBtn").addEventListener("click", () => {
+  document.getElementById("previewCloseBtn")?.addEventListener("click", () => {
     previewAudio.pause();
     previewAudio.src = "";
     previewCurrent = null;
-    previewBar.classList.add("hidden");
+    if (previewBar) previewBar.classList.add("hidden");
   });
 
   // ── Système de dons ────────────────────────────────────────────
@@ -604,28 +621,48 @@
   function applyDonationSettings(s) {
     donationSettings = { ...donationSettings, ...s };
     const enabled = !!donationSettings.enabled;
-    document.getElementById("donationEnabledToggle").checked = enabled;
-    document.getElementById("donationOptions").classList.toggle("hidden", !enabled);
-    if (s.required   !== undefined) document.getElementById("donationRequiredToggle").checked = !!s.required;
-    if (s.amount     !== undefined) document.getElementById("donationAmountInput").value       = s.amount;
-    if (s.link       !== undefined) document.getElementById("donationLinkInput").value         = s.link || "";
-    if (s.message    !== undefined) document.getElementById("donationMessageInput").value      = s.message || "";
-    if (s.goalAmount !== undefined) document.getElementById("donationGoalAmountInput").value   = s.goalAmount || 0;
-    if (s.raisedTotal !== undefined) document.getElementById("donationsRaisedTotalInput").value = s.raisedTotal || 0;
+    const toggle = document.getElementById("donationsEnabledToggle") || document.getElementById("donationEnabledToggle");
+    if (toggle) toggle.checked = enabled;
+    const opt = document.getElementById("donationOptions");
+    if (opt) opt.classList.toggle("hidden", !enabled);
+    const req = document.getElementById("donationRequiredToggle");
+    if (req && s.required !== undefined) req.checked = !!s.required;
+    const amt = document.getElementById("donationAmountInput");
+    if (amt && s.amount !== undefined) amt.value = s.amount;
+    const link = document.getElementById("donationsUrlInput") || document.getElementById("donationLinkInput");
+    if (link && s.link !== undefined) link.value = s.link || "";
+    const msg = document.getElementById("donationMessageInput");
+    if (msg && s.message !== undefined) msg.value = s.message || "";
+    const goal = document.getElementById("donationsTargetInput") || document.getElementById("donationGoalAmountInput");
+    if (goal && s.goalAmount !== undefined) goal.value = s.goalAmount || 0;
+    const raised = document.getElementById("donationsRaisedTotalInput");
+    if (raised && s.raisedTotal !== undefined) raised.value = s.raisedTotal || 0;
   }
 
-  document.getElementById("donationEnabledToggle").addEventListener("change", (e) => {
-    document.getElementById("donationOptions").classList.toggle("hidden", !e.target.checked);
+  document.getElementById("donationsEnabledToggle")?.addEventListener("change", (e) => {
+    const opt = document.getElementById("donationOptions");
+    if (opt) opt.classList.toggle("hidden", !e.target.checked);
+  });
+  document.getElementById("donationEnabledToggle")?.addEventListener("change", (e) => {
+    const opt = document.getElementById("donationOptions");
+    if (opt) opt.classList.toggle("hidden", !e.target.checked);
   });
 
-  document.getElementById("btnSaveDonation").addEventListener("click", () => {
-    const link    = document.getElementById("donationLinkInput").value.trim();
-    const amount  = parseFloat(document.getElementById("donationAmountInput").value);
-    const required = document.getElementById("donationRequiredToggle").checked;
-    const enabled  = document.getElementById("donationEnabledToggle").checked;
-    const message  = document.getElementById("donationMessageInput").value.trim();
-    const goalAmount = parseFloat(document.getElementById("donationGoalAmountInput").value);
-    const raisedTotal = parseFloat(document.getElementById("donationsRaisedTotalInput").value);
+  document.getElementById("btnSaveDonation")?.addEventListener("click", () => {
+    const linkInput = document.getElementById("donationsUrlInput") || document.getElementById("donationLinkInput");
+    const link = linkInput ? linkInput.value.trim() : "";
+    const amountInput = document.getElementById("donationAmountInput");
+    const amount = amountInput ? parseFloat(amountInput.value) : 2;
+    const reqToggle = document.getElementById("donationRequiredToggle");
+    const required = reqToggle ? reqToggle.checked : false;
+    const enToggle = document.getElementById("donationsEnabledToggle") || document.getElementById("donationEnabledToggle");
+    const enabled = enToggle ? enToggle.checked : false;
+    const msgInput = document.getElementById("donationMessageInput");
+    const message = msgInput ? msgInput.value.trim() : "";
+    const targetInput = document.getElementById("donationsTargetInput") || document.getElementById("donationGoalAmountInput");
+    const goalAmount = targetInput ? parseFloat(targetInput.value) : 0;
+    const raisedInput = document.getElementById("donationsRaisedTotalInput");
+    const raisedTotal = raisedInput ? parseFloat(raisedInput.value) : 0;
 
     if (enabled && (!link || !link.startsWith("https://"))) {
       alert("Le lien de paiement doit commencer par https://");
@@ -653,8 +690,10 @@
     });
 
     const fb = document.getElementById("donationSaveFeedback");
-    fb.classList.remove("hidden");
-    setTimeout(() => fb.classList.add("hidden"), 2500);
+    if (fb) {
+      fb.classList.remove("hidden");
+      setTimeout(() => fb.classList.add("hidden"), 2500);
+    }
   });
 
   // ── Système de ban ─────────────────────────────────────────────────────────
@@ -662,22 +701,25 @@
 
   function openBanModal(requestId, userName) {
     banTargetRequestId = requestId;
-    document.getElementById("banModalName").textContent = `Invité : ${userName || "Anonyme"}`;
-    document.getElementById("banModal").classList.remove("hidden");
+    const nameEl = document.getElementById("banModalName");
+    if (nameEl) nameEl.textContent = `Invité : ${userName || "Anonyme"}`;
+    const modal = document.getElementById("banModal");
+    if (modal) modal.classList.remove("hidden");
   }
 
   function closeBanModal() {
     banTargetRequestId = null;
-    document.getElementById("banModal").classList.add("hidden");
+    const modal = document.getElementById("banModal");
+    if (modal) modal.classList.add("hidden");
   }
 
-  document.getElementById("cancelBanModal").addEventListener("click", closeBanModal);
-  document.getElementById("banModal").addEventListener("click", (e) => {
+  document.getElementById("cancelBanModal")?.addEventListener("click", closeBanModal);
+  document.getElementById("banModal")?.addEventListener("click", (e) => {
     if (e.target.id === "banModal") closeBanModal();
   });
 
   // Clic sur une durée de ban
-  document.getElementById("banModal").addEventListener("click", (e) => {
+  document.getElementById("banModal")?.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-ban-duration]");
     if (!btn || !banTargetRequestId) return;
     const duration = parseInt(btn.dataset.banDuration, 10);
@@ -688,7 +730,8 @@
   function renderBannedUsers(bans) {
     const list  = document.getElementById("bannedList");
     const count = document.getElementById("bannedCount");
-    count.textContent = bans.length;
+    if (count) count.textContent = bans.length;
+    if (!list) return;
     if (bans.length === 0) {
       list.innerHTML = `<p class="text-xs" style="color:var(--text-muted)">Aucun invité bloqué</p>`;
       return;
@@ -726,7 +769,8 @@
   }
 
   function renderLivePollState() {
-    const box = document.getElementById("pollLiveState");
+    const box = document.getElementById("livePollSection") || document.getElementById("pollLiveState");
+    const resBox = document.getElementById("livePollResults");
     if (!box) return;
     if (!livePollState?.isActive) {
       box.classList.add("hidden");
@@ -735,21 +779,23 @@
     const options = livePollState.options || [];
     const percentages = livePollState.percentages || [];
     const counts = livePollState.counts || [];
-    box.innerHTML = `
-      <p class="font-semibold mb-1" style="color:var(--text-primary)">${livePollState.question || "Sondage actif"}</p>
-      ${options.map((o, i) => `
-        <div class="flex items-center justify-between gap-2">
-          <span class="truncate">${o}</span>
-          <span class="tabular-nums">${percentages[i] || 0}% · ${counts[i] || 0}</span>
-        </div>
-      `).join("")}
-      <p class="mt-1">Total votes: ${livePollState.totalVotes || 0}</p>
-    `;
+    if (resBox) {
+      resBox.innerHTML = `
+        <p class="font-bold mb-1" style="color:var(--text-primary)">${livePollState.question || "Sondage actif"}</p>
+        ${options.map((o, i) => `
+          <div class="flex items-center justify-between gap-2 py-0.5">
+            <span class="truncate">${o}</span>
+            <span class="tabular-nums font-bold" style="color:var(--green)">${percentages[i] || 0}% (${counts[i] || 0})</span>
+          </div>
+        `).join("")}
+        <p class="mt-1 text-[11px]" style="color:var(--text-muted)">Total votes: ${livePollState.totalVotes || 0}</p>
+      `;
+    }
     box.classList.remove("hidden");
   }
 
   // Débannir depuis la liste des blocages
-  document.getElementById("bannedList").addEventListener("click", (e) => {
+  document.getElementById("bannedList")?.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-unban-client]");
     if (!btn) return;
     socket.emit("unban-user", { eventId, clientId: btn.dataset.unbanClient });
@@ -770,19 +816,19 @@
     const badge       = document.getElementById("modBadgeActive");
 
     function showModLink(url) {
-      linkInput.value = url;
-      linkBox.classList.remove("hidden");
-      btnGenerate.classList.add("hidden");
-      badge.classList.remove("hidden");
+      if (linkInput) linkInput.value = url;
+      if (linkBox) linkBox.classList.remove("hidden");
+      if (btnGenerate) btnGenerate.classList.add("hidden");
+      if (badge) badge.classList.remove("hidden");
     }
     function hideModLink() {
-      linkBox.classList.add("hidden");
-      btnGenerate.classList.remove("hidden");
-      badge.classList.add("hidden");
-      linkInput.value = "";
+      if (linkBox) linkBox.classList.add("hidden");
+      if (btnGenerate) btnGenerate.classList.remove("hidden");
+      if (badge) badge.classList.add("hidden");
+      if (linkInput) linkInput.value = "";
     }
 
-    btnGenerate.addEventListener("click", async () => {
+    btnGenerate?.addEventListener("click", async () => {
       try {
         const csrf = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] || "";
         const res  = await fetch(`/api/events/${eventId}/generate-mod-token`, {
@@ -794,7 +840,7 @@
       } catch (err) { console.error("Erreur génération mod token:", err); }
     });
 
-    btnRevoke.addEventListener("click", async () => {
+    btnRevoke?.addEventListener("click", async () => {
       if (!confirm("Révoquer le lien modérateur ? Les modérateurs actifs seront déconnectés.")) return;
       try {
         const csrf = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] || "";
@@ -806,7 +852,8 @@
       } catch (err) { console.error("Erreur révocation mod token:", err); }
     });
 
-    btnCopy.addEventListener("click", () => {
+    btnCopy?.addEventListener("click", () => {
+      if (!linkInput) return;
       navigator.clipboard.writeText(linkInput.value).then(() => {
         btnCopy.innerHTML = `<svg class="w-4 h-4" style="color:var(--green)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
         setTimeout(() => {
