@@ -1852,6 +1852,7 @@
   document.getElementById("sortByCamelotQueue")?.addEventListener("click", sortQueueByCamelot);
 
   function renderPending() {
+    saveLocalDjCache();
     const container = document.getElementById("pendingRequests");
     document.getElementById("pendingCount").textContent = `${pendingRequests.length}`;
     if (pendingRequests.length === 0) {
@@ -1948,6 +1949,7 @@
   }
 
   function renderQueue() {
+    saveLocalDjCache();
     const container = document.getElementById("queue");
     document.getElementById("queueCount").textContent = `${queue.length}`;
     updateEmptyQueueAlert();
@@ -2174,5 +2176,68 @@
   }
 
   initWebMIDI();
+
+  // ── Mode Hors-Ligne & Cache Local Régie DJ ──
+  const CACHE_KEY = `ml_dj_cache_${eventId}`;
+
+  function saveLocalDjCache() {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        queue,
+        pendingRequests,
+        ts: Date.now(),
+      }));
+    } catch {}
+  }
+
+  function loadLocalDjCache() {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.queue) && queue.length === 0) {
+        queue = data.queue;
+        renderQueue();
+      }
+      if (Array.isArray(data.pendingRequests) && pendingRequests.length === 0) {
+        pendingRequests = data.pendingRequests;
+        renderPending();
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function setNetworkBanner(state, message) {
+    const banner = document.getElementById("djNetworkBanner");
+    const text = document.getElementById("djNetworkBannerText");
+    if (!banner || !text) return;
+    if (state === "offline") {
+      banner.style.background = "rgba(239, 68, 68, 0.25)";
+      banner.style.color = "#fca5a5";
+      text.textContent = message || "📶 Mode Hors-Ligne — Connexion perdue. Vos données locales sont actives sans freeze.";
+      banner.classList.remove("hidden");
+    } else if (state === "online") {
+      banner.style.background = "rgba(16, 185, 129, 0.25)";
+      banner.style.color = "#6ee7b7";
+      text.textContent = message || "✨ Reconnecté au serveur ! Synchronisation en cours...";
+      banner.classList.remove("hidden");
+      setTimeout(() => banner.classList.add("hidden"), 3000);
+    } else {
+      banner.classList.add("hidden");
+    }
+  }
+
+  window.addEventListener("offline", () => {
+    setNetworkBanner("offline");
+  });
+
+  window.addEventListener("online", () => {
+    setNetworkBanner("online");
+    socket.emit("join-event", { eventId });
+  });
+
+  loadLocalDjCache();
 
   window.addEventListener("beforeunload", stopProgressUpdate);
