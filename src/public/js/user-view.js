@@ -151,6 +151,8 @@
     }
   }
 
+  let filterExplicitEnabled = false;
+
   function renderResults(tracks) {
     const container = document.getElementById("searchResults");
     if (!tracks || tracks.length === 0) {
@@ -158,18 +160,26 @@
       return;
     }
     container.innerHTML = tracks.map((t) => {
+      const isExplicitBlocked = filterExplicitEnabled && t.explicit;
       const j = JSON.stringify(t).replace(/"/g, "&quot;");
       return `
-        <div class="track-item flex items-center gap-3 px-1 py-2 rounded-2xl" data-track="${j}">
+        <div class="track-item flex items-center gap-3 px-1 py-2 rounded-2xl ${isExplicitBlocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}" ${isExplicitBlocked ? 'data-blocked="1"' : `data-track="${j}"`}>
           <img src="${t.image}" alt="" class="w-14 h-14 rounded-xl object-cover shrink-0" loading="lazy" />
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold leading-snug" style="color:var(--text-primary)">${t.name}</p>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <p class="text-sm font-semibold leading-snug" style="color:var(--text-primary)">${t.name}</p>
+              ${t.explicit ? `<span class="badge text-[10px] font-bold px-1.5 py-0.2 rounded" style="background:rgba(239,68,68,0.15);color:#ef4444">18+ Explicite</span>` : ""}
+            </div>
             <p class="text-xs mt-0.5 truncate" style="color:var(--text-secondary)">${t.artist}</p>
             <p class="text-xs mt-0.5" style="color:var(--text-muted)">${t.album || ""}</p>
           </div>
-          <div class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--accent)">
-            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </div>
+          ${isExplicitBlocked ? `
+            <div class="shrink-0 text-xs font-bold text-red-400 px-2 py-1 rounded-lg" style="background:rgba(239,68,68,0.1)">Bloqué</div>
+          ` : `
+            <div class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--accent)">
+              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          `}
         </div>`;
     }).join("");
     container.querySelectorAll("[data-track]").forEach((el) => {
@@ -1044,6 +1054,10 @@
       updateMyRequestCard();
       updateQueueDisplay();
     }
+    if (data.filterExplicit !== undefined) {
+      filterExplicitEnabled = !!data.filterExplicit;
+      if (lastTracks && lastTracks.length > 0) renderResults(lastTracks);
+    }
     // Mise à jour des dons en live
     if (data.donationEnabled !== undefined || data.donationRequired !== undefined ||
         data.donationLink    !== undefined) {
@@ -1075,6 +1089,7 @@
     .then((data) => {
       document.getElementById("eventName").textContent = data.name || "Soirée";
       votesEnabled = data.votes_enabled;
+      filterExplicitEnabled = !!data.filter_explicit;
       fullQueue    = data.queue || [];
       const frozenUntil = data.requests_frozen_until ? Number(data.requests_frozen_until) : null;
       requestsFreezeState = {

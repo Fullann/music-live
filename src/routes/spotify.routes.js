@@ -84,6 +84,7 @@ router.get("/search", async (req, res) => {
       uri: track.uri,
       duration_ms: track.duration_ms,
       preview_url: track.preview_url,
+      explicit: !!track.explicit,
     }));
 
     // Sauvegarder dans le cache
@@ -568,5 +569,104 @@ router.get("/lyrics", async (req, res) => {
     return res.status(404).json({ error: "Paroles non disponibles" });
   }
 });
+
+// ── Endpoint Export Playlist Spotify de Soirée (DJ) ──
+router.post(
+  "/export-playlist/:eventId",
+  requireAuth,
+  requireEventOwnership,
+  eventIdValidator,
+  handleValidationErrors,
+  async (req, res) => {
+    const { eventId } = req.params;
+
+    try {
+      const token = await getValidEventToken(eventId);
+      if (!token) {
+        return res.status(401).json({ error: "Compte Spotify non connecté ou token expiré" });
+      }
+
+      // 1. Récupérer les infos de l'événement et tous les morceaux joués
+      const [eventRows] = await db.query(
+        "SELECT name, after_party_playlist_url FROM events WHERE id = ?",
+        [eventId],
+      );
+      if (eventRows.length === 0) {
+        return res.status(404).json({ error: "Événement non trouvé" });
+      }
+      const eventName = eventRows[0].name || "Soirée";
+
+      const [playedRows] = await db.query(
+        "SELECT song_name, artist, spotify_uri FROM requests WHERE event_id = ? AND status = 'played' AND spotify_uri IS NOT NULL ORDER BY played_at ASC",
+        [eventId],
+      );
+
+      if (playedRows.length === 0) {
+        return res.status(400).json({ error: "Aucun morceau joué à exporter dans la playlist" });
+      }
+
+      // 2. Récupérer l'ID utilisateur Spotify du DJ
+      const meRes = await axios.get("https://api.spotify.com/v1/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const spotifyUserId = meRes.data?.id;
+      if (!spotifyUserId) {
+        return res.status(400).json({ error: "Impossible de récupérer le profil Spotify" });
+      }
+
+      // 3. Créer la playlist publique sur Spotify
+      const dateStr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      const createRes = await axios.post(
+        `https://api.spotify.com/v1/users/${spotifyUserId}/playlists`,
+        {
+          name: `Music Live — ${eventName} (${dateStr})`,
+          description: `Playlist officielle de la soirée "${eventName}" mixée en direct sur Music Live 🎵`,
+          public: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const playlistId = createRes.data?.id;
+      const playlistUrl = createRes.data?.external_urls?.spotify || `https://open.spotify.com/playlist/${playlistId}`;
+
+      // 4. Ajouter les morceaux par lots de 100
+      const uris = playedRows.map((r) => r.spotify_uri).filter(Boolean);
+      for (let i = 0; i < uris.length; i += 100) {
+        const batch = uris.slice(i, i + 100);
+        await axios.post(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+          { uris: batch },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      }
+
+      // 5. Sauvegarder l'URL sur l'événement
+      await db.query(
+        "UPDATE events SET after_party_playlist_url = ? WHERE id = ?",
+        [playlistUrl, eventId],
+      );
+
+      res.json({
+        success: true,
+        playlistId,
+        playlistUrl,
+        totalTracks: uris.length,
+      });
+    } catch (error) {
+      console.error("Erreur export playlist Spotify:", error.response?.data || error.message);
+      res.status(500).json({ error: "Erreur lors de la création de la playlist Spotify" });
+    }
+  },
+);
 
 module.exports = router;

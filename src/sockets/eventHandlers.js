@@ -443,7 +443,7 @@ function setupSocketHandlers(io) {
         let eventRows;
         try {
           [eventRows] = await db.query(
-            "SELECT allow_duplicates, auto_accept_enabled, repeat_cooldown_minutes, requests_frozen_until FROM events WHERE id = ?",
+            "SELECT allow_duplicates, auto_accept_enabled, repeat_cooldown_minutes, requests_frozen_until, filter_explicit FROM events WHERE id = ?",
             [eventId],
           );
         } catch {
@@ -459,6 +459,16 @@ function setupSocketHandlers(io) {
         }
 
         const event = eventRows[0];
+
+        // Vérifier le filtre explicite
+        if (event.filter_explicit && songData.explicit) {
+          socket.emit("request-error", {
+            type: "explicit-blocked",
+            message: "Ce titre contient des paroles explicites et n'est pas autorisé pour cet événement.",
+          });
+          return;
+        }
+
         const frozenUntil = event.requests_frozen_until ? Number(event.requests_frozen_until) : null;
         if (frozenUntil && Date.now() < frozenUntil) {
           const remainingMs = Math.max(0, frozenUntil - Date.now());
@@ -1228,6 +1238,11 @@ function setupSocketHandlers(io) {
           }
         }
 
+        if (data.filterExplicit !== undefined) {
+          updates.push("filter_explicit = ?");
+          values.push(data.filterExplicit ? 1 : 0);
+        }
+
         if (updates.length > 0) {
           values.push(eventId);
           await db.query(
@@ -1261,6 +1276,7 @@ function setupSocketHandlers(io) {
             requestFreezeMinutes: requestFreezeMinutes !== undefined
               ? parseInt(String(requestFreezeMinutes), 10)
               : undefined,
+            filterExplicit: data.filterExplicit !== undefined ? !!data.filterExplicit : undefined,
           });
           await logEventAction(eventId, perm, "update-event-settings", null, {
             hasDonationGoalUpdate: donationGoalAmount !== undefined || donationsRaisedTotal !== undefined,

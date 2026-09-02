@@ -338,6 +338,34 @@
   document.getElementById("votesToggle")?.addEventListener("change", toggleVotes);
   document.getElementById("duplicatesToggle")?.addEventListener("change", toggleDuplicates);
   document.getElementById("autoAcceptToggle")?.addEventListener("change", toggleAutoAccept);
+  document.getElementById("filterExplicitToggle")?.addEventListener("change", (e) => {
+    socket.emit("update-event-settings", { eventId, filterExplicit: e.target.checked });
+  });
+  document.getElementById("btnExportSpotifyPlaylist")?.addEventListener("click", async () => {
+    const btn = document.getElementById("btnExportSpotifyPlaylist");
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin text-xs">⏳</span> Création…`;
+    try {
+      const csrf = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] || "";
+      const res = await fetch(`/api/spotify/export-playlist/${eventId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrf },
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`🎵 Playlist Spotify créée (${data.totalTracks} titres) !`);
+        window.open(data.playlistUrl, "_blank");
+      } else {
+        showToast(data.error || "Erreur lors de la création de la playlist", "error");
+      }
+    } catch {
+      showToast("Erreur communication Spotify", "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }
+  });
   document.getElementById("btnUpdateRateLimit")?.addEventListener("click", updateRateLimit);
   document.getElementById("btnFreeze5")?.addEventListener("click", () => {
     socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 5 });
@@ -1036,6 +1064,7 @@
       setChecked("votesToggle", votesEnabled);
       setChecked("duplicatesToggle", allowDuplicates);
       setChecked("autoAcceptToggle", autoAcceptEnabled);
+      setChecked("filterExplicitToggle", data.filter_explicit);
       setValue("rateLimitMax", data.rate_limit_max || 3);
       setValue("rateLimitWindow", data.rate_limit_window_minutes || 15);
       setValue("repeatCooldownMinutes", data.repeat_cooldown_minutes != null ? data.repeat_cooldown_minutes : 0);
@@ -1663,16 +1692,50 @@
     }
   }
 
-  // ── Audio Features (BPM / tonalité / énergie) ──
+  // ── Audio Features & Détection Harmonique (Camelot Wheel) ──
+
+  const CAMELOT_MAJOR = { 0:"8B", 1:"3B", 2:"10B", 3:"5B", 4:"12B", 5:"7B", 6:"2B", 7:"9B", 8:"4B", 9:"11B", 10:"6B", 11:"1B" };
+  const CAMELOT_MINOR = { 0:"5A", 1:"12A", 2:"7A", 3:"2A", 4:"9A", 5:"4A", 6:"11A", 7:"6A", 8:"1A", 9:"8A", 10:"3A", 11:"10A" };
+  const MUSICAL_KEYS  = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 
   function getTrackId(spotifyUri) {
     return spotifyUri?.split(":")[2] || null;
   }
 
-  function formatKey(key, mode) {
+  function getCamelotInfo(key, mode) {
     if (key === -1 || key === undefined || key === null) return null;
-    const keys = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-    return keys[key] + (mode === 1 ? "" : "m");
+    const isMajor = mode === 1;
+    const camelot = isMajor ? CAMELOT_MAJOR[key] : CAMELOT_MINOR[key];
+    const musical = (MUSICAL_KEYS[key] || "") + (isMajor ? "" : "m");
+    return { camelot, musical, key, mode, isMajor };
+  }
+
+  function getHarmonicMatch(currentCamelot, candidateCamelot) {
+    if (!currentCamelot || !candidateCamelot) return null;
+    if (currentCamelot === candidateCamelot) {
+      return { label: "✨ Mix Parfait", color: "#10b981", bg: "rgba(16,185,129,0.18)" };
+    }
+    const curNum = parseInt(currentCamelot.slice(0, -1), 10);
+    const curLet = currentCamelot.slice(-1);
+    const candNum = parseInt(candidateCamelot.slice(0, -1), 10);
+    const candLet = candidateCamelot.slice(-1);
+
+    // Relatif Majeur / Mineur (même numéro, lettre opposée : ex 8A <-> 8B)
+    if (curNum === candNum && curLet !== candLet) {
+      return { label: "🎶 Relatif", color: "#8b5cf6", bg: "rgba(139,92,246,0.18)" };
+    }
+
+    // Voisins harmoniques (+1 ou -1 modulo 12 sur même lettre, ex 8A <-> 7A ou 9A)
+    const diff = (candNum - curNum + 12) % 12;
+    if (curLet === candLet) {
+      if (diff === 1 || diff === 11) {
+        return { label: "🎶 Harmonique", color: "#06b6d4", bg: "rgba(6,182,212,0.18)" };
+      }
+      if (diff === 2) {
+        return { label: "⚡ Boost +2", color: "#f59e0b", bg: "rgba(245,158,11,0.18)" };
+      }
+    }
+    return null;
   }
 
   function energyStyle(e) {
@@ -1686,17 +1749,30 @@
     const trackId = getTrackId(spotifyUri);
     if (!trackId || !audioFeatures[trackId]) return "";
     const f   = audioFeatures[trackId];
-    const key = formatKey(f.key, f.mode);
+    const keyInfo = getCamelotInfo(f.key, f.mode);
     const en  = energyStyle(f.energy);
     const hasBpm = f.bpm != null && f.bpm > 0;
     const mainBadge = hasBpm
       ? `<span class="text-xs font-bold px-1.5 py-0.5 rounded" style="background:rgba(124,92,252,0.15);color:var(--accent)">${f.bpm} BPM</span>`
       : `<span class="text-xs font-bold px-1.5 py-0.5 rounded" style="background:rgba(124,92,252,0.15);color:var(--accent)">&#9835; ${Math.round(f.energy * 100)}%</span>`;
-    const keyBadge = key
-      ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background:rgba(6,182,212,0.12);color:#06b6d4">${key}</span>`
-      : "";
+    
+    let keyBadge = "";
+    if (keyInfo) {
+      keyBadge = `<span class="text-xs font-bold px-1.5 py-0.5 rounded" style="background:rgba(6,182,212,0.12);color:#06b6d4" title="Clé Camelot / Tonalité">${keyInfo.camelot} / ${keyInfo.musical}</span>`;
+    }
+
+    let matchBadge = "";
+    const curF = currentPlayingUri ? audioFeatures[getTrackId(currentPlayingUri)] : null;
+    const curKeyInfo = curF ? getCamelotInfo(curF.key, curF.mode) : null;
+    if (curKeyInfo && keyInfo && spotifyUri !== currentPlayingUri) {
+      const match = getHarmonicMatch(curKeyInfo.camelot, keyInfo.camelot);
+      if (match) {
+        matchBadge = `<span class="text-xs font-bold px-1.5 py-0.5 rounded" style="background:${match.bg};color:${match.color}">${match.label}</span>`;
+      }
+    }
+
     return `<div class="flex flex-wrap gap-1 mt-1.5">
-      ${mainBadge}${keyBadge}
+      ${mainBadge}${keyBadge}${matchBadge}
       <span class="text-xs px-1.5 py-0.5 rounded" style="background:${en.color}22;color:${en.color}">${en.label}</span>
     </div>`;
   }
@@ -1730,6 +1806,36 @@
     bpmSortDesc = !bpmSortDesc;
     renderPending();
   }
+
+  let camelotSortDescPending = true;
+  function sortPendingByCamelot() {
+    pendingRequests.sort((a, b) => {
+      const fa = audioFeatures[getTrackId(a.spotify_uri)];
+      const fb = audioFeatures[getTrackId(b.spotify_uri)];
+      const ka = fa ? (getCamelotInfo(fa.key, fa.mode)?.camelot || "") : "";
+      const kb = fb ? (getCamelotInfo(fb.key, fb.mode)?.camelot || "") : "";
+      return camelotSortDescPending ? ka.localeCompare(kb) : kb.localeCompare(ka);
+    });
+    camelotSortDescPending = !camelotSortDescPending;
+    renderPending();
+  }
+
+  let camelotSortDescQueue = true;
+  function sortQueueByCamelot() {
+    queue.sort((a, b) => {
+      const fa = audioFeatures[getTrackId(a.spotify_uri)];
+      const fb = audioFeatures[getTrackId(b.spotify_uri)];
+      const ka = fa ? (getCamelotInfo(fa.key, fa.mode)?.camelot || "") : "";
+      const kb = fb ? (getCamelotInfo(fb.key, fb.mode)?.camelot || "") : "";
+      return camelotSortDescQueue ? ka.localeCompare(kb) : kb.localeCompare(ka);
+    });
+    camelotSortDescQueue = !camelotSortDescQueue;
+    renderQueue();
+    socket.emit("reorder-queue", { eventId, newQueue: queue });
+  }
+
+  document.getElementById("sortByCamelotPending")?.addEventListener("click", sortPendingByCamelot);
+  document.getElementById("sortByCamelotQueue")?.addEventListener("click", sortQueueByCamelot);
 
   function renderPending() {
     const container = document.getElementById("pendingRequests");
@@ -1912,5 +2018,147 @@
     }, 5500);
   }
   function markPlayed(requestId)    { socket.emit("mark-played", { eventId, requestId }); }
+
+  // ── Raccourcis Clavier Pro Régie DJ ──────────────────────
+  function isInputFocused() {
+    const el = document.activeElement;
+    if (!el) return false;
+    const tag = el.tagName.toLowerCase();
+    return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (isInputFocused()) return;
+
+    if (e.code === "Space") {
+      e.preventDefault();
+      document.getElementById("btnPlayPause")?.click();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (pendingRequests.length > 0) {
+        acceptRequest(pendingRequests[0].id);
+        showToast("Demande acceptée (Entrée)");
+      }
+    } else if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault();
+      if (pendingRequests.length > 0) {
+        rejectRequest(pendingRequests[0].id);
+        showToast("Demande refusée (Suppr)");
+      }
+    } else if (e.key === "ArrowRight" || e.key.toLowerCase() === "n") {
+      e.preventDefault();
+      document.getElementById("btnNext")?.click();
+    } else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      document.getElementById("btnPrevious")?.click();
+    } else if (e.key.toLowerCase() === "f") {
+      e.preventDefault();
+      // Gel d'urgence 5 min
+      socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 5 });
+      showToast("❄️ Gel d'urgence 5 min activé (Touche F)");
+    } else if (e.key.toLowerCase() === "s") {
+      e.preventDefault();
+      document.getElementById("showSettings")?.click();
+    } else if (e.key.toLowerCase() === "m") {
+      e.preventDefault();
+      document.getElementById("showMessagePanel")?.click();
+    } else if (e.key === "?" || e.key.toLowerCase() === "h") {
+      e.preventDefault();
+      document.getElementById("shortcutsHelpModal")?.classList.remove("hidden");
+    } else if (e.key === "Escape") {
+      document.getElementById("shortcutsHelpModal")?.classList.add("hidden");
+      document.getElementById("settingsPanel")?.classList.add("hidden");
+      document.getElementById("messagePanel")?.classList.add("hidden");
+      document.getElementById("addSongPanel")?.classList.add("hidden");
+    }
+  });
+
+  // Modale Raccourcis & MIDI
+  document.getElementById("btnShortcutsHelp")?.addEventListener("click", () => {
+    document.getElementById("shortcutsHelpModal")?.classList.remove("hidden");
+  });
+  document.getElementById("closeShortcutsHelp")?.addEventListener("click", () => {
+    document.getElementById("shortcutsHelpModal")?.classList.add("hidden");
+  });
+
+  // ── Support Contrôleur MIDI (Web MIDI API) ───────────────
+  function initWebMIDI() {
+    if (!navigator.requestMIDIAccess) return;
+    navigator.requestMIDIAccess({ sysex: false }).then((midiAccess) => {
+      function updateMidiStatus() {
+        const inputs = Array.from(midiAccess.inputs.values());
+        const statusEl = document.getElementById("djMidiStatus");
+        const nameEl = document.getElementById("djMidiName");
+        if (inputs.length > 0) {
+          if (statusEl) statusEl.classList.remove("hidden");
+          if (nameEl) nameEl.textContent = `🎛️ MIDI : ${inputs[0].name || "Connecté"}`;
+        } else {
+          if (statusEl) statusEl.classList.add("hidden");
+        }
+      }
+
+      midiAccess.onstatechange = updateMidiStatus;
+      updateMidiStatus();
+
+      for (const input of midiAccess.inputs.values()) {
+        input.onmidimessage = (msg) => {
+          const [status, note, velocity] = msg.data;
+          // NoteOn ou CC avec valeur positive
+          const isNoteOn = (status & 0xf0) === 0x90 && velocity > 0;
+          const isCC     = (status & 0xf0) === 0xb0 && velocity > 0;
+
+          if (!isNoteOn && !isCC) return;
+
+          // Mapping pads 1-8 (notes 36-43 ou 60-67 ou 0-7)
+          let padIndex = -1;
+          if (note >= 36 && note <= 43) padIndex = note - 36;
+          else if (note >= 60 && note <= 67) padIndex = note - 60;
+          else if (note >= 1 && note <= 8) padIndex = note - 1;
+          else padIndex = note % 8;
+
+          switch (padIndex) {
+            case 0: // PAD 1: Play/Pause
+              document.getElementById("btnPlayPause")?.click();
+              showToast("🎛️ MIDI PAD 1 : Play/Pause");
+              break;
+            case 1: // PAD 2: Accepter 1er
+              if (pendingRequests.length > 0) {
+                acceptRequest(pendingRequests[0].id);
+                showToast("🎛️ MIDI PAD 2 : Demande acceptée");
+              }
+              break;
+            case 2: // PAD 3: Refuser 1er
+              if (pendingRequests.length > 0) {
+                rejectRequest(pendingRequests[0].id);
+                showToast("🎛️ MIDI PAD 3 : Demande refusée");
+              }
+              break;
+            case 3: // PAD 4: Titre suivant
+              document.getElementById("btnNext")?.click();
+              showToast("🎛️ MIDI PAD 4 : Titre Suivant");
+              break;
+            case 4: // PAD 5: Titre précédent
+              document.getElementById("btnPrevious")?.click();
+              showToast("🎛️ MIDI PAD 5 : Titre Précédent");
+              break;
+            case 5: // PAD 6: Gel d'urgence 5 min
+              socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 5 });
+              showToast("🎛️ MIDI PAD 6 : ❄️ Gel 5 min");
+              break;
+            case 6: // PAD 7: Ouvrir message
+              document.getElementById("showMessagePanel")?.click();
+              showToast("🎛️ MIDI PAD 7 : Message");
+              break;
+            case 7: // PAD 8: Tout accepter
+              document.getElementById("btnAcceptAllPending")?.click();
+              showToast("🎛️ MIDI PAD 8 : Tout accepter");
+              break;
+          }
+        };
+      }
+    }).catch(() => {});
+  }
+
+  initWebMIDI();
 
   window.addEventListener("beforeunload", stopProgressUpdate);

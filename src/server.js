@@ -618,9 +618,20 @@ process.on("uncaughtException", (err) => {
   // On laisse le gestionnaire de processus décider du redémarrage.
 });
 
+// === Auto Migrations ===
+async function runAutoMigrations() {
+  try {
+    await db.query("ALTER TABLE events ADD COLUMN filter_explicit BOOLEAN DEFAULT 0");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE events ADD COLUMN after_party_playlist_url VARCHAR(512) DEFAULT NULL");
+  } catch {}
+}
+
 // === Démarrage ===
 async function start() {
   try {
+    await runAutoMigrations();
     // Connecter Redis seulement en production
     if (process.env.NODE_ENV === "production") {
       await connectRedis();

@@ -160,9 +160,59 @@ class EventsController {
         [eventId],
       );
 
+      // Morceau le plus voté
+      const [topVotedRows] = await db.query(
+        `
+        SELECT r.song_name, r.artist, r.image_url,
+          (COALESCE(SUM(CASE WHEN v.vote_type = 'up' THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN v.vote_type = 'down' THEN 1 ELSE 0 END), 0)) as score,
+          COUNT(v.id) as total_votes
+        FROM requests r
+        LEFT JOIN votes v ON r.id = v.request_id
+        WHERE r.event_id = ?
+        GROUP BY r.id, r.song_name, r.artist, r.image_url
+        ORDER BY score DESC, total_votes DESC
+        LIMIT 1
+      `,
+        [eventId],
+      );
+
+      // Top artiste
+      const [topArtistRows] = await db.query(
+        `
+        SELECT r.artist, COUNT(*) as count
+        FROM requests r
+        WHERE r.event_id = ? AND r.artist IS NOT NULL AND r.artist != ''
+        GROUP BY r.artist
+        ORDER BY count DESC
+        LIMIT 1
+      `,
+        [eventId],
+      );
+
+      // Total des votes
+      const [votesTotalRows] = await db.query(
+        `
+        SELECT COUNT(v.id) as total_votes
+        FROM votes v
+        JOIN requests r ON v.request_id = r.id
+        WHERE r.event_id = ?
+      `,
+        [eventId],
+      );
+
+      // Event playlist url
+      const [eventRows] = await db.query(
+        "SELECT after_party_playlist_url FROM events WHERE id = ?",
+        [eventId],
+      );
+
       res.json({
         stats: stats[0],
         topSongs,
+        topVotedSong: topVotedRows[0] || null,
+        topArtist: topArtistRows[0] || null,
+        totalVotes: votesTotalRows[0]?.total_votes || 0,
+        playlistUrl: eventRows[0]?.after_party_playlist_url || null,
       });
     } catch (error) {
       console.error("Erreur stats:", error);

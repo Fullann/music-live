@@ -3,54 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Soirée terminée — Music Live</title>
+  <title>Page Souvenir & Aftermovie — Music Live</title>
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4" style="background:var(--bg-base)">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6" style="background:var(--bg-base)">
 
-  <div class="w-full max-w-lg fade-in">
-    <div class="card p-8 text-center">
-      <!-- Icon -->
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6" style="background:var(--accent-dim);border:1px solid rgba(124,92,252,0.2)">
-        <svg class="w-8 h-8" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18V5l12-2v13"/>
-          <circle cx="6" cy="18" r="3"/>
-          <circle cx="18" cy="16" r="3"/>
-        </svg>
+  <div class="w-full max-w-xl fade-in space-y-5 my-6">
+
+    <!-- Card Principale Souvenir -->
+    <div class="card p-6 sm:p-8 text-center relative overflow-hidden" style="background:var(--bg-surface);border:1px solid var(--border)">
+      <div class="absolute -top-24 -left-24 w-60 h-60 rounded-full blur-3xl opacity-30 pointer-events-none" style="background:var(--accent)"></div>
+      <div class="absolute -bottom-24 -right-24 w-60 h-60 rounded-full blur-3xl opacity-30 pointer-events-none" style="background:var(--cyan)"></div>
+
+      <!-- Icon & Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4" style="background:var(--accent-dim);border:1px solid var(--accent-glow);color:var(--text-primary)">
+        <span>✨</span> Page Souvenir & Aftermovie
       </div>
 
-      <h1 class="text-2xl font-bold mb-2" style="color:var(--text-primary)">La soirée est terminée</h1>
-      <p id="eventName" class="text-sm mb-6" style="color:var(--text-secondary)">Chargement...</p>
+      <h1 id="eventName" class="text-2xl sm:text-3xl font-black mb-2 tracking-tight" style="color:var(--text-primary)">Chargement...</h1>
+      <p class="text-xs sm:text-sm mb-5 font-medium" style="color:var(--text-muted)">Merci d'avoir enflammé la piste de danse ! 🎵</p>
 
-      <!-- Thank you message -->
-      <div class="rounded-xl p-5 mb-6 text-left" style="background:var(--bg-elevated);border:1px solid var(--border)">
+      <!-- Message de remerciement du DJ -->
+      <div class="rounded-2xl p-4 sm:p-5 mb-6 text-left" style="background:var(--bg-elevated);border:1px solid var(--border)">
+        <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--accent)">Mot du DJ</p>
         <p class="text-sm leading-relaxed" style="color:var(--text-secondary)" id="thankYouMessage">
-          Merci d'avoir participé ! On espère que vous avez passé un excellent moment.
+          Merci à tous pour votre incroyable énergie et vos propositions musicales !
         </p>
       </div>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-3 gap-3 mb-8">
-        <div class="rounded-xl p-4" style="background:var(--green-dim);border:1px solid rgba(34,197,94,0.15)">
-          <p class="text-2xl font-bold" id="totalPlayed" style="color:var(--green)">—</p>
-          <p class="text-xs mt-1" style="color:var(--text-muted)">Jouées</p>
-        </div>
-        <div class="rounded-xl p-4" style="background:var(--accent-dim);border:1px solid rgba(124,92,252,0.15)">
-          <p class="text-2xl font-bold" id="totalRequests" style="color:var(--accent)">—</p>
-          <p class="text-xs mt-1" style="color:var(--text-muted)">Demandes</p>
-        </div>
-        <div class="rounded-xl p-4" style="background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.15)">
-          <p class="text-2xl font-bold" id="duration" style="color:var(--cyan)">—</p>
-          <p class="text-xs mt-1" style="color:var(--text-muted)">Durée</p>
+      <!-- ── Bannière Playlist Spotify Officielle de la Soirée ── -->
+      <div id="spotifyPlaylistCard" class="hidden rounded-2xl p-5 mb-6 text-left relative overflow-hidden group transition-all"
+           style="background:linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.1) 100%);border:1.5px solid rgba(16,185,129,0.35)">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg" style="background:#10b981;color:#fff">
+            <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-extrabold uppercase tracking-wider text-green-400">Playlist Spotify Officielle</p>
+            <p class="text-sm font-bold text-white truncate">Tous les sons joués ce soir</p>
+            <p class="text-[11px] text-white/70">Enregistre la playlist sur ton compte</p>
+          </div>
+          <a id="btnOpenSpotifyPlaylist" href="#" target="_blank" rel="noopener noreferrer"
+             class="btn btn-sm font-bold text-black shrink-0 px-4 py-2.5 rounded-xl shadow-md hover:scale-105 transition"
+             style="background:#10b981;color:#fff">
+            Écouter 🎧
+          </a>
         </div>
       </div>
 
-      <a href="/" class="btn btn-ghost btn-full">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        Retour à l'accueil
-      </a>
+      <!-- ── Podium & Moments Forts ── -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6 text-left">
+        <!-- Top Track -->
+        <div id="topTrackCard" class="rounded-2xl p-4 flex items-center gap-3.5" style="background:var(--bg-elevated);border:1px solid var(--border)">
+          <div class="relative shrink-0">
+            <img id="topTrackImg" src="" alt="" class="w-12 h-12 rounded-xl object-cover hidden shadow-md" />
+            <div id="topTrackPlaceholder" class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background:var(--accent-dim);color:var(--accent)">
+              👑
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[11px] font-extrabold uppercase tracking-wider" style="color:var(--accent)">👑 Morceau de la Nuit</p>
+            <p id="topTrackName" class="text-sm font-black truncate" style="color:var(--text-primary)">—</p>
+            <p id="topTrackArtist" class="text-xs truncate" style="color:var(--text-secondary)">—</p>
+          </div>
+        </div>
+
+        <!-- Top Artist -->
+        <div id="topArtistCard" class="rounded-2xl p-4 flex items-center gap-3.5" style="background:var(--bg-elevated);border:1px solid var(--border)">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shrink-0" style="background:var(--cyan-dim);color:var(--cyan)">
+            🎤
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[11px] font-extrabold uppercase tracking-wider" style="color:var(--cyan)">🎤 Top Artiste</p>
+            <p id="topArtistName" class="text-sm font-black truncate" style="color:var(--text-primary)">—</p>
+            <p id="topArtistCount" class="text-xs" style="color:var(--text-muted)">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Statistiques de la soirée ── -->
+      <div class="grid grid-cols-4 gap-2.5 mb-8">
+        <div class="rounded-2xl p-3 text-center" style="background:var(--green-dim);border:1px solid rgba(34,197,94,0.2)">
+          <p class="text-xl sm:text-2xl font-black" id="totalPlayed" style="color:var(--green)">—</p>
+          <p class="text-[10px] sm:text-xs font-semibold mt-0.5" style="color:var(--text-muted)">Jouées</p>
+        </div>
+        <div class="rounded-2xl p-3 text-center" style="background:var(--accent-dim);border:1px solid rgba(124,92,252,0.2)">
+          <p class="text-xl sm:text-2xl font-black" id="totalRequests" style="color:var(--accent)">—</p>
+          <p class="text-[10px] sm:text-xs font-semibold mt-0.5" style="color:var(--text-muted)">Demandes</p>
+        </div>
+        <div class="rounded-2xl p-3 text-center" style="background:rgba(236,72,153,0.12);border:1px solid rgba(236,72,153,0.2)">
+          <p class="text-xl sm:text-2xl font-black" id="totalVotes" style="color:#ec4899">—</p>
+          <p class="text-[10px] sm:text-xs font-semibold mt-0.5" style="color:var(--text-muted)">Votes</p>
+        </div>
+        <div class="rounded-2xl p-3 text-center" style="background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.2)">
+          <p class="text-xl sm:text-2xl font-black" id="duration" style="color:var(--cyan)">—</p>
+          <p class="text-[10px] sm:text-xs font-semibold mt-0.5" style="color:var(--text-muted)">Durée</p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="space-y-2.5">
+        <button id="btnShareSouvenir" class="btn btn-primary btn-full py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Partager cette page souvenir
+        </button>
+        <a href="/" class="btn btn-ghost btn-full py-3 font-semibold text-xs text-white/70">
+          Retour à l'accueil
+        </a>
+      </div>
     </div>
   </div>
 
@@ -76,9 +138,17 @@
       .then((r) => r.json())
       .then((data) => {
         eventData = data;
-        document.getElementById("eventName").textContent = data.name;
+        document.getElementById("eventName").textContent = data.name || "Soirée Live";
         if (data.thank_you_message) {
           document.getElementById("thankYouMessage").innerHTML = data.thank_you_message.replace(/\n/g, "<br>");
+        }
+        if (data.after_party_playlist_url) {
+          const playlistCard = document.getElementById("spotifyPlaylistCard");
+          const playlistBtn  = document.getElementById("btnOpenSpotifyPlaylist");
+          if (playlistCard && playlistBtn) {
+            playlistBtn.href = data.after_party_playlist_url;
+            playlistCard.classList.remove("hidden");
+          }
         }
         updateEventDurationDisplay();
       })
@@ -87,11 +157,58 @@
     fetch(`/api/events/${eventId}/stats`)
       .then((r) => r.json())
       .then((data) => {
-        document.getElementById("totalPlayed").textContent   = data.stats.played_count   || 0;
-        document.getElementById("totalRequests").textContent = data.stats.total_requests || 0;
+        document.getElementById("totalPlayed").textContent   = data.stats?.played_count   || 0;
+        document.getElementById("totalRequests").textContent = data.stats?.total_requests || 0;
+        document.getElementById("totalVotes").textContent    = data.totalVotes || 0;
+
+        // Top Voted Song
+        if (data.topVotedSong) {
+          document.getElementById("topTrackName").textContent = data.topVotedSong.song_name;
+          document.getElementById("topTrackArtist").textContent = `${data.topVotedSong.artist} (${data.topVotedSong.score > 0 ? "+" : ""}${data.topVotedSong.score} votes)`;
+          if (data.topVotedSong.image_url) {
+            const img = document.getElementById("topTrackImg");
+            img.src = data.topVotedSong.image_url;
+            img.classList.remove("hidden");
+            document.getElementById("topTrackPlaceholder").classList.add("hidden");
+          }
+        }
+
+        // Top Artist
+        if (data.topArtist) {
+          document.getElementById("topArtistName").textContent = data.topArtist.artist;
+          document.getElementById("topArtistCount").textContent = `${data.topArtist.count} titres demandés`;
+        }
+
+        // Playlist URL si renvoyée par les stats
+        if (data.playlistUrl) {
+          const playlistCard = document.getElementById("spotifyPlaylistCard");
+          const playlistBtn  = document.getElementById("btnOpenSpotifyPlaylist");
+          if (playlistCard && playlistBtn) {
+            playlistBtn.href = data.playlistUrl;
+            playlistCard.classList.remove("hidden");
+          }
+        }
+
         updateEventDurationDisplay();
       })
       .catch(console.error);
+
+    // Partage
+    document.getElementById("btnShareSouvenir")?.addEventListener("click", () => {
+      const title = document.getElementById("eventName")?.textContent || "Soirée Music Live";
+      const url = window.location.href;
+      if (navigator.share) {
+        navigator.share({
+          title: `Souvenir — ${title}`,
+          text: `Découvre le récap et la playlist de la soirée ${title} sur Music Live ! 🎵`,
+          url,
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(url).then(() => {
+          alert("Lien souvenir copié dans le presse-papiers !");
+        });
+      }
+    });
   </script>
 </body>
 </html>
