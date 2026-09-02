@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Historique — Music Live</title>
+  <title>Historique des Soirées — Music Live</title>
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
@@ -13,22 +13,38 @@
 <div class="flex h-screen overflow-hidden">
 
   <!-- ── Sidebar ─────────────────────────────────────────── -->
-  <aside class="hidden lg:flex flex-col w-56 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-    <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid var(--border)">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--accent)">
-        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <aside class="hidden lg:flex flex-col w-64 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
+    <!-- Logo App -->
+    <div class="flex items-center gap-3.5 px-6 py-5" style="border-bottom:1px solid var(--border)">
+      <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%);box-shadow:0 0 20px var(--accent-glow)">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
           <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
           <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
         </svg>
       </div>
-      <span class="font-semibold text-sm">Music Live</span>
+      <div>
+        <span class="font-extrabold text-base tracking-tight" style="color:var(--text-primary)">Music Live</span>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--accent)"></span>
+          <p class="text-[10px] uppercase font-bold tracking-widest text-gradient-purple">Console DJ</p>
+        </div>
+      </div>
     </div>
-    <div class="px-5 py-4" style="border-bottom:1px solid var(--border)">
-      <p class="text-xs font-medium uppercase tracking-widest mb-1" style="color:var(--text-muted)">Connecté</p>
-      <p id="sidebarDjName" class="text-sm font-semibold truncate" style="color:var(--text-primary)">—</p>
-    </div>
-    <nav class="flex-1 p-3 space-y-0.5">
+
+    <!-- Profil DJ connecté -->
+    <a href="/profile" class="mx-3 my-3 p-3 rounded-xl flex items-center gap-3 transition-all hover:bg-white/[0.04] group" style="background:var(--bg-elevated);border:1px solid var(--border)">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black text-white uppercase shrink-0 shadow-sm" style="background:linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%)">
+        DJ
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-[10px] uppercase tracking-wider font-bold" style="color:var(--text-muted)">DJ Connecté</p>
+        <p id="sidebarDjName" class="text-sm font-bold truncate group-hover:text-purple-400 transition" style="color:var(--text-primary)">—</p>
+      </div>
+      <svg class="w-4 h-4 text-muted group-hover:translate-x-0.5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <nav class="flex-1 p-3 space-y-1.5 pt-2">
       <a href="/dashboard" class="nav-item">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Dashboard
@@ -36,6 +52,12 @@
       <a href="/history" class="nav-item active">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Historique
+      </a>
+      <a href="/profile" class="nav-item">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        Mon Profil
       </a>
     </nav>
     <div class="p-3" style="border-top:1px solid var(--border)">
@@ -50,45 +72,86 @@
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <header class="flex items-center gap-4 px-6 py-4 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
-      <a href="/dashboard" class="btn btn-ghost btn-icon btn-sm">
+      <a href="/dashboard" class="btn btn-ghost btn-icon btn-sm" title="Retour au Dashboard">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </a>
-      <div class="flex-1">
-        <h1 class="text-lg font-semibold" style="color:var(--text-primary)">Historique</h1>
-        <p id="djName" class="text-xs mt-0.5" style="color:var(--text-secondary)">Chargement...</p>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight" style="color:var(--text-primary)">Historique des Sessions</h1>
+          <span class="badge badge-accent hidden sm:inline-flex">Archives</span>
+        </div>
+        <p id="djName" class="text-xs" style="color:var(--text-secondary)">Chargement...</p>
       </div>
-      <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Passer en mode clair">
+      <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Alterner mode clair / sombre">
         <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
+      <button id="btnLogoutTop" class="btn btn-danger btn-sm" title="Se déconnecter" aria-label="Se déconnecter">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span class="hidden sm:inline">Déconnexion</span>
+      </button>
     </header>
 
-    <main class="flex-1 overflow-y-auto p-5 lg:p-6 space-y-5 lg:space-y-6">
+    <main class="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
 
-      <!-- Stats -->
+      <!-- Stats KPIs -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="card stat-card">
-          <p class="stat-label">Soirées terminées</p>
-          <p id="totalEndedEvents" class="stat-value mt-2" style="color:var(--accent)">—</p>
+        <div class="stat-card">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="stat-label">Soirées terminées</span>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--accent-dim);color:var(--accent)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+          <p id="totalEndedEvents" class="stat-value text-gradient-purple">—</p>
+          <p class="text-[11px]" style="color:var(--text-muted)">Sessions passées enregistrées</p>
         </div>
-        <div class="card stat-card">
-          <p class="stat-label">Durée totale</p>
-          <p id="totalDuration" class="stat-value mt-2" style="color:var(--cyan)">—</p>
+
+        <div class="stat-card">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="stat-label">Durée totale</span>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--cyan-dim);color:var(--cyan)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+          <p id="totalDuration" class="stat-value text-gradient-cyan">—</p>
+          <p class="text-[11px]" style="color:var(--text-muted)">Temps total mixé au public</p>
         </div>
-        <div class="card stat-card">
-          <p class="stat-label">Chansons totales</p>
-          <p id="totalSongsPlayed" class="stat-value mt-2" style="color:var(--green)">—</p>
+
+        <div class="stat-card">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="stat-label">Chansons totales</span>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--green-dim);color:var(--green)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </div>
+          </div>
+          <p id="totalSongsPlayed" class="stat-value" style="color:var(--green)">—</p>
+          <p class="text-[11px]" style="color:var(--text-muted)">Titres diffusés avec succès</p>
         </div>
       </div>
 
-      <!-- Ended events -->
-      <div class="card overflow-hidden">
-        <div class="flex items-center gap-2.5 px-5 py-4" style="border-bottom:1px solid var(--border)">
-          <svg class="w-4 h-4 shrink-0" style="color:var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <h2 class="text-sm font-semibold" style="color:var(--text-primary)">Soirées passées</h2>
+      <!-- Ended events list -->
+      <div class="dash-card overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4.5" style="border-bottom:1px solid var(--border)">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent-dim);color:var(--accent)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Toutes les Soirées Archivées</h2>
+              <p class="text-[11px]" style="color:var(--text-secondary)">Accédez aux statistiques, réouvrez une session ou exportez vos données</p>
+            </div>
+          </div>
+          <div class="w-full sm:w-64">
+            <input type="text" id="historySearchInput" placeholder="Rechercher une soirée..." class="input text-xs py-2" />
+          </div>
         </div>
         <div id="endedEventsList" class="divide-y" style="border-color:var(--border)">
-          <div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Chargement...</div>
+          <div class="px-6 py-12 text-center text-sm" style="color:var(--text-muted)">Chargement de vos archives...</div>
         </div>
       </div>
 
@@ -99,10 +162,14 @@
 <script src="/js/csrf.js"></script>
 <script src="/js/time-utils.js"></script>
 <script>
-  document.getElementById("btnLogout").addEventListener("click", async () => {
+  let allEvents = [];
+
+  const handleLogout = async () => {
     try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
     window.location.href = "/login";
-  });
+  };
+  document.getElementById("btnLogout")?.addEventListener("click", handleLogout);
+  document.getElementById("btnLogoutTop")?.addEventListener("click", handleLogout);
 
   async function loadHistory() {
     try {
@@ -118,7 +185,8 @@
       document.getElementById("totalDuration").textContent    = window.TimeUtils.formatMinutes(data.stats.totalDurationMinutes || 0);
       document.getElementById("totalSongsPlayed").textContent = data.stats.totalSongsPlayed || 0;
 
-      renderEndedEvents(data.events || []);
+      allEvents = data.events || [];
+      renderEndedEvents(allEvents);
     } catch (error) {
       console.error("Erreur:", error);
     }
@@ -127,7 +195,18 @@
   function renderEndedEvents(events) {
     const container = document.getElementById("endedEventsList");
     if (!events || events.length === 0) {
-      container.innerHTML = `<div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Aucune soirée terminée</div>`;
+      container.innerHTML = `
+        <div class="p-12 text-center flex flex-col items-center justify-center gap-3">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:var(--bg-elevated);border:1px solid var(--border)">
+            <svg class="w-7 h-7" style="color:var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-bold" style="color:var(--text-primary)">Aucune soirée archivée</p>
+            <p class="text-xs mt-1" style="color:var(--text-muted)">Vos futures soirées terminées apparaîtront automatiquement ici.</p>
+          </div>
+        </div>`;
       return;
     }
     container.innerHTML = events.map((event) => {
@@ -135,29 +214,35 @@
       const endDate   = new Date(event.ended_at);
       const dateStr   = startDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
       const duration  = Math.floor((endDate - startDate) / (1000 * 60));
+      const played = event.played_songs || 0;
+      const rejected = event.rejected_songs || 0;
+      const total = event.total_songs || 0;
+      const rate = total > 0 ? Math.round((played / total) * 100) : 0;
+
       return `
-      <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-[var(--bg-elevated)] transition cursor-pointer" onclick="viewEventDetails('${event.id}')">
+      <div class="px-6 py-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition cursor-pointer group" onclick="viewEventDetails('${event.id}')">
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-1">
-            <h3 class="font-semibold text-sm truncate" style="color:var(--text-primary)">${event.name}</h3>
-            <span class="badge badge-neutral shrink-0">Terminée</span>
+          <div class="flex items-center gap-2.5 mb-1.5">
+            <h3 class="font-extrabold text-base truncate group-hover:text-purple-400 transition" style="color:var(--text-primary)">${event.name}</h3>
+            <span class="badge badge-neutral shrink-0 text-[11px] font-mono">${window.TimeUtils.formatMinutes(duration)}</span>
           </div>
-          <p class="text-xs mb-2" style="color:var(--text-muted)">${dateStr} — ${window.TimeUtils.formatMinutes(duration)}</p>
-          <div class="flex flex-wrap gap-3 text-xs">
-            <span style="color:var(--green)">${event.played_songs || 0} jouées</span>
-            <span style="color:var(--red)">${event.rejected_songs || 0} refusées</span>
-            <span style="color:var(--text-muted)">${event.total_songs || 0} demandes</span>
+          <p class="text-xs mb-3" style="color:var(--text-muted)">Mixé le ${dateStr}</p>
+          <div class="flex flex-wrap items-center gap-3 text-xs">
+            <span class="badge badge-green font-semibold">${played} jouées</span>
+            <span class="badge badge-red font-semibold">${rejected} refusées</span>
+            <span class="badge badge-neutral font-semibold">${total} demandes</span>
+            <span class="text-xs font-bold text-gradient-purple ml-1">${rate}% satisfaction</span>
           </div>
         </div>
-        <div class="flex gap-2 shrink-0">
-          <button class="btn btn-ghost btn-sm" title="Rouvrir cette soirée"
+        <div class="flex items-center gap-2 shrink-0">
+          <button class="btn btn-ghost btn-sm font-semibold" title="Rouvrir cette soirée"
                   onclick="event.stopPropagation();reopenEvent('${event.id}', '${event.name.replace(/'/g, "\\'")}')">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
             Rouvrir
           </button>
-          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewEventDetails('${event.id}')">
-            Stats
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <button class="btn btn-primary btn-sm font-bold shadow-md shadow-purple-500/20" onclick="event.stopPropagation();viewEventDetails('${event.id}')">
+            Statistiques
+            <svg class="w-3.5 h-3.5 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       </div>`;
@@ -180,6 +265,17 @@
       alert("Erreur réseau");
     }
   }
+
+  // Barre de recherche
+  document.getElementById("historySearchInput")?.addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      renderEndedEvents(allEvents);
+      return;
+    }
+    const filtered = allEvents.filter(ev => ev.name.toLowerCase().includes(q));
+    renderEndedEvents(filtered);
+  });
 
   loadHistory();
 </script>

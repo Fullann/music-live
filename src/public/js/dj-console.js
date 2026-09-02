@@ -1652,27 +1652,32 @@
 
   function renderPending() {
     const container = document.getElementById("pendingRequests");
-    document.getElementById("pendingCount").textContent = `(${pendingRequests.length})`;
+    document.getElementById("pendingCount").textContent = `${pendingRequests.length}`;
     if (pendingRequests.length === 0) {
-      container.innerHTML = `<div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Aucune demande</div>`;
+      container.innerHTML = `<div class="px-5 py-12 text-center text-sm" style="color:var(--text-muted)">Aucune demande en attente</div>`;
       return;
     }
     const totalWaitMin = queue.length > 0
       ? Math.max(1, Math.ceil(queue.reduce((s, r) => s + window.TimeUtils.getDurationMs(r?.duration_ms), 0) / 60000))
       : 1;
     container.innerHTML = pendingRequests.map((request) => `
-      <div class="px-5 py-4">
-        <div class="flex gap-3 mb-3">
-          ${request.image_url ? `<img src="${request.image_url}" class="w-14 h-14 rounded-lg object-cover shrink-0">` : ""}
+      <div class="p-4 hover:bg-white/[0.02] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5 min-w-0">
+          ${request.image_url 
+            ? `<img src="${request.image_url}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-md">` 
+            : `<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:var(--bg-elevated);border:1px solid var(--border)"><svg class="w-6 h-6 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`
+          }
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold truncate" style="color:var(--text-primary)">${request.song_name}</p>
-            <p class="text-xs truncate mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
-            <p class="text-xs mt-0.5" style="color:var(--text-muted)">Demandé par ${request.user_name}</p>
-            <p class="text-xs mt-0.5" style="color:var(--accent)">Si accepté maintenant: ~${totalWaitMin} min</p>
+            <p class="text-sm font-extrabold truncate" style="color:var(--text-primary)">${request.song_name}</p>
+            <p class="text-xs truncate font-medium mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+              <span class="text-[11px] font-semibold" style="color:var(--text-muted)">Demandé par <span style="color:var(--text-secondary)">${request.user_name}</span></span>
+              <span class="badge badge-accent text-[10px] font-mono">~${totalWaitMin} min</span>
+            </div>
             ${renderAudioBadges(request.spotify_uri)}
           </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
           ${request.preview_url ? `
           <button data-action="preview" data-preview-url="${request.preview_url}"
                   data-track-name="${request.song_name}" data-artist="${request.artist}"
@@ -1680,11 +1685,11 @@
                   class="btn btn-ghost btn-sm" title="Écouter l'aperçu">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
           </button>` : ""}
-          <button data-action="accept" data-request-id="${request.id}" class="btn btn-success btn-sm flex-1">
+          <button data-action="accept" data-request-id="${request.id}" class="btn btn-success btn-sm font-bold shadow-sm">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             Accepter
           </button>
-          <button data-action="reject" data-request-id="${request.id}" class="btn btn-danger btn-sm flex-1">
+          <button data-action="reject" data-request-id="${request.id}" class="btn btn-danger btn-sm font-bold shadow-sm">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             Refuser
           </button>
@@ -1743,10 +1748,10 @@
 
   function renderQueue() {
     const container = document.getElementById("queue");
-    document.getElementById("queueCount").textContent = `(${queue.length})`;
+    document.getElementById("queueCount").textContent = `${queue.length}`;
     updateEmptyQueueAlert();
     if (queue.length === 0) {
-      container.innerHTML = `<div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Queue vide</div>`;
+      container.innerHTML = `<div class="px-5 py-12 text-center text-sm" style="color:var(--text-muted)">Queue de lecture vide</div>`;
       return;
     }
     container.innerHTML = queue.map((request, index) => {
@@ -1754,40 +1759,40 @@
       const netColor  = netVotes > 0 ? "var(--green)" : netVotes < 0 ? "var(--red)" : "var(--text-muted)";
       const waitMin   = window.TimeUtils.estimateQueueWaitMinutes(queue, index);
       return `
-      <div class="flex items-center gap-2 px-4 py-3 select-none" data-id="${request.id}" style="border-bottom:1px solid var(--border)">
+      <div class="flex items-center gap-3 px-4 py-3.5 select-none hover:bg-white/[0.02] transition" data-id="${request.id}" style="border-bottom:1px solid var(--border)">
         <!-- Handle drag -->
-        <div class="drag-handle shrink-0 flex flex-col gap-0.5 cursor-grab active:cursor-grabbing px-1 py-2 rounded" title="Glisser pour réordonner" style="color:var(--text-muted)">
-          <span class="block w-4 h-0.5 rounded" style="background:currentColor"></span>
-          <span class="block w-4 h-0.5 rounded" style="background:currentColor"></span>
-          <span class="block w-4 h-0.5 rounded" style="background:currentColor"></span>
+        <div class="drag-handle shrink-0 flex flex-col gap-0.5 cursor-grab active:cursor-grabbing px-1.5 py-2 rounded-lg hover:bg-white/[0.05]" title="Glisser pour réordonner" style="color:var(--text-muted)">
+          <span class="block w-3.5 h-0.5 rounded-full" style="background:currentColor"></span>
+          <span class="block w-3.5 h-0.5 rounded-full" style="background:currentColor"></span>
+          <span class="block w-3.5 h-0.5 rounded-full" style="background:currentColor"></span>
         </div>
-        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style="background:var(--accent-dim);color:var(--accent)">${index+1}</div>
-        ${request.image_url ? `<img src="${request.image_url}" class="w-10 h-10 rounded-lg object-cover shrink-0 hidden sm:block">` : ""}
+        <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0" style="background:var(--accent-dim);color:var(--accent)">${index+1}</div>
+        ${request.image_url ? `<img src="${request.image_url}" class="w-11 h-11 rounded-xl object-cover shrink-0 hidden sm:block shadow-sm">` : ""}
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold truncate" style="color:var(--text-primary)">${request.song_name}</p>
-          <p class="text-xs truncate" style="color:var(--text-secondary)">${request.artist}</p>
-          <div class="flex flex-wrap gap-2 mt-0.5">
-            <span class="text-xs" style="color:var(--text-muted)">Par ${request.user_name}</span>
-            <span class="text-xs" style="color:var(--accent)">~${waitMin} min</span>
-            <span class="text-xs font-medium" style="color:${netColor}">Net: ${netVotes>0?"+":""}${netVotes}</span>
+          <p class="text-sm font-extrabold truncate" style="color:var(--text-primary)">${request.song_name}</p>
+          <p class="text-xs truncate font-medium mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
+          <div class="flex flex-wrap items-center gap-2 mt-1">
+            <span class="text-[11px]" style="color:var(--text-muted)">Par <span style="color:var(--text-secondary)">${request.user_name}</span></span>
+            <span class="badge badge-accent text-[10px] font-mono">~${waitMin} min</span>
+            <span class="text-[11px] font-bold" style="color:${netColor}">Net: ${netVotes>0?"+":""}${netVotes}</span>
           </div>
           ${renderAudioBadges(request.spotify_uri)}
         </div>
-        <div class="flex flex-col gap-1 shrink-0">
+        <div class="flex items-center gap-1.5 shrink-0">
           ${request.preview_url ? `
           <button data-action="preview" data-preview-url="${request.preview_url}"
                   data-track-name="${request.song_name}" data-artist="${request.artist}"
                   data-img="${request.image_url || ""}"
                   class="btn btn-ghost btn-sm" title="Écouter l'aperçu">
-            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
           </button>` : ""}
           ${request.spotify_uri ? `
-          <button data-action="play" data-request-id="${request.id}" data-spotify-uri="${request.spotify_uri}" class="btn btn-success btn-sm">
-            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <button data-action="play" data-request-id="${request.id}" data-spotify-uri="${request.spotify_uri}" class="btn btn-success btn-sm font-bold shadow-sm">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             Jouer
           </button>` : ""}
-          <button data-action="mark-played" data-request-id="${request.id}" class="btn btn-ghost btn-sm">
-            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <button data-action="mark-played" data-request-id="${request.id}" class="btn btn-ghost btn-sm font-semibold" title="Marquer comme diffusé">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             Fait
           </button>
         </div>

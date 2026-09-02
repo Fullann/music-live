@@ -166,17 +166,17 @@ function renderActiveEvents(events) {
 
   if (!events || events.length === 0) {
     container.innerHTML = `
-      <div class="px-6 py-12 text-center flex flex-col items-center justify-center gap-3">
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:var(--bg-elevated);border:1px solid var(--border)">
-          <svg class="w-7 h-7" style="color:var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <div class="dash-card p-10 sm:p-12 text-center flex flex-col items-center justify-center gap-4">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg" style="background:var(--bg-elevated);border:1px solid var(--border)">
+          <svg class="w-8 h-8" style="color:var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
           </svg>
         </div>
-        <div>
-          <p class="text-sm font-semibold" style="color:var(--text-primary)">Aucune soirée en direct actuellement</p>
-          <p class="text-xs mt-1 max-w-sm mx-auto" style="color:var(--text-muted)">Lancez une nouvelle soirée pour générer un QR code interactif et permettre à votre public de voter pour les prochains sons.</p>
+        <div class="max-w-md">
+          <p class="text-base font-bold" style="color:var(--text-primary)">Aucune soirée en direct actuellement</p>
+          <p class="text-xs mt-1.5 leading-relaxed" style="color:var(--text-secondary)">Lancez une nouvelle soirée pour générer un QR code interactif et permettre à votre public de voter pour les prochains morceaux.</p>
         </div>
-        <button onclick="openCreateEventModal()" class="btn btn-primary btn-sm mt-2">
+        <button onclick="openCreateEventModal()" class="btn btn-primary btn-sm font-bold mt-2">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Lancer une soirée maintenant
         </button>
@@ -198,7 +198,7 @@ function renderActiveEvents(events) {
     if (!isScheduled) {
       // Carte LIVE active (Glow Deck)
       return `
-      <div class="p-5 sm:p-6 live-glow-card rounded-2xl mb-4 transition-all">
+      <div class="p-6 sm:p-7 live-glow-card rounded-2xl mb-4 transition-all">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4" style="border-bottom:1px solid rgba(255,255,255,0.08)">
           <div class="space-y-1.5">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -206,69 +206,69 @@ function renderActiveEvents(events) {
                 <span class="live-pulse-dot"></span>
                 En direct
               </span>
-              <span class="text-xs px-2.5 py-1 rounded-full font-mono" style="background:var(--bg-elevated);color:var(--text-muted)">
-                Débutée le ${dateFormatted}
+              <span class="text-xs px-2.5 py-1 rounded-full font-mono" style="background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-muted)">
+                Débutée à ${dateFormatted}
               </span>
             </div>
-            <h3 class="text-xl font-bold tracking-tight mt-1" style="color:var(--text-primary)">${event.name}</h3>
+            <h3 class="text-xl sm:text-2xl font-black tracking-tight mt-1" style="color:var(--text-primary)">${event.name}</h3>
           </div>
-          <div class="flex items-center gap-2 self-start lg:self-center">
+          <div class="flex items-center gap-2.5 self-start lg:self-center px-3 py-1.5 rounded-full" style="background:var(--green-dim);border:1px solid rgba(16,185,129,0.3)">
             <div class="equalizer-bar" title="Activité audio en cours">
               <span></span><span></span><span></span><span></span>
             </div>
-            <span class="text-xs font-semibold" style="color:var(--green)">Session active</span>
+            <span class="text-xs font-bold" style="color:var(--green)">Session Ouverte</span>
           </div>
         </div>
 
         <!-- Compteurs métriques du set -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
-          <div class="p-3 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <p class="text-xs" style="color:var(--text-muted)">Jouées au public</p>
-            <p class="text-lg font-extrabold mt-1" style="color:var(--green)">${playedSongs}</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5">
+          <div class="p-3.5 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+            <p class="text-[11px] font-semibold uppercase tracking-wider" style="color:var(--text-muted)">Jouées au public</p>
+            <p class="text-xl font-black mt-1" style="color:var(--green)">${playedSongs}</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <p class="text-xs" style="color:var(--text-muted)">En attente régie</p>
-            <p class="text-lg font-extrabold mt-1" style="color:var(--amber)">${acceptedCount}</p>
+          <div class="p-3.5 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+            <p class="text-[11px] font-semibold uppercase tracking-wider" style="color:var(--text-muted)">En attente régie</p>
+            <p class="text-xl font-black mt-1" style="color:var(--amber)">${acceptedCount}</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <p class="text-xs" style="color:var(--text-muted)">Refusées</p>
-            <p class="text-lg font-extrabold mt-1" style="color:var(--red)">${rejectedSongs}</p>
+          <div class="p-3.5 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+            <p class="text-[11px] font-semibold uppercase tracking-wider" style="color:var(--text-muted)">Refusées</p>
+            <p class="text-xl font-black mt-1" style="color:var(--red)">${rejectedSongs}</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <p class="text-xs" style="color:var(--text-muted)">Total demandes</p>
-            <p class="text-lg font-extrabold mt-1" style="color:var(--text-primary)">${totalSongs}</p>
+          <div class="p-3.5 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+            <p class="text-[11px] font-semibold uppercase tracking-wider" style="color:var(--text-muted)">Total demandes</p>
+            <p class="text-xl font-black mt-1" style="color:var(--text-primary)">${totalSongs}</p>
           </div>
         </div>
 
         <!-- Barre d'action complète -->
-        <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2">
-          <div class="flex flex-wrap items-center gap-2">
-            <button onclick="goToDJ('${event.id}')" class="btn btn-primary btn-sm font-semibold shadow-lg shadow-purple-500/20">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="goToDJ('${event.id}')" class="btn btn-primary btn-sm font-bold shadow-md shadow-purple-500/25">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
               </svg>
               Régie DJ Live
             </button>
-            <a href="/event/${event.id}/qr" target="_blank" class="btn btn-ghost btn-sm" style="color:var(--cyan);border-color:rgba(6,182,212,0.3)">
+            <a href="/event/${event.id}/qr" target="_blank" class="btn btn-ghost btn-sm font-semibold" style="color:var(--cyan);border-color:rgba(6,182,212,0.3)">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
               </svg>
               Mode Écran Géant
             </a>
-            <button onclick="showQRCode('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm">
+            <button onclick="showQRCode('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm font-semibold">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
               </svg>
               QR Code
             </button>
-            <a href="/event/${event.id}/stats" class="btn btn-ghost btn-sm" style="color:var(--accent)">
+            <a href="/event/${event.id}/stats" class="btn btn-ghost btn-sm font-semibold" style="color:var(--accent);border-color:var(--border-accent)">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
               </svg>
               Stats en direct
             </a>
           </div>
-          <button onclick="endEvent('${event.id}', '${escapedName}')" class="btn btn-danger btn-sm">
+          <button onclick="endEvent('${event.id}', '${escapedName}')" class="btn btn-danger btn-sm font-semibold">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>
             Clôturer
           </button>
@@ -280,23 +280,23 @@ function renderActiveEvents(events) {
         day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
       });
       return `
-      <div class="p-5 rounded-2xl mb-4 transition-all" style="background:var(--bg-surface);border:1px solid rgba(245,158,11,0.3)">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="p-6 rounded-2xl dash-card mb-4 transition-all" style="border:1px solid rgba(245,158,11,0.3)">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="badge shrink-0" style="background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3)">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="badge shrink-0" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.3)">
                 🟡 Planifiée
               </span>
-              <h3 class="font-bold text-base truncate" style="color:var(--text-primary)">${event.name}</h3>
+              <h3 class="font-extrabold text-lg truncate" style="color:var(--text-primary)">${event.name}</h3>
             </div>
             <p class="text-xs" style="color:var(--amber)">Ouverture programmée : ${scheduledOpen}</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button onclick="showQRCode('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm">
+            <button onclick="showQRCode('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm font-semibold">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
               QR Code
             </button>
-            <button onclick="goToDJ('${event.id}')" class="btn btn-primary btn-sm">
+            <button onclick="goToDJ('${event.id}')" class="btn btn-primary btn-sm font-semibold">
               Préparer la régie
             </button>
             <button onclick="endEvent('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm text-red-400">
@@ -317,7 +317,7 @@ function renderPastEvents(events) {
 
   if (!events || events.length === 0) {
     container.innerHTML = `
-      <div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">
+      <div class="dash-card p-10 text-center text-sm" style="color:var(--text-muted)">
         Aucune soirée passée enregistrée pour le moment.
       </div>`;
     return;
@@ -336,40 +336,40 @@ function renderPastEvents(events) {
         const escapedName = event.name.replace(/'/g, "\\'");
 
         return `
-        <div class="p-5 rounded-2xl dash-card flex flex-col justify-between transition hover:-translate-y-0.5">
+        <div class="p-6 rounded-2xl dash-card flex flex-col justify-between transition hover:-translate-y-1 hover:border-purple-500/30">
           <div>
             <div class="flex items-center justify-between gap-2 mb-2">
-              <h3 class="font-bold text-base truncate" style="color:var(--text-primary)">${event.name}</h3>
-              <span class="badge shrink-0 text-xs" style="background:var(--bg-elevated);color:var(--text-secondary)">
+              <h3 class="font-extrabold text-base truncate" style="color:var(--text-primary)">${event.name}</h3>
+              <span class="badge shrink-0 text-xs font-mono" style="background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary)">
                 ${formatDuration(durationMinutes)}
               </span>
             </div>
             <p class="text-xs mb-4" style="color:var(--text-muted)">Mixé le ${dateStr}</p>
             
             <!-- Statistiques résumées de la soirée -->
-            <div class="grid grid-cols-3 gap-2 p-3 rounded-xl mb-4" style="background:var(--bg-elevated)">
+            <div class="grid grid-cols-3 gap-2.5 p-3.5 rounded-xl mb-4" style="background:var(--bg-elevated);border:1px solid var(--border)">
               <div class="text-center">
                 <p class="text-[10px] uppercase font-bold tracking-wider" style="color:var(--text-muted)">Diffusées</p>
-                <p class="text-sm font-extrabold mt-0.5" style="color:var(--green)">${playedCount}</p>
+                <p class="text-base font-black mt-0.5" style="color:var(--green)">${playedCount}</p>
               </div>
               <div class="text-center">
                 <p class="text-[10px] uppercase font-bold tracking-wider" style="color:var(--text-muted)">Demandes</p>
-                <p class="text-sm font-extrabold mt-0.5" style="color:var(--text-primary)">${totalCount}</p>
+                <p class="text-base font-black mt-0.5" style="color:var(--text-primary)">${totalCount}</p>
               </div>
               <div class="text-center">
-                <p class="text-[10px] uppercase font-bold tracking-wider" style="color:var(--text-muted)">Satisfaction</p>
-                <p class="text-sm font-extrabold mt-0.5" style="color:var(--accent)">${successRate}%</p>
+                <p class="text-[10px] uppercase font-bold tracking-wider" style="color:var(--text-muted)">Succès</p>
+                <p class="text-base font-black mt-0.5 text-gradient-purple">${successRate}%</p>
               </div>
             </div>
           </div>
 
           <!-- Boutons d'action : Accès direct aux stats détaillées -->
-          <div class="flex items-center justify-between gap-2 pt-2 border-t" style="border-color:var(--border)">
-            <button onclick="reopenEvent('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm text-xs" title="Reprendre cette session">
+          <div class="flex items-center justify-between gap-2 pt-3 border-t" style="border-color:var(--border)">
+            <button onclick="reopenEvent('${event.id}', '${escapedName}')" class="btn btn-ghost btn-sm text-xs font-semibold" title="Reprendre cette session">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
               Rouvrir
             </button>
-            <a href="/event/${event.id}/stats" class="btn btn-ghost btn-sm text-xs font-semibold" style="color:var(--accent);background:var(--accent-dim)">
+            <a href="/event/${event.id}/stats" class="btn btn-ghost btn-sm text-xs font-bold" style="color:var(--accent);background:var(--accent-dim);border-color:var(--border-accent)">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
               </svg>
@@ -385,7 +385,7 @@ function renderPastEvents(events) {
 function renderTopSongs(songs) {
   const container = document.getElementById("topSongsList");
   if (!songs || songs.length === 0) {
-    container.innerHTML = `<div class="px-5 py-10 text-center text-sm" style="color:var(--text-muted)">Aucun morceau joué pour le moment</div>`;
+    container.innerHTML = `<div class="p-10 text-center text-sm" style="color:var(--text-muted)">Aucun morceau joué pour le moment</div>`;
     return;
   }
 
@@ -393,24 +393,26 @@ function renderTopSongs(songs) {
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm">
         <thead>
-          <tr class="text-xs uppercase tracking-wider font-semibold" style="color:var(--text-muted);border-bottom:1px solid var(--border)">
-            <th class="py-3 px-4 w-12 text-center">Rang</th>
-            <th class="py-3 px-4">Titre</th>
-            <th class="py-3 px-4">Artiste</th>
-            <th class="py-3 px-4 text-center">Diffusions</th>
-            <th class="py-3 px-4 text-center">Votes Moyens</th>
+          <tr class="text-[11px] uppercase tracking-wider font-bold" style="color:var(--text-muted);border-bottom:1px solid var(--border)">
+            <th class="py-3.5 px-5 w-16 text-center">Rang</th>
+            <th class="py-3.5 px-5">Titre</th>
+            <th class="py-3.5 px-5">Artiste</th>
+            <th class="py-3.5 px-5 text-center">Diffusions</th>
+            <th class="py-3.5 px-5 text-center">Votes Moyens</th>
           </tr>
         </thead>
         <tbody class="divide-y" style="border-color:var(--border)">
           ${songs.slice(0, 10).map((song, i) => {
-            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
+            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `<span class="badge badge-neutral text-xs font-mono">#${i + 1}</span>`;
             return `
-            <tr class="hover:bg-[var(--bg-elevated)] transition">
-              <td class="py-3.5 px-4 text-center font-bold text-base">${medal}</td>
-              <td class="py-3.5 px-4 font-semibold" style="color:var(--text-primary)">${song.song_name}</td>
-              <td class="py-3.5 px-4" style="color:var(--text-secondary)">${song.artist}</td>
-              <td class="py-3.5 px-4 text-center font-bold" style="color:var(--green)">${song.play_count}</td>
-              <td class="py-3.5 px-4 text-center font-semibold" style="color:var(--accent)">
+            <tr class="hover:bg-white/[0.02] transition">
+              <td class="py-4 px-5 text-center font-bold text-base">${medal}</td>
+              <td class="py-4 px-5 font-bold" style="color:var(--text-primary)">${song.song_name}</td>
+              <td class="py-4 px-5 font-medium" style="color:var(--text-secondary)">${song.artist}</td>
+              <td class="py-4 px-5 text-center font-extrabold" style="color:var(--green)">
+                <span class="badge badge-green">${song.play_count}</span>
+              </td>
+              <td class="py-4 px-5 text-center font-bold" style="color:var(--amber)">
                 ★ ${(parseFloat(song.avg_upvotes) || 0).toFixed(1)}
               </td>
             </tr>`;
@@ -510,6 +512,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Déconnexions
   document.getElementById("btnLogout")?.addEventListener("click", logout);
+  document.getElementById("btnLogoutTop")?.addEventListener("click", logout);
   document.getElementById("btnLogoutMobile")?.addEventListener("click", logout);
   document.getElementById("btnLogoutMobile2")?.addEventListener("click", logout);
 

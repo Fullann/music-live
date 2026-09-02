@@ -3,28 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Statistiques — Music Live</title>
+  <title>Statistiques Soirée — Music Live</title>
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
   <style>
     /* Barres du graphique */
-    .bar-track { background: var(--bg-elevated); border-radius: 4px; overflow: hidden; height: 28px; }
-    .bar-fill  { height: 100%; border-radius: 4px; transition: width 600ms ease; background: var(--accent); }
-    .bar-fill.peak { background: var(--green); }
-
-    /* Badge LIVE */
-    @keyframes live-pulse { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
-    .live-dot { animation: live-pulse 1.5s ease infinite; }
-
-    /* Carte stat */
-    .kpi { padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-surface); }
-    .kpi-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-    .kpi-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; margin-top: .25rem; color: var(--text-muted); }
+    .bar-track { background: var(--bg-elevated); border-radius: 6px; overflow: hidden; height: 32px; border: 1px solid var(--border); }
+    .bar-fill  { height: 100%; border-radius: 6px; transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1); background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%); }
+    .bar-fill.peak { background: linear-gradient(90deg, #10b981 0%, #34d399 100%); box-shadow: 0 0 14px var(--green-glow); }
 
     /* Feed ligne */
-    .feed-row { display: flex; align-items: center; gap: .75rem; padding: .6rem 1rem; border-bottom: 1px solid var(--border); }
+    .feed-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); transition: background 0.15s ease; }
     .feed-row:last-child { border-bottom: none; }
+    .feed-row:hover { background: rgba(255, 255, 255, 0.02); }
   </style>
 </head>
 <body style="background:var(--bg-base);color:var(--text-primary)">
@@ -32,92 +24,129 @@
 <div class="flex h-screen overflow-hidden">
 
   <!-- ── Sidebar ───────────────────────────────────────────── -->
-  <aside class="hidden lg:flex flex-col w-56 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-    <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid var(--border)">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--accent)">
-        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+  <aside class="hidden lg:flex flex-col w-64 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
+    <!-- Logo App -->
+    <div class="flex items-center gap-3.5 px-6 py-5" style="border-bottom:1px solid var(--border)">
+      <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%);box-shadow:0 0 20px var(--accent-glow)">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
         </svg>
       </div>
-      <span class="font-semibold text-sm">Music Live</span>
+      <div>
+        <span class="font-extrabold text-base tracking-tight" style="color:var(--text-primary)">Music Live</span>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--cyan)"></span>
+          <p class="text-[10px] uppercase font-bold tracking-widest text-gradient-cyan">Analytics DJ</p>
+        </div>
+      </div>
     </div>
-    <nav class="flex-1 p-3 space-y-0.5 pt-4">
+
+    <nav class="flex-1 p-3 space-y-1.5 pt-4">
       <a href="/dashboard" class="nav-item">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
+        Dashboard Live
       </a>
-      <a href="/history" class="nav-item">
+      <a href="/history" class="nav-item active">
         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Historique
+        Historique & Stats
+      </a>
+      <a href="/profile" class="nav-item">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mon Profil
       </a>
     </nav>
+    <div class="p-3" style="border-top:1px solid var(--border)">
+      <button id="btnLogout" class="nav-item danger w-full">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Déconnexion
+      </button>
+    </div>
   </aside>
 
   <!-- ── Main ──────────────────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="flex items-center gap-3 px-5 py-3.5 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
-      <a id="backBtn" href="/history" class="btn btn-ghost btn-icon btn-sm shrink-0">
+    <header class="flex items-center gap-3 px-5 sm:px-7 py-3.5 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
+      <a id="backBtn" href="/history" class="btn btn-ghost btn-icon btn-sm shrink-0" title="Retour">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </a>
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2">
-          <h1 id="eventName" class="text-base font-bold truncate">Chargement…</h1>
+        <div class="flex items-center gap-2.5">
+          <h1 id="eventName" class="text-base sm:text-lg font-extrabold truncate" style="color:var(--text-primary)">Chargement…</h1>
           <!-- Badge LIVE injecté par JS -->
-          <span id="liveBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold" style="background:rgba(239,68,68,0.15);color:var(--red)">
-            <span class="live-dot w-1.5 h-1.5 rounded-full shrink-0" style="background:var(--red)"></span>
+          <span id="liveBadge" class="hidden items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black shadow-sm" style="background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.35);color:var(--red)">
+            <span class="w-2 h-2 rounded-full live-pulse-dot" style="background:var(--red);box-shadow:0 0 10px var(--red)"></span>
             LIVE
           </span>
         </div>
         <p id="eventDate" class="text-xs mt-0.5" style="color:var(--text-secondary)">…</p>
       </div>
+
       <!-- Durée soirée -->
-      <div id="durationBadge" class="hidden shrink-0 text-right">
-        <p id="liveClock" class="text-sm font-bold tabular-nums" style="color:var(--accent)">00:00</p>
-        <p class="text-xs" style="color:var(--text-muted)">en cours</p>
+      <div id="durationBadge" class="hidden shrink-0 text-right px-3 py-1 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
+        <p id="liveClock" class="text-sm font-black tabular-nums text-gradient-purple">00:00</p>
+        <p class="text-[10px] uppercase tracking-wider font-bold" style="color:var(--text-muted)">En direct</p>
       </div>
+
       <!-- Lien DJ si live -->
-      <a id="djLink" href="#" class="hidden btn btn-primary btn-sm shrink-0">Ouvrir la régie</a>
-      <!-- Refresh manuel -->
-      <a id="exportCsvBtn" href="#" class="btn btn-ghost btn-sm shrink-0">Export CSV</a>
-      <button id="refreshBtn" class="btn btn-ghost btn-icon btn-sm shrink-0" title="Rafraîchir">
+      <a id="djLink" href="#" class="hidden btn btn-primary btn-sm font-bold shadow-md shadow-purple-500/25 shrink-0">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        <span class="hidden sm:inline">Régie DJ</span>
+      </a>
+
+      <!-- Refresh & Export -->
+      <a id="exportCsvBtn" href="#" class="btn btn-ghost btn-sm shrink-0 font-semibold" title="Télécharger les logs de demandes en CSV">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span class="hidden sm:inline">Export CSV</span>
+      </a>
+      <button id="refreshBtn" class="btn btn-ghost btn-icon btn-sm shrink-0" title="Rafraîchir les données">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       </button>
-      <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm">
+      <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Alterner mode clair / sombre">
         <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button id="btnLogoutTop" class="btn btn-danger btn-sm" title="Se déconnecter" aria-label="Se déconnecter">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span class="hidden sm:inline">Déconnexion</span>
       </button>
     </header>
 
     <!-- Contenu scrollable -->
-    <main class="flex-1 overflow-y-auto p-5 space-y-5">
+    <main class="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
 
       <!-- ── KPIs ────────────────────────────────────────────── -->
-      <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div class="kpi">
-          <p class="kpi-value" id="kTotal" style="color:var(--accent)">—</p>
-          <p class="kpi-label">Demandes</p>
+      <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <div class="stat-card p-4 flex flex-col justify-between">
+          <p class="stat-label">Demandes</p>
+          <p class="stat-value text-gradient-purple mt-2" id="kTotal">—</p>
         </div>
-        <div class="kpi">
-          <p class="kpi-value" id="kUsers" style="color:var(--cyan)">—</p>
-          <p class="kpi-label">Personnes</p>
+        <div class="stat-card p-4 flex flex-col justify-between">
+          <p class="stat-label">Personnes</p>
+          <p class="stat-value text-gradient-cyan mt-2" id="kUsers">—</p>
         </div>
-        <div class="kpi">
-          <p class="kpi-value" id="kPlayed" style="color:var(--green)">—</p>
-          <p class="kpi-label">Jouées</p>
+        <div class="stat-card p-4 flex flex-col justify-between">
+          <p class="stat-label">Jouées</p>
+          <p class="stat-value mt-2" style="color:var(--green)" id="kPlayed">—</p>
         </div>
-        <div class="kpi">
-          <p class="kpi-value" id="kQueue" style="color:var(--text-primary)">—</p>
-          <p class="kpi-label">En queue</p>
+        <div class="stat-card p-4 flex flex-col justify-between">
+          <p class="stat-label">En queue</p>
+          <p class="stat-value mt-2" style="color:var(--text-primary)" id="kQueue">—</p>
         </div>
-        <div class="kpi">
-          <p class="kpi-value" id="kPending" style="color:var(--amber)">—</p>
-          <p class="kpi-label">En attente</p>
+        <div class="stat-card p-4 flex flex-col justify-between">
+          <p class="stat-label">En attente</p>
+          <p class="stat-value mt-2" style="color:var(--amber)" id="kPending">—</p>
         </div>
-        <div class="kpi">
-          <p class="kpi-value" id="kRejected" style="color:var(--red)">—</p>
-          <p class="kpi-label">Refusées</p>
+        <div class="stat-card p-4 flex flex-col justify-between">
+          <p class="stat-label">Refusées</p>
+          <p class="stat-value mt-2" style="color:var(--red)" id="kRejected">—</p>
         </div>
       </div>
 
@@ -125,61 +154,72 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <!-- Chanson la plus votée en attente -->
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold">Chanson la plus voulue</h2>
-            <span class="text-xs px-2 py-0.5 rounded-full" style="background:var(--amber-dim);color:var(--amber)">En attente</span>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🔥</span>
+              <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Chanson la plus voulue du public</h2>
+            </div>
+            <span class="badge badge-amber text-xs">En attente</span>
           </div>
-          <div id="hotPending" class="p-5">
+          <div id="hotPending" class="p-6">
             <p class="text-sm text-center py-4" style="color:var(--text-muted)">Aucune demande en attente</p>
           </div>
         </div>
 
         <!-- Top 5 artistes -->
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold">Top artistes</h2>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
+            <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:var(--accent-dim);color:var(--accent)">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            </div>
+            <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Top Artistes de la Soirée</h2>
           </div>
-          <div id="topArtists" class="p-5 space-y-2.5">
+          <div id="topArtists" class="p-6 space-y-3">
             <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
           </div>
         </div>
       </div>
 
       <!-- ── Graphique demandes / 15 min ───────────────────── -->
-      <div class="card overflow-hidden">
-        <div class="px-5 py-3.5 flex items-center gap-3" style="border-bottom:1px solid var(--border)">
-          <h2 class="text-sm font-semibold flex-1">Activité par quart d'heure</h2>
-          <span id="peakSlot" class="text-xs hidden px-2 py-0.5 rounded-full" style="background:var(--green-dim);color:var(--green)"></span>
+      <div class="dash-card overflow-hidden">
+        <div class="px-6 py-4.5 flex items-center justify-between gap-3" style="border-bottom:1px solid var(--border)">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--cyan-dim);color:var(--cyan)">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Activité & Pression du Public (par quart d'heure)</h2>
+          </div>
+          <span id="peakSlot" class="text-xs hidden px-3 py-1 rounded-full font-bold" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,0.3)"></span>
         </div>
-        <div id="activityChart" class="px-5 py-4 space-y-1.5 overflow-x-auto">
+        <div id="activityChart" class="p-6 space-y-2.5 overflow-x-auto">
           <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
         </div>
       </div>
 
       <!-- ── Analytics live avancées ─────────────────────────── -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold">Heatmap horaire</h2>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
+            <h2 class="text-sm font-extrabold">Heatmap Horaire</h2>
           </div>
-          <div id="hourlyHeatmap" class="p-5 space-y-1.5">
+          <div id="hourlyHeatmap" class="p-6 space-y-2">
             <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
           </div>
         </div>
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold">Top tempos</h2>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
+            <h2 class="text-sm font-extrabold">Top Tempos (BPM)</h2>
           </div>
-          <div id="topTempos" class="p-5 space-y-2">
+          <div id="topTempos" class="p-6 space-y-2.5">
             <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
           </div>
         </div>
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold">Skip & votes</h2>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
+            <h2 class="text-sm font-extrabold">Skips & Votes</h2>
           </div>
-          <div id="engagementStats" class="p-5 space-y-2">
+          <div id="engagementStats" class="p-6 space-y-2.5">
             <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
           </div>
         </div>
@@ -189,23 +229,27 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <!-- Top 5 chansons demandées -->
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold">Chansons les plus demandées</h2>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
+            <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Chansons les plus demandées</h2>
+            <span class="text-xs font-bold text-gradient-purple">Top 5</span>
           </div>
           <div id="topSongs" class="divide-y" style="border-color:var(--border)">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
+            <p class="text-sm text-center py-6" style="color:var(--text-muted)">Chargement…</p>
           </div>
         </div>
 
         <!-- Feed live des dernières demandes -->
-        <div class="card overflow-hidden">
-          <div class="px-5 py-3.5 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-semibold flex-1">Dernières demandes</h2>
-            <span id="feedLiveDot" class="hidden w-2 h-2 rounded-full live-dot" style="background:var(--green)"></span>
+        <div class="dash-card overflow-hidden">
+          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Dernières demandes</h2>
+              <span id="feedLiveDot" class="hidden w-2 h-2 rounded-full live-pulse-dot" style="background:var(--green)"></span>
+            </div>
+            <span class="text-xs" style="color:var(--text-muted)">Temps réel</span>
           </div>
-          <div id="feedList">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
+          <div id="feedList" class="max-h-[380px] overflow-y-auto">
+            <p class="text-sm text-center py-6" style="color:var(--text-muted)">Chargement…</p>
           </div>
         </div>
       </div>
@@ -234,230 +278,304 @@
       const hours = Math.floor(mins / 60);
       const m     = mins % 60;
       clock.textContent = hours > 0
-        ? `${hours}h${String(m).padStart(2,"0")}`
-        : `${String(mins).padStart(2,"0")}min`;
-    }, 10000);
+        ? `${hours}h ${String(m).padStart(2, "0")}min`
+        : `${m} min`;
+    }, 1000);
   }
 
   // ── Chargement des stats ──
   async function loadStats() {
     try {
-      const res  = await fetch(`/api/events/${eventId}/live-stats`);
-      if (!res.ok) throw new Error(res.status);
-      lastData = await res.json();
-      render(lastData);
-    } catch (err) {
-      console.error("live-stats:", err);
+      const res = await fetch(`/api/events/${eventId}/live-stats`);
+      if (!res.ok) throw new Error("Stats non disponibles");
+      const data = await res.json();
+      lastData = data;
+      renderAll(data);
+    } catch (e) {
+      console.warn("loadStats error:", e);
     }
   }
 
-  function render(data) {
-    const { event, counts, topArtists, topSongs, hotPending, timeline, recentRequests, hourlyHeatmap, topTempos, skip, voteEngagement } = data;
+  // ── Rendu global ──
+  function renderAll(d) {
+    const ev = d.event || {};
+    isLive   = ev.status === "active";
 
-    // ── En-tête ──
-    document.title = `${event.name} — Stats Music Live`;
-    document.getElementById("eventName").textContent = event.name;
+    // Titre + date
+    document.getElementById("eventName").textContent = ev.name || "Soirée";
+    const createdDate = ev.created_at ? new Date(ev.created_at) : null;
+    const endedDate   = ev.ended_at   ? new Date(ev.ended_at)   : null;
+    const dateFormatted = createdDate
+      ? createdDate.toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
+      : "";
+    document.getElementById("eventDate").textContent = dateFormatted;
 
-    const start = new Date(event.created_at);
-    const dateStr = start.toLocaleDateString("fr-FR", { day:"numeric", month:"long", year:"numeric" });
-    const timeStr = start.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
-
-    isLive = event.isLive;
+    // Badge LIVE vs Terminé
+    const liveBadge = document.getElementById("liveBadge");
+    const durBadge  = document.getElementById("durationBadge");
+    const djLink    = document.getElementById("djLink");
 
     if (isLive) {
-      document.getElementById("eventDate").textContent = `Soirée en cours depuis ${timeStr}`;
-      document.getElementById("liveBadge").classList.remove("hidden");
-      document.getElementById("liveBadge").classList.add("flex");
-      document.getElementById("durationBadge").classList.remove("hidden");
-      document.getElementById("djLink").href    = `/dj/${eventId}`;
-      document.getElementById("djLink").classList.remove("hidden");
-      document.getElementById("backBtn").href   = `/dj/${eventId}`;
+      liveBadge.classList.remove("hidden");
+      liveBadge.classList.add("inline-flex");
+      durBadge.classList.remove("hidden");
+      djLink.classList.remove("hidden");
+      djLink.href = `/dj/${eventId}`;
+      if (createdDate && !startTime) {
+        startTime = createdDate.getTime();
+        startLiveClock();
+      }
       document.getElementById("feedLiveDot").classList.remove("hidden");
-      startTime = start.getTime();
-      startLiveClock();
     } else {
-      const end    = new Date(event.ended_at);
-      const endStr = end.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
-      document.getElementById("eventDate").textContent = `${dateStr} · ${timeStr} — ${endStr}`;
+      liveBadge.classList.add("hidden");
+      djLink.classList.add("hidden");
+      if (createdDate && endedDate) {
+        const totalMins = Math.floor((endedDate - createdDate) / 60000);
+        const h = Math.floor(totalMins / 60);
+        const m = totalMins % 60;
+        document.getElementById("liveClock").textContent = h > 0 ? `${h}h ${String(m).padStart(2,"0")}min` : `${m} min`;
+        durBadge.querySelector("p:last-child").textContent = "durée totale";
+        durBadge.classList.remove("hidden");
+      }
     }
 
-    // ── KPIs ──
-    document.getElementById("kTotal").textContent   = counts.total     || 0;
-    document.getElementById("kUsers").textContent   = counts.unique_users || 0;
-    document.getElementById("kPlayed").textContent  = counts.played    || 0;
-    document.getElementById("kQueue").textContent   = parseInt(counts.accepted || 0) + parseInt(counts.played || 0);
-    document.getElementById("kPending").textContent = counts.pending   || 0;
-    document.getElementById("kRejected").textContent= counts.rejected  || 0;
+    // KPIs
+    const k = d.kpis || {};
+    document.getElementById("kTotal").textContent    = k.totalRequests ?? 0;
+    document.getElementById("kUsers").textContent    = k.uniqueUsers ?? 0;
+    document.getElementById("kPlayed").textContent   = k.playedCount ?? 0;
+    document.getElementById("kQueue").textContent    = k.queueCount ?? 0;
+    document.getElementById("kPending").textContent  = k.pendingCount ?? 0;
+    document.getElementById("kRejected").textContent = k.rejectedCount ?? 0;
 
-    // ── Chanson la plus voulue ──
-    const hp = document.getElementById("hotPending");
-    if (hotPending) {
-      hp.innerHTML = `
-        <div class="flex items-center gap-3">
-          ${hotPending.image_url ? `<img src="${hotPending.image_url}" class="w-14 h-14 rounded-xl object-cover shrink-0">` : ""}
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold truncate" style="color:var(--text-primary)">${hotPending.song_name}</p>
-            <p class="text-sm truncate" style="color:var(--text-secondary)">${hotPending.artist}</p>
-            <div class="flex items-center gap-3 mt-1.5">
-              <span class="flex items-center gap-1 text-xs font-semibold" style="color:var(--green)">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                ${hotPending.up}
-              </span>
-              <span class="flex items-center gap-1 text-xs" style="color:var(--text-muted)">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
-                ${hotPending.down}
-              </span>
-            </div>
+    // Hot pending
+    renderHotPending(d.hotPending);
+
+    // Top artistes
+    renderTopArtists(d.topArtists || []);
+
+    // Graphique 15 min
+    renderActivityChart(d.timeline || [], d.peakSlot);
+
+    // Analytics avancées
+    renderHourlyHeatmap(d.analytics?.hourlyDistribution || []);
+    renderTopTempos(d.analytics?.tempoDistribution || []);
+    renderEngagement(d.analytics?.engagement || {});
+
+    // Top chansons
+    renderTopSongs(d.topSongs || []);
+
+    // Feed live
+    renderFeed(d.recentRequests || []);
+  }
+
+  // ── Chanson chaude en attente ──
+  function renderHotPending(hot) {
+    const el = document.getElementById("hotPending");
+    if (!hot) {
+      el.innerHTML = `<p class="text-xs text-center py-3" style="color:var(--text-muted)">Aucune demande en attente</p>`;
+      return;
+    }
+    el.innerHTML = `
+      <div class="flex items-center gap-3.5 p-3.5 rounded-2xl" style="background:var(--bg-elevated);border:1px solid rgba(245,158,11,0.3)">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 font-bold text-lg shadow-sm" style="background:var(--amber-dim);color:var(--amber)">
+          🔥
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate" style="color:var(--text-primary)">${hot.song_name}</p>
+          <p class="text-xs truncate mt-0.5" style="color:var(--text-muted)">${hot.artist}</p>
+        </div>
+        <div class="text-right shrink-0">
+          <span class="badge badge-amber font-extrabold text-sm">▲ ${hot.upvotes}</span>
+          <p class="text-[10px] mt-1 font-semibold" style="color:var(--text-muted)">votes</p>
+        </div>
+      </div>`;
+  }
+
+  // ── Top 5 Artistes ──
+  function renderTopArtists(artists) {
+    const el = document.getElementById("topArtists");
+    if (!artists.length) {
+      el.innerHTML = `<p class="text-xs text-center py-3" style="color:var(--text-muted)">Pas assez de données</p>`;
+      return;
+    }
+    const maxReq = Math.max(...artists.map(a => a.count), 1);
+    el.innerHTML = artists.map((a, i) => {
+      const pct = Math.round((a.count / maxReq) * 100);
+      return `
+        <div>
+          <div class="flex justify-between text-xs mb-1 font-semibold">
+            <span class="truncate" style="color:var(--text-primary)"><span class="font-mono text-muted mr-1.5">#${i+1}</span> ${a.artist}</span>
+            <span class="tabular-nums font-bold" style="color:var(--accent)">${a.count} <span class="font-normal text-[10px] text-muted">demandes</span></span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%"></div>
           </div>
         </div>`;
+    }).join("");
+  }
+
+  // ── Graphique 15 min ──
+  function renderActivityChart(slots, peakSlot) {
+    const el = document.getElementById("activityChart");
+    const peakBadge = document.getElementById("peakSlot");
+
+    if (peakSlot && peakSlot.count > 0) {
+      peakBadge.textContent = `⚡ Pic à ${peakSlot.slot} (${peakSlot.count} demandes)`;
+      peakBadge.classList.remove("hidden");
     } else {
-      hp.innerHTML = `<p class="text-sm text-center py-4" style="color:var(--text-muted)">Aucune demande en attente</p>`;
+      peakBadge.classList.add("hidden");
     }
 
-    // ── Top artistes (barres CSS) ──
-    const maxArtist = topArtists.length ? Math.max(...topArtists.map(a => a.total)) : 1;
-    document.getElementById("topArtists").innerHTML = topArtists.length
-      ? topArtists.map((a, i) => `
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-medium truncate" style="color:var(--text-primary);max-width:60%">${a.artist}</span>
-              <span class="text-xs tabular-nums" style="color:var(--text-muted)">${a.total} dem. · ${a.played||0} jouées</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill ${i===0?"peak":""}" style="width:${Math.round((a.total/maxArtist)*100)}%"></div>
-            </div>
-          </div>`)
-          .join("")
-      : `<p class="text-sm text-center py-4" style="color:var(--text-muted)">Aucune donnée</p>`;
-
-    // ── Graphique activité ──
-    if (timeline && timeline.length) {
-      const maxCount = Math.max(...timeline.map(s => s.count), 1);
-      const peakSlot = timeline.reduce((best, s) => s.count > best.count ? s : best, timeline[0]);
-      if (peakSlot.count > 0) {
-        const pk = document.getElementById("peakSlot");
-        pk.textContent = `Pic à +${peakSlot.slot * 15} min (${peakSlot.count} dem.)`;
-        pk.classList.remove("hidden");
-      }
-      const startH = new Date(data.event.created_at);
-      document.getElementById("activityChart").innerHTML = timeline.map((s) => {
-        const slotTime = new Date(startH.getTime() + s.slot * 15 * 60000);
-        const label    = slotTime.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
-        const pct      = Math.round((s.count / maxCount) * 100);
-        const isPeak   = s.count === maxCount && maxCount > 0;
-        return `
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs tabular-nums shrink-0 w-10 text-right" style="color:var(--text-muted)">${label}</span>
-            <div class="bar-track flex-1">
-              <div class="bar-fill ${isPeak?"peak":""}" style="width:${pct}%"></div>
-            </div>
-            <span class="text-xs tabular-nums shrink-0 w-5" style="color:var(--text-muted)">${s.count}</span>
-          </div>`;
-      }).join("");
-    } else {
-      document.getElementById("activityChart").innerHTML =
-        `<p class="text-sm text-center py-4" style="color:var(--text-muted)">Pas encore de données</p>`;
+    if (!slots.length) {
+      el.innerHTML = `<p class="text-xs text-center py-3" style="color:var(--text-muted)">Aucune activité enregistrée</p>`;
+      return;
     }
 
-    // ── Heatmap horaire ──
-    const maxHourly = hourlyHeatmap && hourlyHeatmap.length
-      ? Math.max(...hourlyHeatmap.map((h) => h.count), 1)
-      : 1;
-    document.getElementById("hourlyHeatmap").innerHTML = hourlyHeatmap && hourlyHeatmap.length
-      ? hourlyHeatmap.map((h) => {
-          const pct = Math.round((h.count / maxHourly) * 100);
-          return `
-            <div class="flex items-center gap-2">
-              <span class="text-xs tabular-nums shrink-0 w-10 text-right" style="color:var(--text-muted)">${h.label}</span>
-              <div class="bar-track flex-1">
-                <div class="bar-fill" style="width:${pct}%"></div>
-              </div>
-              <span class="text-xs tabular-nums shrink-0 w-6" style="color:var(--text-muted)">${h.count}</span>
-            </div>`;
-        }).join("")
-      : `<p class="text-sm text-center py-4" style="color:var(--text-muted)">Pas de données</p>`;
+    const maxCount = Math.max(...slots.map(s => s.count), 1);
+    el.innerHTML = slots.map(s => {
+      const pct = Math.max(Math.round((s.count / maxCount) * 100), s.count > 0 ? 8 : 0);
+      const isPeak = peakSlot && s.slot === peakSlot.slot && s.count > 0;
+      return `
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-mono shrink-0 w-12" style="color:var(--text-muted)">${s.slot}</span>
+          <div class="bar-track flex-1">
+            <div class="bar-fill ${isPeak ? "peak" : ""}" style="width:${pct}%"></div>
+          </div>
+          <span class="text-xs font-extrabold tabular-nums shrink-0 w-8 text-right ${isPeak ? "text-green-400" : ""}" style="color:${isPeak ? "var(--green)" : "var(--text-secondary)"}">
+            ${s.count}
+          </span>
+        </div>`;
+    }).join("");
+  }
 
-    // ── Top tempos ──
-    const maxTempo = topTempos && topTempos.length ? Math.max(...topTempos.map((t) => Number(t.total || 0)), 1) : 1;
-    document.getElementById("topTempos").innerHTML = topTempos && topTempos.length
-      ? topTempos.map((t) => {
-          const total = Number(t.total || 0);
-          const pct = Math.round((total / maxTempo) * 100);
-          return `
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-medium" style="color:var(--text-primary)">${t.bpm_bucket} BPM</span>
-                <span class="text-xs tabular-nums" style="color:var(--text-muted)">${total}</span>
-              </div>
-              <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-            </div>`;
-        }).join("")
-      : `<p class="text-sm text-center py-4" style="color:var(--text-muted)">Tempo indisponible</p>`;
+  // ── Analytics avancées ──
+  function renderHourlyHeatmap(rows) {
+    const el = document.getElementById("hourlyHeatmap");
+    if (!rows.length) {
+      el.innerHTML = `<p class="text-xs text-center py-3" style="color:var(--text-muted)">Aucune donnée</p>`;
+      return;
+    }
+    const maxReq = Math.max(...rows.map(r => r.total_requests), 1);
+    el.innerHTML = rows.map(r => {
+      const pct = Math.max(Math.round((r.total_requests / maxReq) * 100), 6);
+      return `
+        <div>
+          <div class="flex justify-between text-xs mb-1 font-semibold">
+            <span class="font-mono text-muted">${r.hour_label}</span>
+            <span class="font-bold">${r.total_requests} req (${r.played_requests} jouées)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    }).join("");
+  }
 
-    // ── Engagement ──
-    document.getElementById("engagementStats").innerHTML = `
-      <div class="flex items-center justify-between">
-        <span class="text-sm" style="color:var(--text-secondary)">Taux de skip</span>
-        <span class="font-semibold tabular-nums" style="color:var(--text-primary)">${skip?.skipRate || 0}%</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm" style="color:var(--text-secondary)">Skips / jouées</span>
-        <span class="font-semibold tabular-nums" style="color:var(--text-primary)">${skip?.skippedTotal || 0} / ${skip?.playedTotal || 0}</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm" style="color:var(--text-secondary)">Votes totaux</span>
-        <span class="font-semibold tabular-nums" style="color:var(--text-primary)">${voteEngagement?.totalVotes || 0}</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm" style="color:var(--text-secondary)">Votants uniques</span>
-        <span class="font-semibold tabular-nums" style="color:var(--text-primary)">${voteEngagement?.uniqueVoters || 0}</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm" style="color:var(--text-secondary)">Votes / demande</span>
-        <span class="font-semibold tabular-nums" style="color:var(--text-primary)">${voteEngagement?.votesPerRequest || 0}</span>
-      </div>
-    `;
+  function renderTopTempos(rows) {
+    const el = document.getElementById("topTempos");
+    if (!rows.length) {
+      el.innerHTML = `<p class="text-xs text-center py-3" style="color:var(--text-muted)">Données indisponibles</p>`;
+      return;
+    }
+    const maxReq = Math.max(...rows.map(r => r.total_requests), 1);
+    el.innerHTML = rows.map(r => {
+      const pct = Math.max(Math.round((r.total_requests / maxReq) * 100), 6);
+      return `
+        <div>
+          <div class="flex justify-between text-xs mb-1 font-semibold">
+            <span>${r.tempo_range}</span>
+            <span class="font-bold text-gradient-cyan">${r.total_requests}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    }).join("");
+  }
 
-    // ── Top chansons ──
-    document.getElementById("topSongs").innerHTML = topSongs.length
-      ? topSongs.map((s, i) => `
-          <div class="flex items-center gap-3 px-5 py-3">
-            <span class="w-5 text-xs font-bold shrink-0" style="color:var(--accent)">${i+1}</span>
-            ${s.image_url ? `<img src="${s.image_url}" class="w-9 h-9 rounded-lg object-cover shrink-0">` : ""}
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate" style="color:var(--text-primary)">${s.song_name}</p>
-              <p class="text-xs truncate" style="color:var(--text-secondary)">${s.artist}</p>
-            </div>
-            <div class="shrink-0 text-right">
-              <p class="text-xs font-semibold" style="color:var(--text-primary)">${s.total}×</p>
-              ${parseInt(s.played) > 0 ? `<p class="text-xs" style="color:var(--green)">${s.played} jouée${s.played>1?"s":""}</p>` : ""}
-            </div>
-          </div>`)
-          .join("")
-      : `<p class="text-sm text-center py-4 px-5" style="color:var(--text-muted)">Aucune chanson encore demandée</p>`;
+  function renderEngagement(eng) {
+    const el = document.getElementById("engagementStats");
+    const total = eng.total_requests || 0;
+    const votes = eng.total_votes || 0;
+    const avgV  = eng.avg_votes_per_request || 0;
+    const skipped = eng.skipped_requests || 0;
+    const avgPlay = eng.avg_seconds_before_play ? `${Math.round(eng.avg_seconds_before_play / 60)} min` : "—";
 
-    // ── Feed live ──
-    const statusCfg = {
-      played:   { label:"Jouée",     color:"var(--green)" },
-      accepted: { label:"En queue",  color:"var(--accent)" },
-      pending:  { label:"En attente",color:"var(--amber)" },
-      rejected: { label:"Refusée",   color:"var(--red)" },
-    };
-    document.getElementById("feedList").innerHTML = recentRequests.length
-      ? recentRequests.map((r) => {
-          const cfg  = statusCfg[r.status] || statusCfg.pending;
-          const time = new Date(r.created_at).toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
-          return `
-            <div class="feed-row" style="${r.is_fallback_source ? "border:1px solid rgba(99,102,241,.24); border-radius:.6rem; padding:.35rem .45rem;" : ""}">
-              <span class="text-xs tabular-nums shrink-0 w-10" style="color:var(--text-muted)">${time}</span>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium truncate" style="color:var(--text-primary)">${r.song_name}</p>
-                <p class="text-xs truncate" style="color:var(--text-muted)">${r.artist} · ${r.user_name}${r.is_fallback_source ? " · Playlist secours" : ""}</p>
-              </div>
-              <span class="text-xs font-semibold shrink-0" style="color:${cfg.color}">${cfg.label}</span>
-            </div>`;
-        }).join("")
-      : `<p class="text-sm text-center py-4" style="color:var(--text-muted)">Aucune demande</p>`;
+    el.innerHTML = `
+      <div class="space-y-2.5 text-xs">
+        <div class="flex justify-between py-1.5 border-b" style="border-color:var(--border)">
+          <span style="color:var(--text-muted)">Votes totaux</span>
+          <span class="font-bold" style="color:var(--amber)">★ ${votes}</span>
+        </div>
+        <div class="flex justify-between py-1.5 border-b" style="border-color:var(--border)">
+          <span style="color:var(--text-muted)">Moyenne votes / son</span>
+          <span class="font-bold" style="color:var(--accent)">${avgV}</span>
+        </div>
+        <div class="flex justify-between py-1.5 border-b" style="border-color:var(--border)">
+          <span style="color:var(--text-muted)">Demandes zappées / skip</span>
+          <span class="font-bold" style="color:var(--red)">${skipped}</span>
+        </div>
+        <div class="flex justify-between py-1.5">
+          <span style="color:var(--text-muted)">Délai moyen avant diffusion</span>
+          <span class="font-bold font-mono" style="color:var(--green)">${avgPlay}</span>
+        </div>
+      </div>`;
+  }
+
+  // ── Top 5 Chansons ──
+  function renderTopSongs(songs) {
+    const el = document.getElementById("topSongs");
+    if (!songs.length) {
+      el.innerHTML = `<p class="text-xs text-center py-4" style="color:var(--text-muted)">Aucune demande</p>`;
+      return;
+    }
+    el.innerHTML = songs.map((s, i) => {
+      const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `<span class="font-mono text-muted text-xs">#${i+1}</span>`;
+      return `
+        <div class="flex items-center gap-3.5 px-6 py-3.5 hover:bg-white/[0.02] transition">
+          <span class="text-base font-bold shrink-0 w-6 text-center">${medal}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold truncate" style="color:var(--text-primary)">${s.song_name}</p>
+            <p class="text-[11px] truncate mt-0.5" style="color:var(--text-muted)">${s.artist}</p>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="badge badge-accent font-bold">${s.count} demandes</span>
+            ${s.upvotes > 0 ? `<span class="text-[11px] ml-1 font-bold" style="color:var(--amber)">▲${s.upvotes}</span>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  // ── Feed live ──
+  const statusConfig = {
+    pending:  { label: "En attente", color: "var(--amber)", bg: "var(--amber-dim)" },
+    accepted: { label: "En queue",   color: "var(--accent)", bg: "var(--accent-dim)" },
+    played:   { label: "Jouée",      color: "var(--green)",  bg: "var(--green-dim)" },
+    rejected: { label: "Refusée",    color: "var(--red)",    bg: "var(--red-dim)" },
+  };
+
+  function renderFeed(requests) {
+    const el = document.getElementById("feedList");
+    if (!requests.length) {
+      el.innerHTML = `<p class="text-xs text-center py-4" style="color:var(--text-muted)">Aucune demande pour l'instant</p>`;
+      return;
+    }
+    el.innerHTML = requests.map(r => {
+      const cfg  = statusConfig[r.status] || { label: r.status, color: "var(--text-muted)", bg: "var(--bg-elevated)" };
+      const time = r.created_at ? new Date(r.created_at).toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" }) : "";
+      return `
+        <div class="feed-row">
+          <span class="text-xs font-mono tabular-nums shrink-0 w-11" style="color:var(--text-muted)">${time}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold truncate" style="color:var(--text-primary)">${r.song_name}</p>
+            <p class="text-[11px] truncate mt-0.5" style="color:var(--text-muted)">${r.artist} · <span class="text-secondary">${r.user_name || "Invité"}</span></p>
+          </div>
+          <span class="badge shrink-0 text-[10px] font-bold" style="background:${cfg.bg};color:${cfg.color}">
+            ${cfg.label}
+          </span>
+        </div>`;
+    }).join("");
   }
 
   // ── Actualisation automatique (live : 20 s, terminé : jamais) ──
@@ -475,16 +593,23 @@
   socket.on("connect", () => {
     if (isLive) socket.emit("join-event", eventId);
   });
-  // Nouvelle demande → refresh immédiat
   socket.on("new-request",    () => { if (isLive) loadStats(); });
   socket.on("queue-updated",  () => { if (isLive) loadStats(); });
 
   // ── Bouton refresh manuel ──
-  document.getElementById("refreshBtn").addEventListener("click", loadStats);
-  document.getElementById("exportCsvBtn").addEventListener("click", (e) => {
+  document.getElementById("refreshBtn")?.addEventListener("click", loadStats);
+  document.getElementById("exportCsvBtn")?.addEventListener("click", (e) => {
     e.preventDefault();
     window.location.href = `/api/events/${eventId}/live-stats.csv`;
   });
+
+  // ── Déconnexion ──
+  const handleLogout = async () => {
+    try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+    window.location.href = "/login";
+  };
+  document.getElementById("btnLogout")?.addEventListener("click", handleLogout);
+  document.getElementById("btnLogoutTop")?.addEventListener("click", handleLogout);
 
   // ── Init ──
   (async () => {
