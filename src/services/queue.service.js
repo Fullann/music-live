@@ -47,6 +47,31 @@ class QueueService {
     return (maxPos[0].max_pos || 0) + 1;
   }
 
+  async getQueue(eventId) {
+    return this.getQueueWithVotes(eventId);
+  }
+
+  async markSongPlayed(eventId, requestId) {
+    await db.query(
+      "UPDATE requests SET status = 'played', played_at = NOW() WHERE id = ? AND event_id = ?",
+      [requestId, eventId],
+    );
+  }
+
+  async reorderQueue(eventId, newQueue) {
+    if (!Array.isArray(newQueue)) return;
+    for (let i = 0; i < newQueue.length; i++) {
+      const item = newQueue[i];
+      const reqId = typeof item === "object" ? item.id : item;
+      if (reqId) {
+        await db.query(
+          "UPDATE requests SET queue_position = ? WHERE id = ? AND event_id = ?",
+          [i + 1, reqId, eventId],
+        );
+      }
+    }
+  }
+
   async checkDuplicate(eventId, spotifyUri) {
     if (!spotifyUri) return { isDuplicate: false };
 

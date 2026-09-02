@@ -953,7 +953,7 @@ function setupSocketHandlers(io) {
         await queueService.reorderQueue(eventId, newQueue);
 
         // Notifier tous les clients du nouvel ordre
-        socket.to(eventId).emit("queue-updated", newQueue);
+        socket.to(eventId).emit("queue-updated", { queue: newQueue });
         await logEventAction(eventId, perm, "reorder-queue", null, { count: Array.isArray(newQueue) ? newQueue.length : 0 });
       } catch (error) {
         console.error("Erreur reorder-queue:", error);
@@ -962,11 +962,12 @@ function setupSocketHandlers(io) {
 
     // Marquer un morceau comme joué (DJ)
     socket.on("mark-played", async (data) => {
-      const { requestId } = data;
+      const { requestId, eventId: payloadEventId } = data || {};
+      if (!requestId) return;
       try {
-        const row = await verifyRequestEventAccess(socket, requestId);
-        if (!row) return;
-        const eventId = row.event_id;
+        const reqRow = await verifyDjOwnsRequest(socket, requestId);
+        if (!reqRow) return;
+        const eventId = reqRow.event_id || payloadEventId;
         const perm = await verifyActionPermission(socket, eventId, "playback");
         if (!perm) return;
 
@@ -975,13 +976,12 @@ function setupSocketHandlers(io) {
           [requestId, eventId],
         );
 
-        // Décrémenter le compteur de votes de l'utilisateur
-        await queueService.markSongPlayed(eventId, requestId);
+        const queue = await queueService.getQueueWithVotes(eventId);
+        io.to(eventId).emit("queue-updated", { queue });
 
-        const queue = await queueService.getQueue(eventId);
-        io.to(eventId).emit("queue-updated", queue);
-
-        io.to(row.socket_id).emit("request-played", { requestId });
+        if (reqRow.socket_id) {
+          io.to(reqRow.socket_id).emit("request-played", { requestId });
+        }
         await logEventAction(eventId, perm, "mark-played", requestId, null);
       } catch (error) {
         console.error("Erreur mark-played:", error);
@@ -990,16 +990,17 @@ function setupSocketHandlers(io) {
 
     // Marquer un morceau comme zappé (DJ)
     socket.on("mark-skipped", async (data) => {
-      const { requestId } = data;
+      const { requestId, eventId: payloadEventId } = data || {};
+      if (!requestId) return;
       try {
-        const row = await verifyRequestEventAccess(socket, requestId);
-        if (!row) return;
-        const eventId = row.event_id;
+        const reqRow = await verifyDjOwnsRequest(socket, requestId);
+        if (!reqRow) return;
+        const eventId = reqRow.event_id || payloadEventId;
         const perm = await verifyActionPermission(socket, eventId, "playback");
         if (!perm) return;
 
         await db.query(
-          "UPDATE requests SET skipped_at = NOW() WHERE id = ? AND event_id = ? AND status = 'played'",
+          "UPDATE requests SET skipped_at = NOW() WHERE id = ? AND event_id = ?",
           [requestId, eventId],
         );
         await logEventAction(eventId, perm, "mark-skipped", requestId, null);

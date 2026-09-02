@@ -831,13 +831,13 @@
   let myPrevPosition = null; // pour détecter le passage en position 1
 
   socket.on("queue-updated", (data) => {
-    fullQueue = data.queue;
+    fullQueue = Array.isArray(data) ? data : (data?.queue || []);
     const ids = new Set(fullQueue.map((r) => r.id));
     for (const key of myVotesByRequest.keys()) {
       if (!ids.has(key) && key !== myRequestId) myVotesByRequest.delete(key);
     }
     if (myRequestId && myRequestData.status === "accepted") {
-      const idx = data.queue.findIndex((r) => r.id === myRequestId);
+      const idx = fullQueue.findIndex((r) => r.id === myRequestId);
       const pos = idx + 1; // 0 si absent (jouée)
       if (pos > 0) {
         // Passage en position 1 : prochaine chanson !
