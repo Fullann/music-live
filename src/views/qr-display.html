@@ -1326,38 +1326,29 @@
   let initialLoadDone = false;
 
   async function loadData() {
+    // 1. Charger le QR Code de manière prioritaire
     try {
-      const [eventRes, qrRes, statsRes, displayRes] = await Promise.all([
-        fetch(`/api/events/${eventId}`),
-        fetch(`/api/events/${eventId}/qrcode`),
-        fetch(`/api/events/${eventId}/stats`),
-        fetch(`/api/events/${eventId}/display-data`),
-      ]);
+      const qrRes = await fetch(`/api/events/${eventId}/qrcode`);
+      const qr = await qrRes.json();
+      const qrImg = document.getElementById("qrCode");
+      if (qrImg && qr.qrCode) {
+        qrImg.src = qr.qrCode;
+      }
+    } catch (err) {
+      console.warn("Erreur chargement QR Code:", err);
+    }
 
-      const [event, qr, stats, display] = await Promise.all([
-        eventRes.json(), qrRes.json(), statsRes.json(), displayRes.json(),
-      ]);
+    // 2. Charger les données d'affichage (Queue, Jouées, Sondage)
+    try {
+      const displayRes = await fetch(`/api/events/${eventId}/display-data`);
+      const display = await displayRes.json();
 
-      // Nom de l'événement
-      document.getElementById("eventName").textContent =
-        display.event?.name || event.name || "Soirée";
-      currentEventName = display.event?.name || event.name || "Soirée";
-      applyDvdSource();
+      if (display.event?.name) {
+        document.getElementById("eventName").textContent = display.event.name;
+        currentEventName = display.event.name;
+        applyDvdSource();
+      }
 
-      applyProjectionVisuals(
-        !!event.projection_visuals_enabled,
-        (event.projection_visuals_mode || "aurora").toLowerCase(),
-      );
-      projectionVisualsAutoPerTrack = !!event.projection_visuals_auto_per_track;
-
-      // QR code
-      if (qr.qrCode) document.getElementById("qrCode").src = qr.qrCode;
-
-      // Stats
-      document.getElementById("statPending").textContent = stats.stats?.pending_count  || 0;
-      document.getElementById("statPlayed").textContent  = stats.stats?.played_count   || 0;
-
-      // Queue et jouées
       renderQueue(display.upcomingQueue || []);
       renderPlayed(display.recentPlayed || []);
       currentLivePoll = display.activePoll || currentLivePoll;
@@ -1366,14 +1357,11 @@
       donationsRaisedTotal = Number(display.event?.donations_raised_total || 0);
       renderDonationGoal();
 
-      // Fallback now-playing : si aucun état socket reçu, afficher la dernière jouée
-      // ou la première en queue (en attente de lecture)
       if (!initialLoadDone) {
         initialLoadDone = true;
         if (!npState) {
           const lastPlayed = display.recentPlayed?.[0];
           if (lastPlayed) {
-            // Afficher en mode statique (pas de barre de progression animée)
             document.getElementById("npArt").src             = lastPlayed.image_url || "";
             document.getElementById("npTitle").textContent   = lastPlayed.song_name || "—";
             document.getElementById("npArtist").textContent  = lastPlayed.artist    || "—";
@@ -1386,9 +1374,36 @@
           }
         }
       }
-
     } catch (err) {
-      console.error("Erreur chargement:", err);
+      console.warn("Erreur chargement display-data:", err);
+    }
+
+    // 3. Charger les réglages de projection & stats
+    try {
+      const [eventRes, statsRes] = await Promise.all([
+        fetch(`/api/events/${eventId}`),
+        fetch(`/api/events/${eventId}/stats`),
+      ]);
+      const event = await eventRes.json();
+      const stats = await statsRes.json();
+
+      if (event.name && !currentEventName) {
+        document.getElementById("eventName").textContent = event.name;
+        currentEventName = event.name;
+      }
+
+      applyProjectionVisuals(
+        !!event.projection_visuals_enabled,
+        (event.projection_visuals_mode || "aurora").toLowerCase(),
+      );
+      projectionVisualsAutoPerTrack = !!event.projection_visuals_auto_per_track;
+
+      const statPendingEl = document.getElementById("statPending");
+      const statPlayedEl = document.getElementById("statPlayed");
+      if (statPendingEl) statPendingEl.textContent = stats.stats?.pending_count || 0;
+      if (statPlayedEl) statPlayedEl.textContent = stats.stats?.played_count || 0;
+    } catch (err) {
+      console.warn("Erreur chargement stats:", err);
     }
   }
 

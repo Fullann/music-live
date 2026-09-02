@@ -1365,14 +1365,20 @@
     try {
       const response = await fetch(`/api/events/${eventId}/qrcode`);
       const data     = await response.json();
-      document.getElementById("qrCodeImage").src            = data.qrCode;
-      document.getElementById("userLinkInput").value        = data.userUrl;
-      document.getElementById("publicDisplayLinkInput").value = `${window.location.origin}/event/${eventId}/qr`;
-      document.getElementById("qrCodePanel").classList.remove("hidden");
-    } catch { showToast("Erreur lors du chargement du QR code", "error"); }
+      const qrImg    = document.getElementById("qrCodeImage");
+      if (qrImg && data.qrCode) qrImg.src = data.qrCode;
+      const uInput   = document.getElementById("userLinkInput");
+      if (uInput) uInput.value = data.userUrl || `${window.location.origin}/user/${eventId}`;
+      const pInput   = document.getElementById("publicDisplayLinkInput");
+      if (pInput) pInput.value = `${window.location.origin}/event/${eventId}/qr`;
+      document.getElementById("qrCodePanel")?.classList.remove("hidden");
+    } catch (err) {
+      console.error("Erreur QR code DJ:", err);
+      showToast("Erreur lors du chargement du QR code", "error");
+    }
   }
 
-  function closeQRCodePanel() { document.getElementById("qrCodePanel").classList.add("hidden"); }
+  function closeQRCodePanel() { document.getElementById("qrCodePanel")?.classList.add("hidden"); }
 
   function openPublicDisplay() {
     window.open(`/event/${eventId}/qr`, "_blank", "noopener,noreferrer");
