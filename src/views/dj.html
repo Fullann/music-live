@@ -348,6 +348,22 @@
         </div>
 
         <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <p class="text-sm font-bold" style="color:var(--text-primary)">Anti-répétition des morceaux</p>
+              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Délai minimum avant de pouvoir redemander le même titre</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
+            <div>
+              <label class="label">Délai (minutes)</label>
+              <input type="number" id="repeatCooldownMinutes" min="0" max="240" value="0" class="input text-xs" placeholder="0 = désactivé" />
+            </div>
+            <button type="button" id="btnSaveRepeatCooldown" class="btn btn-primary btn-sm font-bold">Enregistrer</button>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
           <div class="flex items-center justify-between gap-3 mb-2">
             <p class="text-sm font-bold" style="color:var(--text-primary)">Mode urgence DJ (Gel temporaire)</p>
             <span id="requestsFreezeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full"

@@ -999,36 +999,46 @@
   fetch(`/api/events/${eventId}`)
     .then((r) => r.json())
     .then((data) => {
-      document.getElementById("eventName").textContent = data.name;
+      const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+      const setValue   = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      const setText    = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+      setText("eventName", data.name || "Soirée");
       queue             = data.queue || [];
       allowDuplicates   = data.allow_duplicates || false;
       votesEnabled      = data.votes_enabled !== false;
       autoAcceptEnabled = data.auto_accept_enabled || false;
 
-      document.getElementById("votesToggle").checked      = votesEnabled;
-      document.getElementById("duplicatesToggle").checked = allowDuplicates;
-      document.getElementById("autoAcceptToggle").checked = autoAcceptEnabled;
-      document.getElementById("rateLimitMax").value       = data.rate_limit_max || 3;
-      document.getElementById("rateLimitWindow").value    = data.rate_limit_window_minutes || 15;
-      document.getElementById("repeatCooldownMinutes").value =
-        data.repeat_cooldown_minutes != null ? data.repeat_cooldown_minutes : 0;
+      setChecked("votesToggle", votesEnabled);
+      setChecked("duplicatesToggle", allowDuplicates);
+      setChecked("autoAcceptToggle", autoAcceptEnabled);
+      setValue("rateLimitMax", data.rate_limit_max || 3);
+      setValue("rateLimitWindow", data.rate_limit_window_minutes || 15);
+      setValue("repeatCooldownMinutes", data.repeat_cooldown_minutes != null ? data.repeat_cooldown_minutes : 0);
+
       projectionVisualsEnabled = !!data.projection_visuals_enabled;
       projectionVisualsMode = (data.projection_visuals_mode || "aurora").toLowerCase();
       projectionVisualsAutoPerTrack = !!data.projection_visuals_auto_per_track;
       requestsFrozenUntil = data.requests_frozen_until ? Number(data.requests_frozen_until) : null;
-      document.getElementById("projectionVisualsToggle").checked = projectionVisualsEnabled;
-      document.getElementById("projectionVisualsMode").value =
+
+      setChecked("projectionVisualsToggle", projectionVisualsEnabled);
+      setValue("projectionVisualsMode",
         ["aurora", "pulse", "strobe", "spectrum", "nebula", "laser", "vortex", "party", "dvd", "bpm-sync"].includes(projectionVisualsMode)
           ? projectionVisualsMode
-          : "aurora";
-      document.getElementById("projectionVisualsAutoPerTrack").checked = projectionVisualsAutoPerTrack;
-      document.getElementById("thankYouMessage").value    = data.thank_you_message || "";
-      if (autoAcceptEnabled) document.getElementById("autoAcceptBanner").classList.remove("hidden");
+          : "aurora"
+      );
+      setChecked("projectionVisualsAutoPerTrack", projectionVisualsAutoPerTrack);
+      setValue("thankYouMessage", data.thank_you_message || "");
+
+      const autoBanner = document.getElementById("autoAcceptBanner");
+      if (autoBanner) {
+        if (autoAcceptEnabled) autoBanner.classList.remove("hidden");
+        else autoBanner.classList.add("hidden");
+      }
 
       // Playlist de secours
       fallbackPlaylistUri = data.fallback_playlist_uri || null;
-      const playlistInput = document.getElementById("fallbackPlaylistInput");
-      if (playlistInput) playlistInput.value = fallbackPlaylistUri || "";
+      setValue("fallbackPlaylistInput", fallbackPlaylistUri || "");
       updateFallbackPlaylistUI();
       loadFallbackPlaylistPreview();
       renderRequestsFreezeBadge();
