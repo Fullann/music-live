@@ -2241,6 +2241,11 @@
   document.getElementById("closeShortcutsHelp")?.addEventListener("click", () => {
     document.getElementById("shortcutsHelpModal")?.classList.add("hidden");
   });
+  document.getElementById("shortcutsHelpModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "shortcutsHelpModal") {
+      document.getElementById("shortcutsHelpModal")?.classList.add("hidden");
+    }
+  });
 
   // ── Support Contrôleur MIDI (Web MIDI API) ───────────────
   function initWebMIDI() {
