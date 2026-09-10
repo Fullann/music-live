@@ -49,6 +49,9 @@ Soirées créées par les DJs.
 | `repeat_cooldown_minutes` | INT UNSIGNED | Non | 0 | Anti-répétition : délai min. avant de reproposer une piste déjà jouée (`played_at`) ; 0 = off (migration `migration_repeat_cooldown.sql`) |
 | `thank_you_message` | TEXT | Oui | NULL | Message de fin de soirée |
 | `fallback_playlist_uri` | VARCHAR(255) | Oui | NULL | URI Spotify de la playlist de secours |
+| `screen_visualizer_mode` | VARCHAR(32) | Non | 'cyber-spectrum' | Animation visualiseur grand écran (`cyber-spectrum`, `radial-spectrum`, `nebula-3d`, etc.) |
+| `karaoke_mode_enabled` | TINYINT(1) | Non | 0 | 1 = Karaoké en direct activé sur le grand écran |
+| `karaoke_auto_enabled` | TINYINT(1) | Non | 0 | 1 = Déclenchement automatique du karaoké si paroles dispo |
 | `donation_enabled` | TINYINT(1) | Non | 0 | Activer le système de dons |
 | `donation_required` | TINYINT(1) | Non | 0 | Don obligatoire avant de proposer |
 | `donation_amount` | DECIMAL(10,2) | Non | 2.00 | Montant suggéré (€) |
@@ -81,6 +84,7 @@ Demandes de chansons par les invités.
 | `duration_ms` | INT | Oui | NULL | Durée en millisecondes |
 | `status` | ENUM | Non | 'pending' | `pending` / `accepted` / `rejected` / `played` |
 | `queue_position` | INT | Oui | NULL | Position dans la queue (NULL si pas en queue) |
+| `is_karaoke` | TINYINT(1) | Non | 0 | 1 = L'invité a demandé un micro pour chanter |
 | `created_at` | DATETIME | Non | NOW() | Date de la demande |
 | `played_at` | DATETIME | Oui | NULL | Date de lecture |
 | `play_started_at` | DATETIME | Oui | NULL | Date de démarrage de lecture (instrumentation live) |
@@ -289,6 +293,16 @@ Même cause (charset/collation/engine non alignés avec `events.id`).
 - Si tu veux absolument la FK, utiliser la variante alignée :
   - `db/migration_abuse_scores_fk_mysql8.sql` (`utf8mb4_0900_ai_ci`)
   - `db/migration_abuse_scores_fk_unicode.sql` (`utf8mb4_unicode_ci`)
+
+### Migration Visualiseur & Karaoké Grand Écran
+
+Fichier : **`db/migration_screen_visualizer_and_karaoke.sql`**
+
+Ajoute à la table `events` les colonnes de pilotage distant du grand écran (`screen_visualizer_mode`, `karaoke_mode_enabled`, `karaoke_auto_enabled`) et à la table `requests` la colonne `is_karaoke` pour l'option de demande micro invité.
+
+```sql
+mysql -u djuser -p dj_queue < db/migration_screen_visualizer_and_karaoke.sql
+```
 
 ---
 

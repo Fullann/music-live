@@ -338,22 +338,49 @@ router.get(
 
     try {
       // Récupérer les pending requests
-      const [pending] = await db.query(
-        `SELECT 
-          id, 
-          user_name, 
-          song_name, 
-          artist, 
-          spotify_uri,
-          image_url,
-          preview_url,
-          status,
-          created_at
-        FROM requests 
-        WHERE event_id = ? AND status = 'pending'
-        ORDER BY created_at ASC`,
-        [eventId],
-      );
+      let pending;
+      try {
+        const [rows] = await db.query(
+          `SELECT 
+            id, 
+            user_name, 
+            song_name, 
+            artist, 
+            spotify_uri,
+            image_url,
+            preview_url,
+            status,
+            created_at,
+            is_karaoke
+          FROM requests 
+          WHERE event_id = ? AND status = 'pending'
+          ORDER BY created_at ASC`,
+          [eventId],
+        );
+        pending = rows;
+      } catch (err) {
+        if (err.code === "ER_BAD_FIELD_ERROR") {
+          const [rows] = await db.query(
+            `SELECT 
+              id, 
+              user_name, 
+              song_name, 
+              artist, 
+              spotify_uri,
+              image_url,
+              preview_url,
+              status,
+              created_at
+            FROM requests 
+            WHERE event_id = ? AND status = 'pending'
+            ORDER BY created_at ASC`,
+            [eventId],
+          );
+          pending = rows;
+        } else {
+          throw err;
+        }
+      }
 
       res.json({ pending });
     } catch (error) {

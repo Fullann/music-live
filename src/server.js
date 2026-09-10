@@ -329,7 +329,7 @@ app.get("/user/:eventId", async (req, res) => {
   }
 });
 
-app.get("/event/:eventId/qr", (req, res) => {
+app.get(["/event/:eventId/qr", "/event/:eventId/qrspectre"], (req, res) => {
   res.sendFile(path.join(__dirname, "/views/qr-display.html"));
 });
 

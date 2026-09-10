@@ -36,6 +36,16 @@
   let projectionVisualsAutoPerTrack = false;
   let requestsFrozenUntil = null;
   let livePollState = null;
+  let currentScreenVisualizerMode = "cyber-spectrum";
+  let currentKaraokeState = { enabled: false, autoKaraoke: false, lyricsSize: "normal" };
+  const visualizerLabelsMap = {
+    "cyber-spectrum": "Spectre Cyber",
+    "radial-spectrum": "Spectre Circulaire",
+    "nebula-3d": "Nébuleuse 3D",
+    "neon-waveform": "Ondes Néon",
+    "bass-ripple": "Ripple Bass",
+    "off": "Désactivé",
+  };
   let recentClientErrors = [];
   let socketLatencyMs = null;
   let liveHealthPanelOpen = false;
@@ -647,6 +657,215 @@
     showToast("Visuels de projection mis à jour", "info");
   });
 
+  // ── Contrôle du Visualiseur Grand Écran & Mode Karaoké à Distance ──
+  function updateKaraokeUI(kState) {
+    if (!kState) return;
+    currentKaraokeState = { ...currentKaraokeState, ...kState };
+    const badge = document.getElementById("quickKaraokeBadge");
+    const quickBtn = document.getElementById("btnQuickKaraoke");
+    const remoteToggle = document.getElementById("karaokeRemoteToggle");
+    const autoBox = document.getElementById("karaokeAutoPerTrack");
+    const sizeSelect = document.getElementById("karaokeLyricsSizeSelect");
+
+    if (badge) {
+      badge.textContent = currentKaraokeState.enabled ? "ON" : "OFF";
+      badge.style.background = currentKaraokeState.enabled ? "rgba(192,132,252,0.35)" : "rgba(255,255,255,0.1)";
+      badge.style.color = currentKaraokeState.enabled ? "#c084fc" : "rgba(255,255,255,0.7)";
+    }
+    if (quickBtn) {
+      if (currentKaraokeState.enabled) {
+        quickBtn.style.background = "rgba(192,132,252,0.2)";
+        quickBtn.style.borderColor = "rgba(192,132,252,0.7)";
+        quickBtn.style.boxShadow = "0 0 14px rgba(192,132,252,0.35)";
+      } else {
+        quickBtn.style.background = "";
+        quickBtn.style.borderColor = "rgba(192,132,252,0.35)";
+        quickBtn.style.boxShadow = "";
+      }
+    }
+    if (remoteToggle) remoteToggle.checked = !!currentKaraokeState.enabled;
+    if (autoBox) autoBox.checked = !!currentKaraokeState.autoKaraoke;
+    if (sizeSelect && currentKaraokeState.lyricsSize) sizeSelect.value = currentKaraokeState.lyricsSize;
+    updateMiniMonitor();
+  }
+
+  function updateScreenVisualizerUI(mode) {
+    if (!mode) return;
+    currentScreenVisualizerMode = mode;
+    const qLbl = document.getElementById("quickVisualizerLabel");
+    const cBadge = document.getElementById("screenVisualizerCurrentBadge");
+    const select = document.getElementById("screenVisualizerSelect");
+
+    const label = visualizerLabelsMap[mode] || mode;
+    if (qLbl) qLbl.textContent = label.split(" ")[0] || label;
+    if (cBadge) cBadge.textContent = label;
+    if (select) select.value = mode;
+    updateMiniMonitor();
+  }
+
+  // ── Mini Monitor Grand Écran ──
+  function updateMiniMonitor() {
+    const statusBadge = document.getElementById("miniMonitorStatusBadge");
+    const visEl = document.getElementById("miniMonitorVisualizer");
+    const btnKaraokeText = document.getElementById("miniMonitorKaraokeBtnText");
+    const btnKaraoke = document.getElementById("btnMiniMonitorToggleKaraoke");
+
+    const isKaraoke = !!currentKaraokeState.enabled;
+    if (statusBadge) {
+      if (isKaraoke) {
+        statusBadge.textContent = "🎤 Karaoké En Direct";
+        statusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase bg-purple-500/25 text-purple-200 border border-purple-400/50 shadow-sm animate-pulse";
+      } else {
+        statusBadge.textContent = "Mode QR Standard";
+        statusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30";
+      }
+    }
+    if (btnKaraokeText) {
+      btnKaraokeText.textContent = isKaraoke ? "Couper Karaoké" : "Lancer Karaoké";
+    }
+    if (btnKaraoke) {
+      if (isKaraoke) {
+        btnKaraoke.classList.add("bg-purple-500/20", "border-purple-400");
+      } else {
+        btnKaraoke.classList.remove("bg-purple-500/20", "border-purple-400");
+      }
+    }
+    if (visEl) {
+      visEl.textContent = visualizerLabelsMap[currentScreenVisualizerMode] || currentScreenVisualizerMode;
+    }
+  }
+
+  // Clics boutons Mini Monitor Grand Écran
+  document.getElementById("btnMiniMonitorToggleKaraoke")?.addEventListener("click", () => {
+    document.getElementById("btnQuickKaraoke")?.click();
+  });
+  document.getElementById("btnMiniMonitorCycleVis")?.addEventListener("click", () => {
+    document.getElementById("btnQuickVisualizer")?.click();
+  });
+  document.getElementById("btnMiniMonitorOpenDisplay")?.addEventListener("click", () => {
+    window.open(`/event/${eventId}/qrspectre`, "_blank");
+  });
+
+  // ── Vérification des Paroles Synchronisées (LRCLIB) ──
+  const lyricsAvailableMap = new Map();
+  let lyricsCheckTimer = null;
+
+  function scheduleLyricsBatchCheck(tracks) {
+    if (!Array.isArray(tracks) || tracks.length === 0) return;
+    clearTimeout(lyricsCheckTimer);
+    lyricsCheckTimer = setTimeout(() => runLyricsBatchCheck(tracks), 300);
+  }
+
+  async function runLyricsBatchCheck(tracks) {
+    const unknown = tracks.filter((t) => {
+      const key = `${String(t.song_name || t.name || "").toLowerCase().trim()}:::${String(t.artist || "").toLowerCase().trim()}`;
+      return !lyricsAvailableMap.has(key);
+    });
+    if (unknown.length === 0) return;
+
+    try {
+      const payload = unknown.slice(0, 30).map((t) => ({
+        id: `${String(t.song_name || t.name || "").toLowerCase().trim()}:::${String(t.artist || "").toLowerCase().trim()}`,
+        track: t.song_name || t.name,
+        artist: t.artist,
+        duration: t.duration_ms ? Math.round(t.duration_ms / 1000) : null,
+      }));
+      const res = await fetch("/api/spotify/lyrics/batch-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tracks: payload }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.available) {
+          let hasNew = false;
+          for (const [k, hasLyrics] of Object.entries(data.available)) {
+            lyricsAvailableMap.set(k, !!hasLyrics);
+            if (hasLyrics) hasNew = true;
+          }
+          if (hasNew) {
+            updateLyricsIconsInDom();
+          }
+        }
+      }
+    } catch {}
+  }
+
+  function hasLyricsAvailable(songName, artist) {
+    if (!songName || !artist) return false;
+    const key = `${String(songName).toLowerCase().trim()}:::${String(artist).toLowerCase().trim()}`;
+    return !!lyricsAvailableMap.get(key);
+  }
+
+  function updateLyricsIconsInDom() {
+    document.querySelectorAll("[data-lyrics-key]").forEach((el) => {
+      const key = el.getAttribute("data-lyrics-key");
+      if (lyricsAvailableMap.get(key)) {
+        el.classList.remove("hidden");
+        el.classList.add("inline-flex");
+      }
+    });
+  }
+
+  // Clic sur bouton rapide Karaoké (bascule immédiate)
+  document.getElementById("btnQuickKaraoke")?.addEventListener("click", () => {
+    const nextEnabled = !currentKaraokeState.enabled;
+    socket.emit("set-karaoke-mode", {
+      eventId,
+      enabled: nextEnabled,
+      autoKaraoke: currentKaraokeState.autoKaraoke,
+      lyricsSize: currentKaraokeState.lyricsSize,
+    });
+    updateKaraokeUI({ enabled: nextEnabled });
+    showToast(nextEnabled ? "🎤 Karaoké activé sur le grand écran" : "🎤 Karaoké désactivé", "info");
+  });
+
+  // Clic sur bouton rapide Visualiseur (cycle des animations)
+  document.getElementById("btnQuickVisualizer")?.addEventListener("click", () => {
+    const modesList = ["cyber-spectrum", "radial-spectrum", "nebula-3d", "neon-waveform", "bass-ripple", "off"];
+    const curIdx = modesList.indexOf(currentScreenVisualizerMode);
+    const nextMode = modesList[(curIdx + 1) % modesList.length];
+    socket.emit("set-screen-visualizer", { eventId, visualizerMode: nextMode });
+    updateScreenVisualizerUI(nextMode);
+    showToast(`Animation écran : ${visualizerLabelsMap[nextMode] || nextMode}`, "info");
+  });
+
+  // Appliquer le visualiseur depuis la modale de réglages
+  document.getElementById("btnApplyScreenVisualizer")?.addEventListener("click", () => {
+    const select = document.getElementById("screenVisualizerSelect");
+    const mode = select ? select.value : "cyber-spectrum";
+    socket.emit("set-screen-visualizer", { eventId, visualizerMode: mode });
+    updateScreenVisualizerUI(mode);
+    showToast(`Animation visualiseur appliquée : ${visualizerLabelsMap[mode] || mode}`, "info");
+  });
+
+  // Appliquer les réglages karaoké depuis la modale
+  document.getElementById("btnSaveKaraokeSettings")?.addEventListener("click", () => {
+    const toggle = document.getElementById("karaokeRemoteToggle");
+    const autoBox = document.getElementById("karaokeAutoPerTrack");
+    const sizeSelect = document.getElementById("karaokeLyricsSizeSelect");
+    const payload = {
+      eventId,
+      enabled: toggle ? toggle.checked : currentKaraokeState.enabled,
+      autoKaraoke: autoBox ? autoBox.checked : currentKaraokeState.autoKaraoke,
+      lyricsSize: sizeSelect ? sizeSelect.value : "normal",
+    };
+    socket.emit("set-karaoke-mode", payload);
+    updateKaraokeUI(payload);
+    showToast("Réglages Karaoké appliqués au grand écran", "info");
+  });
+
+  // Bascule directe du toggle karaoké dans les réglages
+  document.getElementById("karaokeRemoteToggle")?.addEventListener("change", (e) => {
+    socket.emit("set-karaoke-mode", {
+      eventId,
+      enabled: e.target.checked,
+      autoKaraoke: currentKaraokeState.autoKaraoke,
+      lyricsSize: currentKaraokeState.lyricsSize,
+    });
+    updateKaraokeUI({ enabled: e.target.checked });
+  });
+
   let undoRejectRequestId = null;
   let undoRejectTimer     = null;
   document.getElementById("rejectUndoBtn")?.addEventListener("click", () => {
@@ -1211,6 +1430,16 @@
       setChecked("projectionVisualsAutoPerTrack", projectionVisualsAutoPerTrack);
       setValue("thankYouMessage", data.thank_you_message || "");
 
+      if (data.screen_visualizer_mode) {
+        updateScreenVisualizerUI(data.screen_visualizer_mode);
+      }
+      if (data.karaoke_mode_enabled !== undefined) {
+        updateKaraokeUI({
+          enabled: !!data.karaoke_mode_enabled,
+          autoKaraoke: !!data.karaoke_auto_enabled,
+        });
+      }
+
       const autoBanner = document.getElementById("autoAcceptBanner");
       if (autoBanner) {
         if (autoAcceptEnabled) autoBanner.classList.remove("hidden");
@@ -1690,6 +1919,8 @@
   socket.on("spectator-count", (data) => {
     const badge = document.getElementById("spectatorBadge");
     document.getElementById("spectatorCount").textContent = data.count;
+    const miniViewers = document.getElementById("miniMonitorViewers");
+    if (miniViewers) miniViewers.textContent = data.count;
     badge.classList.remove("hidden");
     badge.classList.add("inline-flex");
   });
@@ -1723,6 +1954,18 @@
   socket.on("live-poll-updated", (data) => {
     livePollState = data?.poll || null;
     renderLivePollState();
+  });
+
+  socket.on("screen-visualizer-updated", (data) => {
+    if (data && data.visualizerMode) {
+      updateScreenVisualizerUI(data.visualizerMode);
+    }
+  });
+
+  socket.on("karaoke-mode-updated", (data) => {
+    if (data) {
+      updateKaraokeUI(data);
+    }
   });
 
   // ── Render ──
@@ -2013,7 +2256,12 @@
     const totalWaitMin = queue.length > 0
       ? Math.max(1, Math.ceil(queue.reduce((s, r) => s + window.TimeUtils.getDurationMs(r?.duration_ms), 0) / 60000))
       : 1;
-    container.innerHTML = pendingRequests.map((request) => `
+    container.innerHTML = pendingRequests.map((request) => {
+      const lyricsKey = `${String(request.song_name || "").toLowerCase().trim()}:::${String(request.artist || "").toLowerCase().trim()}`;
+      const hasLrc = hasLyricsAvailable(request.song_name, request.artist);
+      const isKaraokeReq = request.is_karaoke === true || request.is_karaoke === 1 || request.is_karaoke === "1";
+
+      return `
       <div class="p-4 hover:bg-white/[0.02] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-3.5 min-w-0">
           ${request.image_url 
@@ -2021,10 +2269,18 @@
             : `<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:var(--bg-elevated);border:1px solid var(--border)"><svg class="w-6 h-6 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`
           }
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-extrabold truncate" style="color:var(--text-primary)">${request.song_name}</p>
+            <p class="text-sm font-extrabold truncate flex items-center gap-1.5" style="color:var(--text-primary)">
+              <span class="truncate">${request.song_name}</span>
+              <span class="lyrics-badge ${hasLrc ? "inline-flex" : "hidden"} items-center justify-center w-5 h-5 rounded-md text-[11px] bg-purple-500/25 text-purple-300 border border-purple-500/40 shrink-0" data-lyrics-key="${lyricsKey}" title="Paroles karaoké synchronisées disponibles (LRCLIB)">🎤</span>
+            </p>
             <p class="text-xs truncate font-medium mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
             <div class="flex flex-wrap items-center gap-2 mt-1">
               <span class="text-[11px] font-semibold" style="color:var(--text-muted)">Demandé par <span style="color:var(--text-secondary)">${request.user_name}</span></span>
+              ${isKaraokeReq ? `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-200 border border-purple-400/60 shadow-lg shadow-purple-500/20 animate-pulse" title="L'invité a demandé un micro pour chanter sur scène">
+                  <span class="text-xs">🎤</span> Demande Karaoké
+                </span>
+              ` : ""}
               <span class="badge badge-accent text-[10px] font-mono">~${totalWaitMin} min</span>
             </div>
             ${renderAudioBadges(request.spotify_uri)}
@@ -2052,9 +2308,11 @@
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
           </button>
         </div>
-      </div>`).join("");
+      </div>`;
+    }).join("");
 
     loadAudioFeatures(pendingRequests);
+    scheduleLyricsBatchCheck([...pendingRequests, ...queue]);
   }
 
   // ── Alerte file vide ──
@@ -2114,6 +2372,10 @@
       const netVotes  = (request.upvotes||0) - (request.downvotes||0);
       const netColor  = netVotes > 0 ? "var(--green)" : netVotes < 0 ? "var(--red)" : "var(--text-muted)";
       const waitMin   = window.TimeUtils.estimateQueueWaitMinutes(queue, index);
+      const lyricsKey = `${String(request.song_name || "").toLowerCase().trim()}:::${String(request.artist || "").toLowerCase().trim()}`;
+      const hasLrc    = hasLyricsAvailable(request.song_name, request.artist);
+      const isKaraokeReq = request.is_karaoke === true || request.is_karaoke === 1 || request.is_karaoke === "1";
+
       return `
       <div class="flex items-center gap-3 px-4 py-3.5 select-none hover:bg-white/[0.02] transition" data-id="${request.id}" style="border-bottom:1px solid var(--border)">
         <!-- Handle drag -->
@@ -2125,10 +2387,18 @@
         <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0" style="background:var(--accent-dim);color:var(--accent)">${index+1}</div>
         ${request.image_url ? `<img src="${request.image_url}" class="w-11 h-11 rounded-xl object-cover shrink-0 hidden sm:block shadow-sm">` : ""}
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-extrabold truncate" style="color:var(--text-primary)">${request.song_name}</p>
+          <p class="text-sm font-extrabold truncate flex items-center gap-1.5" style="color:var(--text-primary)">
+            <span class="truncate">${request.song_name}</span>
+            <span class="lyrics-badge ${hasLrc ? "inline-flex" : "hidden"} items-center justify-center w-5 h-5 rounded-md text-[11px] bg-purple-500/25 text-purple-300 border border-purple-500/40 shrink-0" data-lyrics-key="${lyricsKey}" title="Paroles karaoké synchronisées disponibles (LRCLIB)">🎤</span>
+          </p>
           <p class="text-xs truncate font-medium mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
           <div class="flex flex-wrap items-center gap-2 mt-1">
             <span class="text-[11px]" style="color:var(--text-muted)">Par <span style="color:var(--text-secondary)">${request.user_name}</span></span>
+            ${isKaraokeReq ? `
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-200 border border-purple-400/60 shadow-lg shadow-purple-500/20 animate-pulse" title="L'invité a demandé un micro pour chanter sur scène">
+                <span class="text-xs">🎤</span> Demande Karaoké
+              </span>
+            ` : ""}
             <span class="badge badge-accent text-[10px] font-mono">~${waitMin} min</span>
             <span class="text-[11px] font-bold" style="color:${netColor}">Net: ${netVotes>0?"+":""}${netVotes}</span>
           </div>
@@ -2172,6 +2442,7 @@
     });
 
     loadAudioFeatures(queue);
+    scheduleLyricsBatchCheck([...queue, ...pendingRequests]);
   }
 
   // ── Actions ──
@@ -2231,6 +2502,9 @@
     } else if (e.key.toLowerCase() === "m") {
       e.preventDefault();
       document.getElementById("showMessagePanel")?.click();
+    } else if (e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      document.getElementById("btnQuickKaraoke")?.click();
     } else if (e.key === "?" || e.key.toLowerCase() === "h") {
       e.preventDefault();
       document.getElementById("shortcutsHelpModal")?.classList.remove("hidden");

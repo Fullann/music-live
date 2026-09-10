@@ -10,6 +10,7 @@ Une application web temps réel permettant aux participants d'une soirée de pro
 
 ### 👥 Pour les Participants
 - 📱 **Accès QR Code** : Scan et accès instantané sans compte
+- 🎤 **Option Karaoké ("Je veux chanter au micro ! 🎤")** : Demande spéciale alertant le DJ pour préparer un micro sur scène
 - 🔍 **Recherche Spotify** : Recherche de musiques en temps réel
 - 📊 **Système de Votes** : Vote pour/contre les musiques proposées
 - ⏱️ **Suivi Temps Réel** : Statut des demandes (en attente/accepté/refusé)
@@ -20,7 +21,11 @@ Une application web temps réel permettant aux participants d'une soirée de pro
 - 🎧 **Preview Audio** : Écoute d'extraits des morceaux
 
 ### 🎧 Pour les DJs
-- 🎛️ **Dashboard Complet** : Vue d'ensemble des événements actifs
+- 🎛️ **Dashboard & Console Live** : Vue d'ensemble et contrôle en temps réel des événements
+- 🖥️ **Mini Monitor Grand Écran** : Aperçu en direct du statut de projection (animation, mode QR vs Karaoké, spectateurs en ligne)
+- 🎤 **Indicateur Paroles LRCLIB** : Petite icône 🎤 violette pour les titres disposant de paroles synchronisées prêtes pour le karaoké
+- 🎙️ **Badge Demande Micro** : Signalement immédiat des invités souhaitant chanter sur scène
+- 🎮 **Contrôle Écran Distant** : Bascule du mode Karaoké et changement des animations du visualiseur audio en un clic ou raccourci clavier (<kbd>K</kbd>, <kbd>V</kbd>)
 - 👤 **Page Profil** (`/profile`) : Nom d’affichage, stats globales, déconnexion Spotify
 - ✅ **Gestion Queue** : Acceptation/refus des demandes
 - ⚡ **Actions en masse** : Tout accepter / tout refuser les demandes en attente
@@ -38,7 +43,16 @@ Une application web temps réel permettant aux participants d'une soirée de pro
   - Activation/désactivation des votes
   - Gestion des doublons
   - Rate limiting configurable
-  - Visuels projection (dont mode `bpm-sync`)
+  - Animations visualiseur audio et options de paroles grand écran
+
+### 🌐 Pour le Grand Écran & Projection (`/event/:id/qr` & `/qrspectre`)
+- 🌌 **Visualiseur Audio Canvas 60 FPS** : Modes Spectre Cyber, Halo Circulaire Néon, Nébuleuse 3D, Onde Néon, etc.
+- 🎙️ **Mode Entrée Ligne / Micro Réel** : Réactivité aux basses et à l'ambiance sonore réelle de la salle via Web Audio API
+- 🎤 **Mode Karaoké Grand Format** : Paroles synchronisées LRCLIB avec défilement cinétique amorti (`cubic-bezier`) sans saccades
+- 📱 **Mini QR Code Incrusté** : QR de participation discret en bas à droite pour continuer à recevoir des morceaux pendant le chant
+- 📶 **Reconnexion Transparente Wi-Fi** : Pilule douce sans rechargement brutal de page et resynchronisation d'état immédiate
+- 🔒 **Anti-Veille Écran** : Screen Wake Lock API pour maintenir le projecteur/TV allumé en continu
+- 🖥️ **Plein Écran Natif** : Bouton dédié, double-clic ou touche <kbd>F</kbd>
 
 ## 🚀 Technologies
 

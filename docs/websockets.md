@@ -88,6 +88,7 @@ Demande une chanson (action invité).
   };
   userName?:  string;   // max 100 chars, défaut "Anonyme"
   clientId?:  string;   // identifiant persistant (localStorage)
+  isKaraoke?: boolean;  // 1 / true = l'invité a coché "Je veux chanter au micro ! 🎤"
 }
 ```
 
@@ -98,6 +99,7 @@ Demande une chanson (action invité).
 - Vérification des doublons (si `allow_duplicates=false`)
 - **Anti-répétition** : si `repeat_cooldown_minutes > 0` sur l’événement, refus si une demande avec le même `spotify_uri` a déjà été jouée (`status = played`, `played_at` non NULL) dans la fenêtre de temps ; l’invité reçoit `request-error` avec `type: "repeat-cooldown"`
 - **Anti-abus intelligent** : score par invité (`clientId`) avec throttle progressif ; en cas d’abus l’invité reçoit `request-error` avec `type: "abuse-throttle"` et `remainingMs`.
+- **Option Karaoké** : persistée en base dans `requests.is_karaoke` et diffusée au DJ dans `new-request` et les listes de queue.
 
 ---
 
@@ -277,6 +279,40 @@ Met à jour un ou plusieurs paramètres de l'événement (DJ ou modérateur — 
 
 **Auth :** `verifyEventAccess()`  
 **Side effect :** émet `event-settings-updated` à tous les clients de la room.
+
+---
+
+### `set-screen-visualizer`
+
+Change l'animation visuelle affichée sur le grand écran (`/event/:eventId/qr` ou `/qrspectre`).
+
+```typescript
+{
+  eventId:        string;
+  visualizerMode: "cyber-spectrum" | "radial-spectrum" | "nebula-3d" | "neon-waveform" | "bass-ripple" | "off";
+}
+```
+
+**Auth :** `verifyEventAccess()`  
+**Side effect :** met à jour `events.screen_visualizer_mode` en base et diffuse `screen-visualizer-updated` à toute la room.
+
+---
+
+### `set-karaoke-mode`
+
+Active, désactive ou configure le mode Karaoké en direct sur le grand écran.
+
+```typescript
+{
+  eventId:      string;
+  enabled?:     boolean;
+  autoKaraoke?: boolean;
+  lyricsSize?:  "normal" | "large" | "xl";
+}
+```
+
+**Auth :** `verifyEventAccess()`  
+**Side effect :** met à jour `events.karaoke_mode_enabled` et `events.karaoke_auto_enabled` en base et diffuse `karaoke-mode-updated` à toute la room.
 
 ---
 
@@ -630,6 +666,42 @@ La soirée est terminée (émis par `POST /api/events/:eventId/end`).
 ```
 
 **Comportement :** les invités sont redirigés vers `/event/:eventId/thank-you` après 2 secondes.
+
+---
+
+### `screen-visualizer-updated`
+
+Diffusé à la room lors de la modification de l'effet d'animation du visualiseur grand écran.
+
+```typescript
+{
+  visualizerMode: "cyber-spectrum" | "radial-spectrum" | "nebula-3d" | "neon-waveform" | "bass-ripple" | "off";
+}
+```
+
+---
+
+### `karaoke-mode-updated`
+
+Diffusé à la room lors de l'activation/désactivation ou du changement de réglages du karaoké distant.
+
+```typescript
+{
+  enabled?:     boolean;
+  autoKaraoke?: boolean;
+  lyricsSize?:  "normal" | "large" | "xl";
+}
+```
+
+---
+
+### `spectator-count`
+
+Diffusé en direct à la room (console DJ, écran grand format) dès qu'un invité ou écran rejoint ou quitte la soirée.
+
+```typescript
+{ count: number }
+```
 
 ---
 

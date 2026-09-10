@@ -608,6 +608,17 @@
       35% { transform: scale(1.02); filter: saturate(1.35); }
       100% { transform: scale(1); filter: saturate(1); }
     }
+    /* Karaoké dimensions et interpolation cinétique amortie */
+    #karaokeOverlay.lyrics-size-large .karaoke-line { font-size: clamp(1.5rem, 3.4vw, 2.75rem); }
+    #karaokeOverlay.lyrics-size-xl .karaoke-line { font-size: clamp(1.9rem, 4.4vw, 3.6rem); }
+    #karaokeLines {
+      will-change: transform;
+      transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .karaoke-line {
+      will-change: transform, opacity;
+      transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), color 350ms ease, text-shadow 350ms ease;
+    }
   </style>
 </head>
 <body>
@@ -630,6 +641,10 @@
     <p id="djBannerText"></p>
     <p id="djBannerFrom">Message du DJ</p>
   </div>
+<!-- ── Pilule Reconnexion Douce Réseau / Wi-Fi ────────────────── -->
+<div id="screenOfflinePill" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-2 rounded-full text-xs font-bold text-amber-300 bg-amber-950/90 border border-amber-500/40 backdrop-blur-md shadow-2xl transition-all duration-500 pointer-events-none opacity-0 -translate-y-6">
+  <span id="screenOfflineDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+  <span id="screenOfflineText">📶 Reconnexion à la régie en cours…</span>
 </div>
 
 <!-- ── Visualiseur Audio Canvas ─────────────────────────────── -->
@@ -672,14 +687,6 @@
 <!-- ── Layer Réactions Émojis Flottantes ────────────────────── -->
 <div id="floatingReactionsLayer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
 
-<!-- ── Bannière Combo Réactions ──────────────────────────────── -->
-<div id="reactionsComboBanner" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-4">
-  <div class="flex items-center gap-2 px-4 py-2 rounded-full shadow-2xl backdrop-blur-xl border border-white/20 font-bold text-sm" style="background:rgba(15,15,24,0.92);color:#fff">
-    <span id="reactionsComboEmoji" class="text-lg">🔥</span>
-    <span id="reactionsComboText">Ambiance en folie !</span>
-  </div>
-</div>
-
 <!-- ── Mode Karaoké Paroles Synchronisées ──────────────────── -->
 <div id="karaokeOverlay" class="hidden fixed inset-0 z-40 flex flex-col items-center justify-between p-6 sm:p-10 backdrop-blur-2xl" style="background:radial-gradient(ellipse at center, rgba(15,15,28,0.94) 0%, rgba(8,8,16,0.98) 100%)">
   <div class="flex items-center justify-between w-full max-w-5xl">
@@ -704,16 +711,26 @@
   <!-- Liste des paroles défilantes -->
   <div id="karaokeLyricsScroll" class="flex-1 w-full max-w-4xl flex flex-col items-center justify-start overflow-hidden py-12 text-center select-none relative" style="height:65vh;min-height:360px">
     <div class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[rgba(8,8,16,0.98)] to-transparent pointer-events-none z-10"></div>
-    <div id="karaokeLines" class="flex flex-col items-center gap-6 transition-transform duration-500 ease-out w-full" style="transform:translateY(0px);padding-top:25vh;padding-bottom:25vh">
+    <div id="karaokeLines" class="flex flex-col items-center gap-6 w-full" style="transform:translate3d(0,0px,0);padding-top:25vh;padding-bottom:25vh">
       <p class="text-xl text-white/40 italic">Recherche des paroles synchronisées…</p>
     </div>
     <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[rgba(8,8,16,0.98)] to-transparent pointer-events-none z-10"></div>
   </div>
 
-  <!-- Footer Karaoké -->
-  <div class="w-full max-w-5xl flex items-center justify-between text-xs text-white/50 border-t border-white/10 pt-4">
-    <span class="flex items-center gap-1.5">Touche <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-white">K</kbd> ou <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-white">Échap</kbd> pour fermer</span>
-    <span id="karaokeSyncBadge" class="text-purple-300 font-semibold">⚡ Paroles synchronisées en direct</span>
+  <!-- Footer Karaoké avec Mini QR Incrusté -->
+  <div class="w-full max-w-5xl flex items-center justify-between text-xs text-white/50 border-t border-white/10 pt-4 gap-4">
+    <div class="flex items-center gap-3">
+      <!-- Mini QR Code Incrusté -->
+      <div id="karaokeMiniQrCard" class="hidden sm:flex items-center gap-3 px-3 py-2 rounded-2xl backdrop-blur-xl shadow-2xl border border-white/15" style="background:rgba(255,255,255,0.06)">
+        <img id="karaokeMiniQrImg" src="" alt="QR" class="w-11 h-11 rounded-lg bg-white p-0.5 object-contain shadow-md shrink-0" />
+        <div class="text-left">
+          <p class="text-[11px] font-black text-white leading-tight">Demander un son</p>
+          <p class="text-[9px] text-purple-300 font-semibold leading-tight mt-0.5">Scanne pour la suite !</p>
+        </div>
+      </div>
+      <span class="hidden md:inline text-white/40">Touche <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-white">K</kbd> ou <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-white">Échap</kbd> pour fermer</span>
+    </div>
+    <span id="karaokeSyncBadge" class="text-purple-300 font-semibold shrink-0">⚡ Paroles synchronisées en direct</span>
   </div>
 </div>
 
@@ -739,10 +756,22 @@
         <span id="visualizerModeLabel">Spectre</span>
       </button>
 
+      <!-- Bouton Analyse Audio Réelle Micro -->
+      <button id="micAudioToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md cursor-pointer transition-all hover:bg-white/15" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.85)" title="Activer / Désactiver la réactivité audio au micro réel">
+        <span id="micAudioDot" class="w-2 h-2 rounded-full" style="background:rgba(255,255,255,.4)"></span>
+        <span id="micAudioLabel">Micro Off</span>
+      </button>
+
       <!-- Karaoke Lyrics Button -->
       <button id="karaokeToggleBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold backdrop-blur-md cursor-pointer transition-all hover:bg-white/15" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.85)" title="Afficher/Masquer les paroles karaoké (Touche K)">
         <span>🎤</span>
         <span id="karaokeBtnLabel">Karaoké</span>
+      </button>
+
+      <!-- Bouton Plein Écran -->
+      <button id="fullscreenToggleBtn" class="flex items-center justify-center w-8 h-8 rounded-full backdrop-blur-md cursor-pointer transition-all hover:bg-white/15" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.85)" title="Plein écran (Touche F ou double-clic sur le fond)">
+        <svg id="fullscreenEnterIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <svg id="fullscreenExitIcon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
       </button>
 
       <div class="stat-pill">
@@ -859,7 +888,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/csrf.js"></script>
 <script>
-  const eventId = window.location.pathname.split("/")[2];
+  const eventId = window.location.pathname.match(/\/event\/([^\/]+)/)?.[1] || window.location.pathname.split("/")[2];
   const socket  = io();
 
   // ── Utilitaires ──────────────────────────────────────────
@@ -1331,8 +1360,10 @@
       const qrRes = await fetch(`/api/events/${eventId}/qrcode`);
       const qr = await qrRes.json();
       const qrImg = document.getElementById("qrCode");
-      if (qrImg && qr.qrCode) {
-        qrImg.src = qr.qrCode;
+      const miniQrImg = document.getElementById("karaokeMiniQrImg");
+      if (qr && qr.qrCode) {
+        if (qrImg) qrImg.src = qr.qrCode;
+        if (miniQrImg) miniQrImg.src = qr.qrCode;
       }
     } catch (err) {
       console.warn("Erreur chargement QR Code:", err);
@@ -1398,6 +1429,16 @@
       );
       projectionVisualsAutoPerTrack = !!event.projection_visuals_auto_per_track;
 
+      if (event.screen_visualizer_mode) {
+        setVisualizerMode(event.screen_visualizer_mode);
+      }
+      if (event.karaoke_mode_enabled !== undefined && event.karaoke_mode_enabled !== null) {
+        toggleKaraoke(!!event.karaoke_mode_enabled);
+      }
+      if (event.karaoke_auto_enabled !== undefined && event.karaoke_auto_enabled !== null) {
+        autoKaraokeEnabled = !!event.karaoke_auto_enabled;
+      }
+
       const statPendingEl = document.getElementById("statPending");
       const statPlayedEl = document.getElementById("statPlayed");
       if (statPendingEl) statPendingEl.textContent = stats.stats?.pending_count || 0;
@@ -1407,8 +1448,55 @@
     }
   }
 
-  // ── Socket.IO ─────────────────────────────────────────────
-  socket.on("connect", () => socket.emit("join-event", eventId));
+  // ── Socket.IO & Reconnexion Transparente Wi-Fi ────────────
+  let _screenWasDisconnected = false;
+  let _offlinePillFadeTimer = null;
+
+  function showScreenOfflineBanner(msg) {
+    const pill = document.getElementById("screenOfflinePill");
+    const text = document.getElementById("screenOfflineText");
+    const dot  = document.getElementById("screenOfflineDot");
+    if (!pill || !text) return;
+    clearTimeout(_offlinePillFadeTimer);
+    _screenWasDisconnected = true;
+    text.textContent = msg || "📶 Reconnexion à la régie en cours…";
+    pill.classList.remove("opacity-0", "-translate-y-6", "bg-emerald-950/90", "border-emerald-500/40", "text-emerald-300");
+    pill.classList.add("opacity-100", "translate-y-0", "bg-amber-950/90", "border-amber-500/40", "text-amber-300");
+    if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping";
+  }
+
+  function hideScreenOfflineBannerSuccess() {
+    const pill = document.getElementById("screenOfflinePill");
+    const text = document.getElementById("screenOfflineText");
+    const dot  = document.getElementById("screenOfflineDot");
+    if (!pill || !text) return;
+    clearTimeout(_offlinePillFadeTimer);
+    text.textContent = "✓ Reconnecté à la régie";
+    pill.classList.remove("bg-amber-950/90", "border-amber-500/40", "text-amber-300");
+    pill.classList.add("bg-emerald-950/90", "border-emerald-500/40", "text-emerald-300");
+    if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+    _offlinePillFadeTimer = setTimeout(() => {
+      pill.classList.remove("opacity-100", "translate-y-0");
+      pill.classList.add("opacity-0", "-translate-y-6");
+      _screenWasDisconnected = false;
+    }, 2000);
+  }
+
+  socket.on("disconnect", () => {
+    showScreenOfflineBanner("📶 Perte de connexion — Reconnexion à la régie en arrière-plan…");
+  });
+
+  socket.on("connect_error", () => {
+    showScreenOfflineBanner("📶 Tentative de reconnexion à la régie DJ…");
+  });
+
+  socket.on("connect", () => {
+    socket.emit("join-event", eventId);
+    if (_screenWasDisconnected) {
+      hideScreenOfflineBannerSuccess();
+      loadData();
+    }
+  });
   if (socket.connected) socket.emit("join-event", eventId);
 
   let loadDataDebounceTimer = null;
@@ -1477,6 +1565,23 @@
     currentLivePoll = data?.poll || null;
     renderLivePoll(currentLivePoll);
   });
+  socket.on("screen-visualizer-updated", (data) => {
+    if (data && data.visualizerMode) {
+      setVisualizerMode(data.visualizerMode);
+    }
+  });
+  socket.on("karaoke-mode-updated", (data) => {
+    if (!data) return;
+    if (typeof data.enabled === "boolean") {
+      toggleKaraoke(data.enabled);
+    }
+    if (typeof data.autoKaraoke === "boolean") {
+      autoKaraokeEnabled = data.autoKaraoke;
+    }
+    if (data.lyricsSize) {
+      applyKaraokeLyricsSize(data.lyricsSize);
+    }
+  });
   socket.on("event-ended",      () => {
     document.querySelector(".live-pill").innerHTML = `<span style="color:rgba(255,255,255,.5)">Soirée terminée</span>`;
     loadData();
@@ -1485,10 +1590,11 @@
   // ── Moteur Visualiseur Audio Canvas ───────────────────────
   const visualizerCanvas = document.getElementById("audioVisualizerCanvas");
   const vCtx = visualizerCanvas ? visualizerCanvas.getContext("2d") : null;
-  let visualizerMode = "cyber-spectrum"; // 'cyber-spectrum' | 'nebula-3d' | 'neon-waveform' | 'bass-ripple'
-  const visualizerModes = ["cyber-spectrum", "nebula-3d", "neon-waveform", "bass-ripple"];
+  let visualizerMode = "cyber-spectrum"; // 'cyber-spectrum' | 'radial-spectrum' | 'nebula-3d' | 'neon-waveform' | 'bass-ripple' | 'off'
+  const visualizerModes = ["cyber-spectrum", "radial-spectrum", "nebula-3d", "neon-waveform", "bass-ripple"];
   const visualizerLabels = {
     "cyber-spectrum": "Spectre Cyber",
+    "radial-spectrum": "Halo Circulaire",
     "nebula-3d": "Nébuleuse 3D",
     "neon-waveform": "Ondes Néon",
     "bass-ripple": "Ripple Bass",
@@ -1496,6 +1602,57 @@
   let visualizerRaf = null;
   let vWidth = window.innerWidth;
   let vHeight = window.innerHeight;
+
+  // ── Analyseur Audio Réel (Microphone / Line-in) ─────────────
+  let audioCtx = null;
+  let analyserNode = null;
+  let micStream = null;
+  let audioDataArray = null;
+  let isRealAudioActive = false;
+
+  async function toggleRealAudio() {
+    const btn = document.getElementById("micAudioToggleBtn");
+    const dot = document.getElementById("micAudioDot");
+    const lbl = document.getElementById("micAudioLabel");
+
+    if (isRealAudioActive) {
+      if (micStream) micStream.getTracks().forEach((t) => t.stop());
+      if (audioCtx && audioCtx.state !== "closed") await audioCtx.close();
+      audioCtx = null;
+      analyserNode = null;
+      micStream = null;
+      audioDataArray = null;
+      isRealAudioActive = false;
+
+      if (dot) dot.style.background = "rgba(255,255,255,.4)";
+      if (lbl) lbl.textContent = "Micro Off";
+      if (btn) btn.style.borderColor = "rgba(255,255,255,.12)";
+      return;
+    }
+
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(micStream);
+      analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 256;
+      analyserNode.smoothingTimeConstant = 0.82;
+      source.connect(analyserNode);
+      audioDataArray = new Uint8Array(analyserNode.frequencyBinCount);
+      isRealAudioActive = true;
+
+      if (dot) dot.style.background = "#22c55e";
+      if (lbl) lbl.textContent = "Micro Live";
+      if (btn) btn.style.borderColor = "rgba(34,197,94,.5)";
+      if (visualizerMode === "off") setVisualizerMode("cyber-spectrum");
+    } catch (err) {
+      console.warn("Accès microphone refusé ou non supporté:", err);
+      alert("Microphone ou entrée audio non disponible sur cet appareil.");
+    }
+  }
+  document.getElementById("micAudioToggleBtn")?.addEventListener("click", toggleRealAudio);
 
   function resizeVisualizer() {
     if (!visualizerCanvas) return;
@@ -1523,13 +1680,36 @@
 
   function drawVisualizer() {
     if (!vCtx) return;
+
+    // Optimisation CPU/Batterie : arrêter immédiatement la boucle si le visualiseur est éteint
+    if (visualizerMode === "off") {
+      vCtx.clearRect(0, 0, vWidth, vHeight);
+      if (visualizerRaf) cancelAnimationFrame(visualizerRaf);
+      visualizerRaf = null;
+      return;
+    }
+
     vCtx.clearRect(0, 0, vWidth, vHeight);
 
     const isPlaying = npState && npState.isPlaying;
     const now = performance.now() * 0.001;
     const bpm = Math.max(60, Math.min(180, Number(lastProjectedTrackKey?.bpm || 124)));
     const beatPhase = (now * (bpm / 60) * Math.PI * 2) % (Math.PI * 2);
-    const bassPulse = isPlaying ? Math.pow(Math.sin(beatPhase) * 0.5 + 0.5, 3) : 0.05;
+
+    // Analyse audio réelle si le micro est actif
+    let realFreqData = null;
+    let realBassEnergy = 0;
+    if (isRealAudioActive && analyserNode && audioDataArray) {
+      analyserNode.getByteFrequencyData(audioDataArray);
+      realFreqData = audioDataArray;
+      let sumBass = 0;
+      for (let b = 1; b < 9; b++) sumBass += (realFreqData[b] || 0);
+      realBassEnergy = Math.min(1, Math.max(0, (sumBass / 8) / 180));
+    }
+
+    const bassPulse = isRealAudioActive
+      ? realBassEnergy
+      : (isPlaying ? Math.pow(Math.sin(beatPhase) * 0.5 + 0.5, 3) : 0.05);
 
     if (visualizerMode === "cyber-spectrum") {
       // ── Spectre Audio Cyber (Barres Equalizer) ──
@@ -1539,11 +1719,18 @@
 
       for (let i = 0; i < spectrumBarsCount; i++) {
         const norm = i / spectrumBarsCount;
-        const wave1 = Math.sin(now * 3 + i * 0.28);
-        const wave2 = Math.cos(now * 4.5 - i * 0.18);
-        let height = isPlaying
-          ? (Math.abs(wave1 * 0.6 + wave2 * 0.4) * (0.3 + bassPulse * 0.7) * (1 - norm * 0.4) * maxHeight) + 8
-          : 6;
+        let height;
+        if (isRealAudioActive && realFreqData) {
+          const binIdx = Math.floor((i / spectrumBarsCount) * (realFreqData.length * 0.65));
+          const val = (realFreqData[binIdx] || 0) / 255;
+          height = Math.max(6, val * maxHeight * 1.25);
+        } else {
+          const wave1 = Math.sin(now * 3 + i * 0.28);
+          const wave2 = Math.cos(now * 4.5 - i * 0.18);
+          height = isPlaying
+            ? (Math.abs(wave1 * 0.6 + wave2 * 0.4) * (0.3 + bassPulse * 0.7) * (1 - norm * 0.4) * maxHeight) + 8
+            : 6;
+        }
 
         if (height > spectrumPeaks[i]) spectrumPeaks[i] = height;
         else spectrumPeaks[i] = Math.max(0, spectrumPeaks[i] - 1.8);
@@ -1559,7 +1746,7 @@
 
         vCtx.fillStyle = grad;
         vCtx.shadowColor = "#8b5cf6";
-        vCtx.shadowBlur = isPlaying ? 16 : 4;
+        vCtx.shadowBlur = isPlaying || isRealAudioActive ? 16 : 4;
         vCtx.beginPath();
         vCtx.roundRect(x, y, barWidth, height, [6, 6, 0, 0]);
         vCtx.fill();
@@ -1572,6 +1759,63 @@
           vCtx.fillRect(x, vHeight - spectrumPeaks[i] - 4, barWidth, 3);
         }
       }
+      vCtx.shadowBlur = 0;
+    } else if (visualizerMode === "radial-spectrum") {
+      // ── Spectre Circulaire Néon (Halo Radial Central) ──
+      const cx = vWidth * 0.5;
+      const cy = vHeight * 0.5;
+      const baseRadius = Math.min(vWidth, vHeight) * 0.18 * (1 + bassPulse * 0.12);
+      const bars = 48;
+      const angleStep = (Math.PI * 2) / bars;
+
+      // Halo lumineux central
+      const haloGrad = vCtx.createRadialGradient(cx, cy, baseRadius * 0.2, cx, cy, baseRadius * 1.5);
+      haloGrad.addColorStop(0, `rgba(168, 85, 247, ${0.12 + bassPulse * 0.25})`);
+      haloGrad.addColorStop(0.6, `rgba(6, 182, 212, ${0.08 + bassPulse * 0.18})`);
+      haloGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      vCtx.fillStyle = haloGrad;
+      vCtx.beginPath();
+      vCtx.arc(cx, cy, baseRadius * 1.6, 0, Math.PI * 2);
+      vCtx.fill();
+
+      // Rayons du spectre
+      for (let i = 0; i < bars; i++) {
+        const angle = i * angleStep + (now * 0.12);
+        let barLen;
+        if (isRealAudioActive && realFreqData) {
+          const bin = Math.floor((i / bars) * (realFreqData.length * 0.55));
+          barLen = ((realFreqData[bin] || 0) / 255) * baseRadius * 0.95 + 8;
+        } else {
+          const osc = Math.sin(now * 4 + i * 0.35) * Math.cos(now * 2.5 - i * 0.2);
+          barLen = (Math.abs(osc) * (0.35 + bassPulse * 0.75) * baseRadius * 0.8) + 8;
+        }
+
+        const x1 = cx + Math.cos(angle) * (baseRadius + 4);
+        const y1 = cy + Math.sin(angle) * (baseRadius + 4);
+        const x2 = cx + Math.cos(angle) * (baseRadius + barLen);
+        const y2 = cy + Math.sin(angle) * (baseRadius + barLen);
+
+        const hue = (i / bars) * 360 + (now * 25);
+        vCtx.strokeStyle = `hsla(${hue}, 85%, 65%, ${0.65 + bassPulse * 0.35})`;
+        vCtx.lineWidth = Math.max(2.5, baseRadius * 0.08);
+        vCtx.lineCap = "round";
+        vCtx.shadowColor = `hsl(${hue}, 90%, 60%)`;
+        vCtx.shadowBlur = 12;
+
+        vCtx.beginPath();
+        vCtx.moveTo(x1, y1);
+        vCtx.lineTo(x2, y2);
+        vCtx.stroke();
+      }
+
+      // Anneau intérieur néon pulsant
+      vCtx.beginPath();
+      vCtx.arc(cx, cy, baseRadius, 0, Math.PI * 2);
+      vCtx.strokeStyle = `rgba(236, 72, 153, ${0.45 + bassPulse * 0.5})`;
+      vCtx.lineWidth = 3;
+      vCtx.shadowColor = "#ec4899";
+      vCtx.shadowBlur = 16;
+      vCtx.stroke();
       vCtx.shadowBlur = 0;
     } else if (visualizerMode === "nebula-3d") {
       // ── Nébuleuse 3D Orbitale ──
@@ -1662,12 +1906,38 @@
   }
   drawVisualizer();
 
-  // Bouton de changement de mode visualiseur
+  // Contrôle du visualiseur (local & distant)
+  function setVisualizerMode(mode) {
+    if (!mode) return;
+    const cleanMode = String(mode).toLowerCase().trim();
+    if (cleanMode === "off" || cleanMode === "none" || cleanMode === "disabled") {
+      visualizerMode = "off";
+      if (visualizerCanvas) visualizerCanvas.style.display = "none";
+      if (vCtx) vCtx.clearRect(0, 0, vWidth, vHeight);
+      if (visualizerRaf) {
+        cancelAnimationFrame(visualizerRaf);
+        visualizerRaf = null;
+      }
+      const lbl = document.getElementById("visualizerModeLabel");
+      if (lbl) lbl.textContent = "Désactivé";
+      return;
+    }
+    if (visualizerModes.includes(cleanMode)) {
+      visualizerMode = cleanMode;
+      if (visualizerCanvas) visualizerCanvas.style.display = "block";
+      const lbl = document.getElementById("visualizerModeLabel");
+      if (lbl) lbl.textContent = visualizerLabels[visualizerMode] || "Spectre";
+      if (!visualizerRaf) {
+        drawVisualizer();
+      }
+    }
+  }
+
   function cycleVisualizerMode() {
-    const nextIdx = (visualizerModes.indexOf(visualizerMode) + 1) % visualizerModes.length;
-    visualizerMode = visualizerModes[nextIdx];
-    const lbl = document.getElementById("visualizerModeLabel");
-    if (lbl) lbl.textContent = visualizerLabels[visualizerMode] || "Spectre";
+    const list = [...visualizerModes, "off"];
+    const curIdx = list.indexOf(visualizerMode);
+    const nextIdx = (curIdx + 1) % list.length;
+    setVisualizerMode(list[nextIdx]);
   }
   document.getElementById("visualizerToggleBtn")?.addEventListener("click", cycleVisualizerMode);
 
@@ -1675,13 +1945,24 @@
   let currentLyrics = null;
   let activeLyricIdx = -1;
   let isKaraokeOpen = false;
+  let autoKaraokeEnabled = false;
+  let karaokeLyricsSize = "normal";
+
+  function applyKaraokeLyricsSize(size) {
+    karaokeLyricsSize = size || "normal";
+    const overlay = document.getElementById("karaokeOverlay");
+    if (overlay) {
+      overlay.classList.remove("lyrics-size-normal", "lyrics-size-large", "lyrics-size-xl");
+      overlay.classList.add(`lyrics-size-${karaokeLyricsSize}`);
+    }
+  }
 
   async function loadTrackLyrics(trackName, artistName, durationMs) {
     currentLyrics = null;
     activeLyricIdx = -1;
     const container = document.getElementById("karaokeLines");
     if (container) {
-      container.style.transform = "translateY(0px)";
+      container.style.transform = "translate3d(0, 0px, 0)";
       container.innerHTML = `<p class="text-xl text-white/40 italic">Recherche des paroles pour ${trackName}…</p>`;
     }
 
@@ -1692,6 +1973,9 @@
       if (data && data.lines && data.lines.length > 0) {
         currentLyrics = data;
         renderLyricsLines();
+        if (autoKaraokeEnabled) {
+          toggleKaraoke(true);
+        }
       } else {
         if (container) container.innerHTML = `<p class="text-xl text-white/40 italic">Paroles non disponibles pour ce titre</p>`;
       }
@@ -1773,7 +2057,7 @@
           const containerHeight = scrollContainer.clientHeight;
           const targetOffset = activeEl.offsetTop + (activeEl.clientHeight / 2);
           const translateY = (containerHeight / 2) - targetOffset;
-          linesWrapper.style.transform = `translateY(${translateY}px)`;
+          linesWrapper.style.transform = `translate3d(0, ${Math.round(translateY)}px, 0)`;
         }
       }
     }
@@ -1797,17 +2081,70 @@
   document.getElementById("karaokeToggleBtn")?.addEventListener("click", () => toggleKaraoke());
   document.getElementById("closeKaraokeBtn")?.addEventListener("click", () => toggleKaraoke(false));
 
-  // Raccourcis clavier (V = Visualiseur, K = Karaoké, Echap = Fermer)
+  // Raccourcis clavier (V = Visualiseur, K = Karaoké, F = Plein Écran, Echap = Fermer)
   window.addEventListener("keydown", (e) => {
     if (e.key === "v" || e.key === "V") cycleVisualizerMode();
     if (e.key === "k" || e.key === "K") toggleKaraoke();
+    if (e.key === "f" || e.key === "F") toggleFullScreen();
     if (e.key === "Escape") toggleKaraoke(false);
+  });
+
+  // ── Screen Wake Lock API (Anti-Veille Écran / TV) ──────────
+  let screenWakeLock = null;
+  async function acquireWakeLock() {
+    if ("wakeLock" in navigator) {
+      try {
+        screenWakeLock = await navigator.wakeLock.request("screen");
+        screenWakeLock.addEventListener("release", () => {
+          screenWakeLock = null;
+        });
+      } catch (err) {
+        console.warn("Wake Lock non actif:", err);
+      }
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && !screenWakeLock) {
+      acquireWakeLock();
+    }
+  });
+  window.addEventListener("load", acquireWakeLock);
+  window.addEventListener("click", () => { if (!screenWakeLock) acquireWakeLock(); }, { once: true });
+
+  // ── Gestion du Plein Écran Natif ──
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.warn("Erreur passage plein écran:", err);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
+
+  function updateFullscreenIcons() {
+    const isFs = !!document.fullscreenElement;
+    const enterIcon = document.getElementById("fullscreenEnterIcon");
+    const exitIcon = document.getElementById("fullscreenExitIcon");
+    if (enterIcon) enterIcon.classList.toggle("hidden", isFs);
+    if (exitIcon) exitIcon.classList.toggle("hidden", !isFs);
+  }
+  document.addEventListener("fullscreenchange", updateFullscreenIcons);
+  document.getElementById("fullscreenToggleBtn")?.addEventListener("click", toggleFullScreen);
+
+  // Double-clic sur le fond pour basculer plein écran
+  document.getElementById("ambientBg")?.addEventListener("dblclick", toggleFullScreen);
+  document.getElementById("app")?.addEventListener("dblclick", (e) => {
+    if (e.target.id === "app" || e.target.id === "header" || e.target.id === "main") {
+      toggleFullScreen();
+    }
   });
 
   // ── Moteur de Réactions Émojis Flottantes ──────────────────
   const reactionsLayer = document.getElementById("floatingReactionsLayer");
-  let reactionCounter = 0;
-  let reactionTimer = null;
 
   function spawnFloatingReaction(emoji, senderName = "", count = 1) {
     if (!reactionsLayer) return;
@@ -1841,28 +2178,6 @@
       reactionsLayer.appendChild(el);
       setTimeout(() => el.remove(), 4200);
     }
-
-    // Gestion de Combo d'ambiance
-    reactionCounter += burstCount;
-    clearTimeout(reactionTimer);
-    const banner = document.getElementById("reactionsComboBanner");
-    const bannerEmoji = document.getElementById("reactionsComboEmoji");
-    const bannerText  = document.getElementById("reactionsComboText");
-
-    if (banner && reactionCounter >= 5) {
-      if (bannerEmoji) bannerEmoji.textContent = emoji;
-      if (bannerText) bannerText.textContent = `Ambiance en folie ! +${reactionCounter} réactions 🔥`;
-      banner.classList.remove("opacity-0", "translate-y-4");
-      banner.classList.add("opacity-100", "translate-y-0");
-    }
-
-    reactionTimer = setTimeout(() => {
-      if (banner) {
-        banner.classList.remove("opacity-100", "translate-y-0");
-        banner.classList.add("opacity-0", "translate-y-4");
-      }
-      reactionCounter = 0;
-    }, 3500);
   }
 
   // Écoute du broadcast de réaction live

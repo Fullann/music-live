@@ -14,8 +14,8 @@ Description complète de toutes les fonctionnalités de Music Live.
 | Profil DJ | `/profile` | DJ | Nom affiché, stats globales, déconnexion Spotify |
 | Interface DJ | `/dj/:eventId` | DJ | Contrôle temps réel de la soirée |
 | Interface modérateur | `/mod/:eventId?token=...` | Modérateur (lien) | Gestion des demandes déléguée |
-| Page invité | `/user/:eventId` | Invité | Proposer des chansons, voter |
-| Écran grand format | `/event/:eventId/qr` | Public | Affichage TV/projecteur |
+| Page invité | `/user/:eventId` | Invité | Proposer des chansons, option micro, voter |
+| Écran grand format | `/event/:eventId/qr` ou `/qrspectre` | Public | Affichage TV/projecteur (visualiseur audio, karaoké, QR) |
 | Statistiques | `/event/:eventId/stats` | DJ | Stats live et post-événement |
 | Historique | `/history` | DJ | Soirées terminées |
 | Erreur | `/error?code=...` | Tous | Page d'erreur branded |
@@ -53,10 +53,20 @@ Description complète de toutes les fonctionnalités de Music Live.
 
 **URL :** `/dj/:eventId`
 
+### Mini Monitor Grand Écran
+
+Widget interactif temps réel situé au-dessus des decks DJ :
+- **Statut de l'écran en direct** : *"Mode QR Standard"* ou *"🎤 Karaoké En Direct"* avec badge et pulsation
+- **Animation active** : *"Spectre Cyber"*, *"Halo Circulaire"*, *"Nébuleuse 3D"*, etc.
+- **Compteur de spectateurs** : nombre d'écrans et invités connectés en ligne (`spectator-count`)
+- **Raccourcis rapides** : bascule directe du karaoké, cycle des animations visualiseur, ouverture de l'écran
+
 ### Queue de lecture
 
 La queue affiche les chansons acceptées dans leur ordre de lecture. Chaque carte contient :
 - Pochette, titre, artiste
+- **Indicateur paroles disponibles** : petite icône 🎤 violette si des paroles synchronisées existent sur LRCLIB
+- **Badge Demande Karaoké** : mention spéciale si l'invité a demandé à chanter au micro
 - Métadonnées musicales : BPM (ou popularité si BPM indisponible), tonalité, énergie
 - Durée formatée
 - Bouton **Play** (lecture immédiate)
@@ -71,11 +81,18 @@ Bouton "Trier" : trie les chansons acceptées par BPM décroissant (ou popularit
 
 Liste des demandes `pending` avec :
 - Infos chanson + invité
+- **Indicateur paroles LRCLIB** (🎤 violette) et **badge demande micro**
 - Boutons **Accepter** / **Refuser**
 - **Tout accepter** / **Tout refuser** : traite toutes les demandes en attente d’un coup (socket `accept-all-pending` / `reject-all-pending`)
 - Après un **refus unitaire**, une barre **Annuler** permet de remettre la demande en `pending` pendant quelques secondes (`undo-reject-request`)
 - Bouton **Preview** (écouter avant de décider)
 - Votes (upvotes / downvotes) si les votes sont activés
+
+### Contrôles Distants Visualiseur & Karaoké
+
+- Bouton rapide **🎤 Karaoké [ON/OFF]** (touche clavier <kbd>K</kbd>) : déclenche ou ferme instantanément les paroles sur le grand écran
+- Bouton rapide **Animation** : fait défiler les animations du visualiseur grand écran
+- Panneau de configuration avancée dans la modale de réglages (taille des paroles normal/large/xl, auto-karaoké par morceau)
 
 ### Crossfade automatique
 
@@ -168,8 +185,9 @@ Conçue pour une utilisation sur smartphone.
 1. Saisir un titre ou un artiste dans la barre de recherche
 2. Les résultats Spotify s'affichent (pochette, titre, artiste, durée)
 3. Appuyer sur une chanson → bottom sheet apparaît pour saisir son prénom
-4. Si un don est requis → voir [Dons](#système-de-dons) d'abord
-5. Appuyer sur "Proposer" → confirmation affichée
+4. **Option Karaoké ("Je veux chanter au micro ! 🎤")** : case à cocher facultative pour prévenir le DJ de préparer un micro sur scène
+5. Si un don est requis → voir [Dons](#système-de-dons) d'abord
+6. Appuyer sur "Proposer cette chanson" → confirmation affichée
 
 ### Statut de la demande
 
@@ -262,18 +280,48 @@ Le don est déclaratif côté client — il n'y a pas de vérification automatiq
 
 ---
 
-## Écran grand format (QR Display)
+## Écran grand format & Visualiseur (QR Display)
 
-**URL :** `/event/:eventId/qr`
+**URL :** `/event/:eventId/qr` ou `/event/:eventId/qrspectre`
 
-Conçu pour être projeté sur un écran TV ou vidéoprojecteur.
+Conçu pour être projeté sur un écran TV ou vidéoprojecteur dans la salle.
 
 ### Informations affichées
 
-- **Chanson en cours** : grande pochette, titre, artiste, barre de progression
+- **Chanson en cours** : grande pochette, titre, artiste, barre de progression dynamique
 - **File d'attente** : prochaines chansons (jusqu'à 5)
 - **Chansons récemment jouées**
-- **Visuels projection** (pilotés par réglages DJ) : aurora/pulse/strobe/spectrum/nebula/laser/vortex/party/dvd/**bpm-sync**
+- **QR Code d'invitation principal** : pour scanner et proposer des sons
+
+### Visualiseur Audio Canvas 60 FPS
+
+L'écran intègre un visualiseur audio en temps réel avec plusieurs modes :
+- `cyber-spectrum` : Barres spectrales dynamiques réactives
+- `radial-spectrum` : Spectre circulaire néon avec pulsation centrale
+- `nebula-3d` : Particules stellaires 3D en orbite
+- `neon-waveform` : Oscilloscope néon sinusoïdal
+- `bass-ripple` : Ondes circulaires de basses fréquences
+- `off` : Visualiseur désactivé pour économiser les ressources CPU/batterie
+
+**Réactivité Audio Réelle :** Un bouton micro permet de brancher l'analyseur sur l'entrée ligne ou le microphone de la machine via la Web Audio API pour réagir à l'acoustique ambiante de la salle.
+
+### Mode Karaoké Grand Format
+
+- **Paroles synchronisées LRCLIB** : chargement instantané dès le début de la lecture
+- **Défilement cinétique amorti (Smooth Lyric Scrolling)** : transition `cubic-bezier(0.22, 1, 0.36, 1)` avec accélération GPU `translate3d` pour éviter les sauts brusques sur les tempos rapides
+- **Mini QR Code incrusté** : affiché discrètement en bas à droite (`#karaokeMiniQrCard`) pour continuer à récolter des propositions même pendant les chants
+- **Taille de police ajustable** : normal / large / xl, synchronisée depuis la console DJ
+- **Raccourci clavier** : touche <kbd>K</kbd> ou bouton tactile
+
+### Reconnexion Transparente Wi-Fi
+
+- En cas de coupure Wi-Fi ou réseau, une pilule douce `#screenOfflinePill` apparaît sans rechargement brutal de la page (zéro F5)
+- Dès que la connexion est rétablie, l'écran réémet immédiatement `join-event` et resynchronise l'intégralité de l'état (queue, lecture, paramètres) avec un flash vert discret
+
+### Anti-Veille Écran & Plein Écran
+
+- **Screen Wake Lock API** : empêche la mise en veille automatique ou l'économiseur de la TV/projecteur
+- **Mode Plein Écran natif** : bouton dédié, touche <kbd>F</kbd> ou double-clic sur le fond de l'écran
 
 ### Scène visuelle pilotée par BPM
 
@@ -287,10 +335,6 @@ Conçu pour être projeté sur un écran TV ou vidéoprojecteur.
   - `dvd=text&dvdText=...`
   - `dvd=event`
 - Quand un paramètre `dvd=...` est présent, le mode DVD est **verrouillé** (pas d’override aléatoire par auto-switch par track).
-
-### Actualisation
-
-L'écran se rafraîchit automatiquement toutes les 10 secondes via l'API `/api/events/:eventId/display-data`. Pas de Socket.IO pour simplifier (la page est prévue pour un usage passif).
 
 ---
 

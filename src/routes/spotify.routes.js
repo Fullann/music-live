@@ -701,6 +701,51 @@ router.get("/lyrics", async (req, res) => {
   }
 });
 
+// ── Endpoint Vérification Rapide Groupée de Paroles Synchronisées (Console DJ) ──
+router.post("/lyrics/batch-check", async (req, res) => {
+  const tracks = Array.isArray(req.body?.tracks) ? req.body.tracks.slice(0, 30) : [];
+  const results = {};
+  const headers = { "User-Agent": "MusicLiveApp/2.0 (https://music-live.fullann.ch)" };
+
+  await Promise.all(
+    tracks.map(async (item) => {
+      const id = item.id || item.spotify_uri;
+      const trackName = String(item.track || item.song_name || "").trim();
+      const artistName = String(item.artist || "").trim();
+      if (!id || !trackName || !artistName) return;
+
+      const cacheKey = `${trackName.toLowerCase()}:::${artistName.toLowerCase()}`;
+      if (lyricsCache.has(cacheKey)) {
+        const cached = lyricsCache.get(cacheKey);
+        results[id] = !!(cached?.synced || (cached?.lines && cached.lines.length > 0));
+        return;
+      }
+
+      const durNum = item.duration ? Math.round(Number(item.duration)) : null;
+      const cleanedTitle = cleanLyricsSearchTitle(trackName);
+
+      try {
+        const params = { track_name: cleanedTitle || trackName, artist_name: artistName };
+        if (durNum) params.duration = durNum;
+        const resp = await axios.get("https://lrclib.net/api/get", { params, timeout: 2200, headers });
+        const hasLyrics = !!(resp.data?.syncedLyrics || resp.data?.plainLyrics);
+        results[id] = hasLyrics;
+        if (hasLyrics && resp.data?.syncedLyrics) {
+          if (lyricsCache.size >= 500) lyricsCache.delete(lyricsCache.keys().next().value);
+          lyricsCache.set(cacheKey, {
+            synced: true,
+            lines: parseLrc(resp.data.syncedLyrics),
+          });
+        }
+      } catch {
+        results[id] = false;
+      }
+    }),
+  );
+
+  res.json({ available: results });
+});
+
 // ── Endpoint Export Playlist Spotify de Soirée (DJ) ──
 router.post(
   "/export-playlist/:eventId",

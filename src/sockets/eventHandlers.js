@@ -212,6 +212,10 @@ const nowPlayingCache = new Map(); // eventId → payload
 const djMessageCache = new Map(); // eventId → { message, sentAt }
 const DJ_MESSAGE_TTL_MS = 5 * 60 * 1000;
 
+// Stockage en mémoire du mode visualiseur grand écran et de l'état Karaoké
+const screenVisualizerCache = new Map(); // eventId → 'cyber-spectrum' | 'nebula-3d' | 'neon-waveform' | 'bass-ripple' | 'off'
+const karaokeCache = new Map(); // eventId → { enabled: boolean, autoKaraoke: boolean, lyricsSize: string }
+
 /** Refus récents éligibles à « Annuler » (fenêtre courte, mémoire processus) */
 const recentRejectUndo = new Map(); // requestId → rejectedAt (ms)
 const UNDO_REJECT_WINDOW_MS = 8000;
@@ -417,6 +421,13 @@ function setupSocketHandlers(io) {
       } catch (err) {
         console.error("Erreur live-poll join-event:", err);
       }
+
+      // Visualiseur et Karaoké pour grand écran (synchro état courant)
+      const curVisualizer = screenVisualizerCache.get(eventId) || "cyber-spectrum";
+      socket.emit("screen-visualizer-updated", { visualizerMode: curVisualizer });
+
+      const curKaraoke = karaokeCache.get(eventId) || { enabled: false, autoKaraoke: false, lyricsSize: "normal" };
+      socket.emit("karaoke-mode-updated", curKaraoke);
     });
 
     // Demander une chanson
@@ -608,28 +619,59 @@ function setupSocketHandlers(io) {
           queuePosition = await queueService.getNextQueuePosition(eventId);
         }
 
-        // Insérer la demande (champs validés et tronqués)
-        await db.query(
-          `INSERT INTO requests 
-      (id, event_id, socket_id, client_id, user_name, song_name, artist, spotify_uri, 
-       image_url, preview_url, duration_ms, status, queue_position) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            requestId,
-            eventId,
-            socket.id,
-            clientId,
-            safeUser,
-            safeName,
-            safeArtist,
-            songData.uri,
-            safeImage,
-            safePreview,
-            safeDuration,
-            status,
-            queuePosition,
-          ],
-        );
+        const isKaraoke = (data.isKaraoke === true || data.isKaraoke === 1 || data.isKaraoke === "true") ? 1 : 0;
+
+        // Insérer la demande (avec rétrocompatibilité si la colonne is_karaoke n'existe pas encore)
+        try {
+          await db.query(
+            `INSERT INTO requests 
+        (id, event_id, socket_id, client_id, user_name, song_name, artist, spotify_uri, 
+         image_url, preview_url, duration_ms, status, queue_position, is_karaoke) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              requestId,
+              eventId,
+              socket.id,
+              clientId,
+              safeUser,
+              safeName,
+              safeArtist,
+              songData.uri,
+              safeImage,
+              safePreview,
+              safeDuration,
+              status,
+              queuePosition,
+              isKaraoke,
+            ],
+          );
+        } catch (insertErr) {
+          if (insertErr.code === "ER_BAD_FIELD_ERROR") {
+            await db.query(
+              `INSERT INTO requests 
+          (id, event_id, socket_id, client_id, user_name, song_name, artist, spotify_uri, 
+           image_url, preview_url, duration_ms, status, queue_position) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                requestId,
+                eventId,
+                socket.id,
+                clientId,
+                safeUser,
+                safeName,
+                safeArtist,
+                songData.uri,
+                safeImage,
+                safePreview,
+                safeDuration,
+                status,
+                queuePosition,
+              ],
+            );
+          } else {
+            throw insertErr;
+          }
+        }
 
         // Incrémenter le rate limit
         await rateLimitService.incrementRateLimit(clientId);
@@ -651,6 +693,7 @@ function setupSocketHandlers(io) {
           status,
           rateLimitStatus: newRateLimitStatus,
           abuseScore: abuseAfter.score,
+          isKaraoke: !!isKaraoke,
         });
 
         if (status === "accepted") {
@@ -668,6 +711,9 @@ function setupSocketHandlers(io) {
           io.to(eventId).emit("request-accepted", { requestId });
         } else {
           const request = await queueService.getRequestWithVotes(requestId);
+          if (request && typeof request.is_karaoke === "undefined") {
+            request.is_karaoke = isKaraoke;
+          }
           io.to(eventId).emit("new-request", request);
         }
       } catch (error) {
@@ -1379,7 +1425,30 @@ function setupSocketHandlers(io) {
               ? parseInt(String(requestFreezeMinutes), 10)
               : undefined,
             filterExplicit: data.filterExplicit !== undefined ? !!data.filterExplicit : undefined,
+            screenVisualizerMode: data.screenVisualizerMode !== undefined ? data.screenVisualizerMode : undefined,
+            karaokeEnabled: data.karaokeEnabled !== undefined ? !!data.karaokeEnabled : undefined,
+            karaokeAutoEnabled: data.karaokeAutoEnabled !== undefined ? !!data.karaokeAutoEnabled : undefined,
+            karaokeLyricsSize: data.karaokeLyricsSize || undefined,
           });
+
+          if (data.screenVisualizerMode !== undefined) {
+            const cleanMode = String(data.screenVisualizerMode).trim().toLowerCase();
+            const valid = ["cyber-spectrum", "nebula-3d", "neon-waveform", "bass-ripple", "radial-spectrum", "off", "none"];
+            const mode = valid.includes(cleanMode) ? (cleanMode === "none" ? "off" : cleanMode) : "cyber-spectrum";
+            screenVisualizerCache.set(eventId, mode);
+            io.to(eventId).emit("screen-visualizer-updated", { visualizerMode: mode });
+          }
+
+          if (data.karaokeEnabled !== undefined || data.karaokeAutoEnabled !== undefined || data.karaokeLyricsSize !== undefined) {
+            const current = karaokeCache.get(eventId) || { enabled: false, autoKaraoke: false, lyricsSize: "normal" };
+            const payload = {
+              enabled: data.karaokeEnabled !== undefined ? !!data.karaokeEnabled : current.enabled,
+              autoKaraoke: data.karaokeAutoEnabled !== undefined ? !!data.karaokeAutoEnabled : current.autoKaraoke,
+              lyricsSize: data.karaokeLyricsSize || current.lyricsSize || "normal",
+            };
+            karaokeCache.set(eventId, payload);
+            io.to(eventId).emit("karaoke-mode-updated", payload);
+          }
           await logEventAction(eventId, perm, "update-event-settings", null, {
             hasDonationGoalUpdate: donationGoalAmount !== undefined || donationsRaisedTotal !== undefined,
           });
@@ -1480,6 +1549,53 @@ function setupSocketHandlers(io) {
       }
     });
 
+    // Contrôle distant de l'animation du visualiseur (grand écran)
+    socket.on("set-screen-visualizer", async (data) => {
+      const { eventId, visualizerMode } = data || {};
+      const perm = await verifyActionPermission(socket, eventId, "playback");
+      if (!perm) return;
+
+      const cleanMode = String(visualizerMode || "").trim().toLowerCase();
+      const validModes = ["cyber-spectrum", "nebula-3d", "neon-waveform", "bass-ripple", "radial-spectrum", "off", "none"];
+      const mode = validModes.includes(cleanMode) ? (cleanMode === "none" ? "off" : cleanMode) : "cyber-spectrum";
+
+      screenVisualizerCache.set(eventId, mode);
+      io.to(eventId).emit("screen-visualizer-updated", { visualizerMode: mode });
+
+      try {
+        await db.query("UPDATE events SET screen_visualizer_mode = ? WHERE id = ?", [mode, eventId]);
+      } catch {
+        // tolérance si colonne non migrée
+      }
+      await logEventAction(eventId, perm, "set-screen-visualizer", null, { mode });
+    });
+
+    // Contrôle et configuration du mode Karaoké à distance
+    socket.on("set-karaoke-mode", async (data) => {
+      const { eventId, enabled, autoKaraoke, lyricsSize } = data || {};
+      const perm = await verifyActionPermission(socket, eventId, "playback");
+      if (!perm) return;
+
+      const current = karaokeCache.get(eventId) || { enabled: false, autoKaraoke: false, lyricsSize: "normal" };
+      const newEnabled = typeof enabled === "boolean" ? enabled : current.enabled;
+      const newAuto = typeof autoKaraoke === "boolean" ? autoKaraoke : current.autoKaraoke;
+      const newSize = lyricsSize && ["normal", "large", "xl"].includes(lyricsSize) ? lyricsSize : current.lyricsSize;
+
+      const payload = { enabled: newEnabled, autoKaraoke: newAuto, lyricsSize: newSize };
+      karaokeCache.set(eventId, payload);
+      io.to(eventId).emit("karaoke-mode-updated", payload);
+
+      try {
+        await db.query(
+          "UPDATE events SET karaoke_mode_enabled = ?, karaoke_auto_enabled = ? WHERE id = ?",
+          [newEnabled ? 1 : 0, newAuto ? 1 : 0, eventId]
+        );
+      } catch {
+        // tolérance si colonne non migrée
+      }
+      await logEventAction(eventId, perm, "set-karaoke-mode", null, payload);
+    });
+
     // Mise à jour du compteur spectateurs à la déconnexion
     socket.on("disconnect", () => {
       if (socket.eventId) {
@@ -1497,4 +1613,6 @@ module.exports = setupSocketHandlers;
 module.exports.clearNowPlayingCache = (eventId) => {
   nowPlayingCache.delete(eventId);
   djMessageCache.delete(eventId);
+  screenVisualizerCache.delete(eventId);
+  karaokeCache.delete(eventId);
 };

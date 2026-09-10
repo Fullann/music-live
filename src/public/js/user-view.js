@@ -297,6 +297,8 @@
     document.getElementById("sheetTrackArtist").textContent = track.artist;
     document.getElementById("sheetTrackImg").src            = track.image;
     document.getElementById("nameInput").value = localStorage.getItem("djq-user-name") || "";
+    const karaokeCheck = document.getElementById("requestIsKaraoke");
+    if (karaokeCheck) karaokeCheck.checked = false;
     const sheet = document.getElementById("nameSheet");
     sheet.classList.remove("closed");
     sheet.classList.add("open");
@@ -374,7 +376,8 @@
     }
     const userName = document.getElementById("nameInput").value.trim() || "Anonyme";
     if (userName !== "Anonyme") localStorage.setItem("djq-user-name", userName);
-    socket.emit("request-song", { eventId, songData: pendingTrack, userName, clientId });
+    const isKaraoke = !!document.getElementById("requestIsKaraoke")?.checked;
+    socket.emit("request-song", { eventId, songData: pendingTrack, userName, clientId, isKaraoke });
     closeNameSheet();
   }
 

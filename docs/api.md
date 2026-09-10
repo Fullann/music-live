@@ -706,6 +706,54 @@ Retourne une piste aléatoire de la playlist de secours.
 
 ---
 
+### `GET /api/spotify/lyrics?track=...&artist=...&duration=...`
+
+Récupère les paroles synchronisées (ou brutes) d'une chanson depuis LRCLIB avec mise en cache LRU en mémoire.
+
+**Auth requise :** Non  
+**Query :**
+- `track` : Titre de la chanson (obligatoire)
+- `artist` : Nom de l'artiste (obligatoire)
+- `duration` : Durée en secondes (optionnel)
+
+**Réponse `200` :**
+```json
+{
+  "synced": true,
+  "lines": [
+    { "time": 12.45, "text": "First line of lyrics" },
+    { "time": 16.80, "text": "Second line of lyrics" }
+  ]
+}
+```
+
+---
+
+### `POST /api/spotify/lyrics/batch-check`
+
+Vérifie rapidement la présence de paroles pour un ensemble de titres (jusqu'à 30) pour alimenter l'indicateur 🎤 de la console DJ.
+
+**Auth requise :** Non  
+**Body :**
+```json
+{
+  "tracks": [
+    { "id": "req-1", "track": "Billie Jean", "artist": "Michael Jackson", "duration": 294 }
+  ]
+}
+```
+
+**Réponse `200` :**
+```json
+{
+  "available": {
+    "req-1": true
+  }
+}
+```
+
+---
+
 ## Routes racine (hors préfixe `/api`)
 
 Ces URLs sont servies par Express directement (`src/server.js`). Pas de header CSRF requis (méthodes GET).
