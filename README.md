@@ -2,8 +2,9 @@
 
 Une application web temps réel permettant aux participants d'une soirée de proposer des musiques au DJ via QR code, avec système de votes et lecture automatique Spotify.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
+![Tests](https://img.shields.io/badge/tests-69%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 
 ## ✨ Fonctionnalités
@@ -11,6 +12,7 @@ Une application web temps réel permettant aux participants d'une soirée de pro
 ### 👥 Pour les Participants
 - 📱 **Accès QR Code** : Scan et accès instantané sans compte
 - 🎤 **Option Karaoké ("Je veux chanter au micro ! 🎤")** : Demande spéciale alertant le DJ pour préparer un micro sur scène
+- ⚡ **Mini Blind-Test Flash (15s)** : Interface de quiz interactive tactile avec 4 choix colorés, chronomètre animé, feedback immédiat et célébration sur le podium
 - 🔍 **Recherche Spotify** : Recherche de musiques en temps réel
 - 📊 **Système de Votes** : Vote pour/contre les musiques proposées
 - ⏱️ **Suivi Temps Réel** : Statut des demandes (en attente/accepté/refusé)
@@ -23,6 +25,9 @@ Une application web temps réel permettant aux participants d'une soirée de pro
 ### 🎧 Pour les DJs
 - 🎛️ **Dashboard & Console Live** : Vue d'ensemble et contrôle en temps réel des événements
 - 🖥️ **Mini Monitor Grand Écran** : Aperçu en direct du statut de projection (animation, mode QR vs Karaoké, spectateurs en ligne)
+- ⚡ **Mini Blind-Test Flash Régie** : Déclenchement en 1 clic d'un quiz musical de transition (15s) avec sélection automatique de 3 leurres cohérents et podium en direct
+- ✨ **Suggestions Roue de Camelot & BPM** : Surlignage émeraude et badges explicatifs (`Mix Parfait`, `Relatif`, `Voisins`, `Energy Boost`) sur les morceaux de la queue compatibles pour des transitions sans dissonance
+- 🖥️ **Régie Multi-Display** : Raccourcis directs vers les profils d'écrans dédiés (`/screen/bar`, `/screen/stage`, `/qr`)
 - 🎤 **Indicateur Paroles LRCLIB** : Petite icône 🎤 violette pour les titres disposant de paroles synchronisées prêtes pour le karaoké
 - 🎙️ **Badge Demande Micro** : Signalement immédiat des invités souhaitant chanter sur scène
 - 🎮 **Contrôle Écran Distant** : Bascule du mode Karaoké et changement des animations du visualiseur audio en un clic ou raccourci clavier (<kbd>K</kbd>, <kbd>V</kbd>)
@@ -45,7 +50,13 @@ Une application web temps réel permettant aux participants d'une soirée de pro
   - Rate limiting configurable
   - Animations visualiseur audio et options de paroles grand écran
 
-### 🌐 Pour le Grand Écran & Projection (`/event/:id/qr` & `/qrspectre`)
+### 🌐 Pour le Grand Écran & Projection (`/event/:id/qr`, `/qrspectre`, `/screen/bar`, `/screen/stage`)
+- ⏱️ **Décompte d'Intro Visuel Karaoké (3... 2... 1... CHANTEZ !)** : Anneau radial SVG dégressif à 5s et flash dynamique calé sur le 1er timestamp LRCLIB
+- 🔥 **Jauge d'Énergie Live (Hype Meter) & Pyrotechnie** : Accumulateur de réactions de la salle avec décroissance naturelle et feux d'artifice de 150 particules multicolores et dorées à 100% ("Ambiance en fusion")
+- 🎧 **Affichage Grand Écran Blind-Test Flash** : Disque vinyle mystère en rotation rapide, compte à rebours géant 15s et podium animé des 3 plus rapides
+- 🖥️ **Profils Multi-Display Dédiés** :
+  - `/screen/bar` : Grand QR Code agrandi (280-320px) et mise en avant de la file d'attente pour inciter aux commandes
+  - `/screen/stage` : Visualiseur 3D haute saturation et paroles karaoké en immersion totale plein écran
 - 🌌 **Visualiseur Audio Canvas 60 FPS** : Modes Spectre Cyber, Halo Circulaire Néon, Nébuleuse 3D, Onde Néon, etc.
 - 🎙️ **Mode Entrée Ligne / Micro Réel** : Réactivité aux basses et à l'ambiance sonore réelle de la salle via Web Audio API
 - 🎤 **Mode Karaoké Grand Format** : Paroles synchronisées LRCLIB avec défilement cinétique amorti (`cubic-bezier`) sans saccades
@@ -235,7 +246,7 @@ POST   /api/spotify/play/:eventId           - Lire musique
 ### Client → Server
 ```javascript
 'join-event'             // Rejoindre un événement
-'request-song'           // Demander une musique
+'request-song'           // Demander une musique (avec option isKaraoke)
 'vote'                   // Voter (up/down)
 'accept-request'         // (DJ) Accepter une demande
 'reject-request'         // (DJ) Refuser une demande
@@ -246,6 +257,11 @@ POST   /api/spotify/play/:eventId           - Lire musique
 'mark-played'            // (DJ) Marquer comme jouée
 'mark-skipped'           // (DJ) Marquer un skip (next avant ~85%)
 'update-event-settings'  // (DJ) Incl. repeatCooldownMinutes (anti-répétition)
+'set-screen-visualizer'  // (DJ) Changer l'effet visuel grand écran à distance
+'set-karaoke-mode'       // (DJ) Activer / configurer le karaoké grand écran
+'start-blind-test'       // (DJ) Lancer un mini Blind-Test Flash (15s)
+'submit-blind-test-answer' // (Invité) Soumettre une réponse au Blind-Test
+'end-blind-test'         // (DJ) Clôturer manuellement le Blind-Test
 ```
 
 ### Server → Client
@@ -259,6 +275,13 @@ POST   /api/spotify/play/:eventId           - Lire musique
 'request-error'             // Erreur demande (incl. repeat-cooldown / abuse-throttle)
 'vote-updated'              // Votes mis à jour
 'event-ended'               // Événement terminé
+'screen-visualizer-updated' // Mode d'animation grand écran synchronisé
+'karaoke-mode-updated'      // État et taille des paroles karaoké synchronisés
+'blind-test-started'        // Session Blind-Test démarrée (options diffusées aux invités)
+'blind-test-dj-started'     // Confirmation au DJ avec bonne réponse
+'blind-test-answer-ack'     // Accusé de réception de réponse invité
+'blind-test-activity'       // Compteur de réponses live
+'blind-test-results'        // Révélation du morceau et podium des gagnants
 ```
 
 ## 🎨 Interface Utilisateur
@@ -272,8 +295,10 @@ POST   /api/spotify/play/:eventId           - Lire musique
 ### Pages DJ (authentifiées)
 - `/dashboard` - Liste événements actifs
 - `/profile` - Profil DJ (nom, stats, Spotify)
-- `/dj/:eventId` - Console DJ (gestion queue)
-- `/event/:eventId/qr` - Affichage QR / grand écran (selon routes serveur)
+- `/dj/:eventId` - Console DJ (gestion queue, blind-test, monitor d'écrans)
+- `/event/:eventId/qr` - Affichage Grand Écran Standard
+- `/event/:eventId/screen/bar` - Affichage Grand Écran Profil Bar (Grand QR & queue)
+- `/event/:eventId/screen/stage` - Affichage Grand Écran Profil Scène (Visualiseur 3D & Karaoké)
 - `/history` - Historique événements
 - `/event/:eventId/stats` - Statistiques détaillées
 
@@ -369,25 +394,42 @@ Ensuite, chaque push sur `main` déclenche le déploiement automatique.
 
 ## 🧪 Tests
 
+La suite de tests automatisée utilise le runner natif `node:test` et `node:assert/strict` :
+
 ```bash
-# TODO: Implémenter tests
+# Lancer tous les tests unitaires
 npm test
 ```
+
+Actuellement **69 tests unitaires passent avec 100% de succès** :
+- Pénalités et seuils du service anti-abus
+- Batching haute concurrence des votes et réactions
+- Détection harmonique et Roue de Camelot (`getCamelotInfo`, `getHarmonicMatch`)
+- Analyseur de paroles LRCLIB
+- Génération de QR codes brandés SVG
+- Assainissement et middlewares de sécurité
+- Décompte d'intro visuel Karaoké (3-2-1 Chantez)
+- Jauge d'énergie Hype Meter et pyrotechnie
+- Moteur de Blind-Test Flash et classement au centième de seconde
+- Résolution des profils d'affichage multi-écrans (`bar`, `stage`, `standard`)
+- Utilitaires temporels et validateurs Express
 
 ## 📈 Roadmap
 
 - [x] Endpoint `/health` pour monitoring externe (UptimeRobot, Better Stack…)
-- [ ] Tests unitaires et intégration
+- [x] Tests unitaires complets (69 tests unitaires natifs `node:test`)
+- [x] CI/CD automatique FTPS vers o2switch avec GitHub Actions
+- [x] Roue de Camelot & suggestions harmoniques en queue DJ
+- [x] Mode Karaoké distant avec décompte d'intro et scroll cinétique
+- [x] Jauge d'Énergie Live (Hype Meter) & feux d'artifice 100%
+- [x] Mini Blind-Test Flash de transition (15s)
+- [x] Profils d'Écrans Multiples (`/screen/bar` vs `/screen/stage`)
 - [ ] Docker Compose complet
-- [ ] CI/CD avec GitHub Actions
 - [ ] Monitoring avec Sentry
-- [ ] Analytics événements
-- [x] Analytics live avancées + export CSV
 - [ ] Mode playlist automatique
 - [ ] Support multi-langues
 - [ ] Application mobile (React Native)
 - [ ] Intégration YouTube Music
-- [ ] Système de modération automatique
 - [ ] Thèmes personnalisables
 
 ## 🤝 Contribution
