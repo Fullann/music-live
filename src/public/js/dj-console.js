@@ -467,6 +467,18 @@
   if (liveStatsBtnEl) liveStatsBtnEl.href = `/event/${eventId}/stats`;
   document.getElementById("openPublicDisplay")?.addEventListener("click", openPublicDisplay);
   document.getElementById("openPublicDisplayFromQR")?.addEventListener("click", openPublicDisplay);
+  document.getElementById("btnOpenScreenStandard")?.addEventListener("click", () => {
+    window.open(`/event/${eventId}/qr`, "_blank", "noopener,noreferrer");
+    closeQRCodePanel();
+  });
+  document.getElementById("btnOpenScreenBar")?.addEventListener("click", () => {
+    window.open(`/event/${eventId}/screen/bar`, "_blank", "noopener,noreferrer");
+    closeQRCodePanel();
+  });
+  document.getElementById("btnOpenScreenStage")?.addEventListener("click", () => {
+    window.open(`/event/${eventId}/screen/stage`, "_blank", "noopener,noreferrer");
+    closeQRCodePanel();
+  });
 
   document.getElementById("addSongBtn")?.addEventListener("click", showAddSongPanel);
   document.getElementById("closeAddSong")?.addEventListener("click", closeAddSongPanel);
@@ -2376,8 +2388,40 @@
       const hasLrc    = hasLyricsAvailable(request.song_name, request.artist);
       const isKaraokeReq = request.is_karaoke === true || request.is_karaoke === 1 || request.is_karaoke === "1";
 
+      let harmonicCardStyle = "border-bottom:1px solid var(--border)";
+      let harmonicCardClass = "hover:bg-white/[0.02]";
+      let harmonicSuggestionBadge = "";
+
+      const curTrackId = currentPlayingUri ? getTrackId(currentPlayingUri) : null;
+      const curF = curTrackId ? audioFeatures[curTrackId] : null;
+      const reqTrackId = request.spotify_uri ? getTrackId(request.spotify_uri) : null;
+      const reqF = reqTrackId ? audioFeatures[reqTrackId] : null;
+
+      if (curF && reqF && request.spotify_uri !== currentPlayingUri) {
+        const curKey = getCamelotInfo(curF.key, curF.mode);
+        const reqKey = getCamelotInfo(reqF.key, reqF.mode);
+        if (curKey && reqKey) {
+          const match = getHarmonicMatch(curKey.camelot, reqKey.camelot);
+          if (match) {
+            let bpmDiff = null;
+            if (curF.bpm && reqF.bpm) {
+              bpmDiff = Math.abs(Math.round(reqF.bpm - curF.bpm));
+            }
+            if (bpmDiff === null || bpmDiff <= 8) {
+              harmonicCardStyle = "border-bottom:1px solid rgba(16,185,129,0.35);background:rgba(16,185,129,0.06);box-shadow:inset 0 0 20px rgba(16,185,129,0.04)";
+              harmonicCardClass = "hover:bg-emerald-500/10";
+              harmonicSuggestionBadge = `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm" title="Transition harmonique recommandée par rapport au titre en cours">
+                  ✨ Transition Idéale (${match.label}${bpmDiff !== null ? ` · Δ${bpmDiff} BPM` : ""})
+                </span>
+              `;
+            }
+          }
+        }
+      }
+
       return `
-      <div class="flex items-center gap-3 px-4 py-3.5 select-none hover:bg-white/[0.02] transition" data-id="${request.id}" style="border-bottom:1px solid var(--border)">
+      <div class="flex items-center gap-3 px-4 py-3.5 select-none ${harmonicCardClass} transition" data-id="${request.id}" style="${harmonicCardStyle}">
         <!-- Handle drag -->
         <div class="drag-handle shrink-0 flex flex-col gap-0.5 cursor-grab active:cursor-grabbing px-1.5 py-2 rounded-lg hover:bg-white/[0.05]" title="Glisser pour réordonner" style="color:var(--text-muted)">
           <span class="block w-3.5 h-0.5 rounded-full" style="background:currentColor"></span>
@@ -2399,6 +2443,7 @@
                 <span class="text-xs">🎤</span> Demande Karaoké
               </span>
             ` : ""}
+            ${harmonicSuggestionBadge}
             <span class="badge badge-accent text-[10px] font-mono">~${waitMin} min</span>
             <span class="text-[11px] font-bold" style="color:${netColor}">Net: ${netVotes>0?"+":""}${netVotes}</span>
           </div>
@@ -2683,6 +2728,187 @@
           reconnectSpotifyPlayer(true);
         });
       }
+    }
+  });
+
+  // ── Régie Mini Blind-Test Flash DJ ──
+  const blindTestModal = document.getElementById("blindTestDjModal");
+  const btnBlindTestFlash = document.getElementById("btnBlindTestFlash");
+  const closeBlindTestDjModal = document.getElementById("closeBlindTestDjModal");
+  const blindTestTrackSelect = document.getElementById("blindTestTrackSelect");
+  const btnLaunchBlindTest = document.getElementById("btnLaunchBlindTest");
+  const btnStopBlindTest = document.getElementById("btnStopBlindTest");
+  const blindTestLiveStatus = document.getElementById("blindTestDjLiveStatus");
+  const blindTestTimeRemaining = document.getElementById("blindTestDjTimeRemaining");
+  const blindTestCorrectHint = document.getElementById("blindTestDjCorrectHint");
+  const blindTestVotesCount = document.getElementById("blindTestDjVotesCount");
+
+  let djBtTimerInterval = null;
+
+  function openBlindTestModal() {
+    if (!blindTestModal) return;
+    blindTestModal.classList.remove("hidden");
+    
+    if (blindTestTrackSelect) {
+      const eligibleTracks = [];
+      queue.forEach((r) => {
+        if (r.song_name && !eligibleTracks.some((t) => t.song_name === r.song_name)) {
+          eligibleTracks.push(r);
+        }
+      });
+      recentlyPlayed.forEach((r) => {
+        if (r.song_name && !eligibleTracks.some((t) => t.song_name === r.song_name)) {
+          eligibleTracks.push(r);
+        }
+      });
+
+      blindTestTrackSelect.innerHTML = `<option value="auto">🎲 Aléatoire intelligent (${eligibleTracks.length} morceaux dispo)</option>` +
+        eligibleTracks.map((t) => `
+          <option value="${encodeURIComponent(JSON.stringify({ song_name: t.song_name, artist: t.artist, preview_url: t.preview_url || "", image_url: t.image_url || "" }))}">
+            ${t.song_name} — ${t.artist}
+          </option>
+        `).join("");
+    }
+  }
+
+  function closeBlindTestModal() {
+    blindTestModal?.classList.add("hidden");
+  }
+
+  btnBlindTestFlash?.addEventListener("click", openBlindTestModal);
+  closeBlindTestDjModal?.addEventListener("click", closeBlindTestModal);
+  blindTestModal?.addEventListener("click", (e) => {
+    if (e.target.id === "blindTestDjModal") closeBlindTestModal();
+  });
+
+  btnLaunchBlindTest?.addEventListener("click", () => {
+    const selectedVal = blindTestTrackSelect?.value || "auto";
+    const duration = parseInt(document.getElementById("blindTestDurationSelect")?.value, 10) || 15;
+
+    const pool = [];
+    const seenKeys = new Set();
+    const addPool = (t) => {
+      if (!t || !t.song_name || !t.artist) return;
+      const k = `${t.song_name.toLowerCase().trim()}:::${t.artist.toLowerCase().trim()}`;
+      if (!seenKeys.has(k)) {
+        seenKeys.add(k);
+        pool.push(t);
+      }
+    };
+    queue.forEach(addPool);
+    recentlyPlayed.forEach(addPool);
+    requests.forEach(addPool);
+
+    let targetTrack = null;
+    if (selectedVal !== "auto") {
+      try { targetTrack = JSON.parse(decodeURIComponent(selectedVal)); } catch {}
+    }
+    if (!targetTrack && pool.length > 0) {
+      targetTrack = pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    if (!targetTrack) {
+      showToast("Ajoutez au moins un morceau à la queue pour lancer le Blind-Test !");
+      return;
+    }
+
+    const distractors = pool.filter((t) => t.song_name !== targetTrack.song_name);
+    for (let i = distractors.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [distractors[i], distractors[j]] = [distractors[j], distractors[i]];
+    }
+
+    const fallbackNames = [
+      { song_name: "Get Lucky", artist: "Daft Punk" },
+      { song_name: "Blinding Lights", artist: "The Weeknd" },
+      { song_name: "Shape of You", artist: "Ed Sheeran" },
+      { song_name: "Billie Jean", artist: "Michael Jackson" },
+    ];
+    let chosenDistractors = distractors.slice(0, 3);
+    while (chosenDistractors.length < 3) {
+      const fb = fallbackNames[chosenDistractors.length];
+      if (!chosenDistractors.some((d) => d.song_name === fb.song_name) && targetTrack.song_name !== fb.song_name) {
+        chosenDistractors.push(fb);
+      }
+    }
+
+    const rawOptions = [
+      `${targetTrack.song_name} — ${targetTrack.artist}`,
+      `${chosenDistractors[0].song_name} — ${chosenDistractors[0].artist}`,
+      `${chosenDistractors[1].song_name} — ${chosenDistractors[1].artist}`,
+      `${chosenDistractors[2].song_name} — ${chosenDistractors[2].artist}`,
+    ];
+
+    const indices = [0, 1, 2, 3];
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    const finalOptions = indices.map((idx) => rawOptions[idx]);
+    const correctIndex = indices.indexOf(0);
+
+    socket.emit("start-blind-test", {
+      eventId,
+      question: "Quel est ce morceau ?",
+      options: finalOptions,
+      correctIndex,
+      mysteryAudioUrl: targetTrack.preview_url || null,
+      durationSec: duration,
+      trackInfo: {
+        title: targetTrack.song_name,
+        artist: targetTrack.artist,
+        imageUrl: targetTrack.image_url || "",
+      },
+    });
+
+    btnLaunchBlindTest.classList.add("hidden");
+    btnStopBlindTest?.classList.remove("hidden");
+    blindTestLiveStatus?.classList.remove("hidden");
+    if (blindTestCorrectHint) {
+      blindTestCorrectHint.textContent = `🎯 Réponse (#${correctIndex + 1}) : ${finalOptions[correctIndex]}`;
+    }
+    if (blindTestVotesCount) blindTestVotesCount.textContent = "0 réponse enregistrée";
+
+    let remaining = duration;
+    if (blindTestTimeRemaining) blindTestTimeRemaining.textContent = `${remaining}s`;
+    if (djBtTimerInterval) clearInterval(djBtTimerInterval);
+    const startTs = Date.now();
+    djBtTimerInterval = setInterval(() => {
+      const elapsed = (Date.now() - startTs) / 1000;
+      remaining = Math.max(0, Math.ceil(duration - elapsed));
+      if (blindTestTimeRemaining) blindTestTimeRemaining.textContent = `${remaining}s`;
+      if (remaining <= 0) {
+        clearInterval(djBtTimerInterval);
+        djBtTimerInterval = null;
+      }
+    }, 250);
+  });
+
+  btnStopBlindTest?.addEventListener("click", () => {
+    socket.emit("end-blind-test", { eventId });
+  });
+
+  socket.on("blind-test-activity", (data) => {
+    if (blindTestVotesCount && data && typeof data.totalAnswers === "number") {
+      blindTestVotesCount.textContent = `${data.totalAnswers} réponse${data.totalAnswers > 1 ? "s" : ""} reçue${data.totalAnswers > 1 ? "s" : ""}`;
+    }
+  });
+
+  socket.on("blind-test-results", (data) => {
+    if (djBtTimerInterval) {
+      clearInterval(djBtTimerInterval);
+      djBtTimerInterval = null;
+    }
+    btnLaunchBlindTest?.classList.remove("hidden");
+    btnStopBlindTest?.classList.add("hidden");
+    if (blindTestTimeRemaining) blindTestTimeRemaining.textContent = "Terminé !";
+
+    const winners = Array.isArray(data.winners) ? data.winners : [];
+    if (winners.length > 0) {
+      const topWin = winners[0];
+      showToast(`🏆 Gagnant Blind-Test : ${topWin.userName} en ${topWin.timeSec}s !`);
+    } else {
+      showToast("Blind-Test terminé : aucun gagnant cette fois-ci.");
     }
   });
 

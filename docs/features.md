@@ -437,6 +437,55 @@ Le modérateur ouvre le lien partagé. Le serveur :
 
 ---
 
+## 🎤 Décompte d'Intro Visuel Karaoké (3... 2... 1... CHANTEZ !)
+
+Afin d'éliminer le stress de l'invité qui s'apprête à chanter au micro, le grand écran affiche automatiquement un compte à rebours dynamique basé sur le timestamp de la première parole issue de LRCLIB :
+- **Seuil d'activation** : Activé automatiquement si l'introduction instrumentale dure plus de 3.5 secondes.
+- **5 secondes avant les paroles** : Apparition d'un disque central avec anneau radial lumineux dégressif et mention `"READY"`.
+- **3... 2... 1...** : Chiffres géants animés calés à la seconde près.
+- **Top départ** : Flash lumineux `"CHANTEZ ! 🎤 - C'est à vous !"` dès la première mesure chantée, puis transition fluide vers les paroles défilantes.
+
+---
+
+## 🔥 Jauge d'Énergie Live (Hype Meter) & Pyrotechnie Visuelle
+
+Transforme la participation de la salle en émulation collective :
+- **Agrégation temps réel** : Chaque réaction envoyée par les invités (`🔥`, `⚡`, `❤️`, `🎉`, etc.) incrémente la jauge d'énergie de +4% à +16% selon l'intensité des salves.
+- **Décroissance naturelle (Decay)** : En l'absence de réactions, la jauge redescend doucement de ~1.8% par seconde.
+- **Seuil 100% (Ambiance en Fusion)** : Déclenchement d'un feu d'artifice de particules multicolores et dorées sur le canvas à triple point d'impact, accompagné d'une bannière de célébration `"🔥 AMBIANCE EN FUSION 100% ! 🎉"`.
+
+---
+
+## ⚡ Mini Blind-Test Flash de transition
+
+Permet au DJ de lancer en 1 clic un mini quiz musical interactif express de 15 secondes entre deux séries de morceaux :
+- **Côté DJ** : Clic sur `⚡ Blind-Test` dans la barre d'outils, sélection automatique ou manuelle d'un titre, tirage de 3 leurres cohérents et diffusion instantanée.
+- **Côté Invités** : Surgissement d'une interface de jeu tactile avec 4 propositions de titres/artistes colorées et chronomètre 15s. Les réponses sont horodatées à la milliseconde près.
+- **Côté Grand Écran** : Disque vinyle mystère animé, compte à rebours 15s et compteur de réponses en direct.
+- **Podium des Vainqueurs** : Dès la fin du chronomètre, affichage des médailles d'or 🥇, argent 🥈 et bronze 🥉 avec temps de réaction exacts sur le grand écran et sur les smartphones des gagnants.
+
+---
+
+## 🎛️ Suggestions Automatiques par Roue de Camelot & BPM
+
+Optimise les transitions musicales en régie DJ grâce à la détection harmonique automatique :
+- **Analyse temps réel** : Comparaison permanente entre le morceau en cours de lecture (`currentPlayingUri`) et tous les morceaux de la file d'attente.
+- **Compatibilités détectées** : Mix Parfait (même clé, ex: 8B ➔ 8B), Voisins Harmoniques (8A ➔ 9A ou 7A), Relatif Majeur/Mineur (8A ➔ 8B), ou Energy Boost (+2).
+- **Filtre de tempo** : Validation que l'écart de tempo $\Delta \text{BPM} \le 8$.
+- **Surlignage visuel** : Les cartes de queue compatibles s'illuminent d'une bordure et d'un fond émeraude néon avec badge explicatif `✨ Transition Idéale (Mix Parfait · Δ2 BPM)`.
+
+---
+
+## 🖥️ Profils d'Écrans Multiples (Multi-Display)
+
+Permet d'alimenter plusieurs téléviseurs et projecteurs avec des présentations adaptées au lieu :
+- **`/event/:eventId/screen/bar`** : Profil Bar / Entrée avec QR Code géant prioritaire au centre (260-320px) et file d'attente élargie pour inciter aux commandes.
+- **`/event/:eventId/screen/stage`** : Profil Scène / Dancefloor avec visualiseur audio 3D haute saturation et karaoké en immersion plein écran.
+- **`/event/:eventId/qr` ou `/qrspectre`** : Profil Standard équilibré.
+- Des boutons d'accès rapide sont directement intégrés dans la fenêtre QR Code de la console DJ.
+
+---
+
 ## CI/CD et déploiement automatique
 
 Tout push sur `main` déclenche automatiquement :
@@ -445,3 +494,4 @@ Tout push sur `main` déclenche automatiquement :
 3. L'app est mise à jour en production
 
 Voir [deployment.md](./deployment.md) pour les détails.
+

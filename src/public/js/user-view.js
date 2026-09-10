@@ -1430,3 +1430,149 @@
       showToast("Image téléchargée !");
     }, "image/png");
   });
+
+  // ── Mini Blind-Test Flash Invité ──
+  let guestBtTimerInterval = null;
+  let activeGuestBtId = null;
+  let hasAnsweredBt = false;
+  let btStartTime = 0;
+
+  socket.on("blind-test-started", (data) => {
+    if (!data || !data.options || data.options.length < 2) return;
+    activeGuestBtId = data.id;
+    hasAnsweredBt = false;
+    btStartTime = Date.now();
+
+    const modal = document.getElementById("blindTestGuestModal");
+    const qEl = document.getElementById("guestBtQuestion");
+    const timerBadge = document.getElementById("guestBtTimerBadge");
+    const timerBar = document.getElementById("guestBtTimerBar");
+    const optContainer = document.getElementById("guestBtOptionsContainer");
+    const feedbackEl = document.getElementById("guestBtFeedback");
+
+    if (!modal || !optContainer) return;
+    modal.classList.remove("hidden");
+    if (feedbackEl) feedbackEl.classList.add("hidden");
+    if (qEl) qEl.textContent = data.question || "Quel est ce morceau ?";
+
+    const duration = data.durationSec || 15;
+    let remaining = duration;
+    if (timerBadge) timerBadge.textContent = `${remaining}s`;
+    if (timerBar) timerBar.style.width = "100%";
+
+    const buttonStyles = [
+      "from-blue-600/30 to-indigo-600/30 border-blue-500/50 hover:border-blue-400 text-blue-100",
+      "from-purple-600/30 to-pink-600/30 border-purple-500/50 hover:border-purple-400 text-purple-100",
+      "from-emerald-600/30 to-teal-600/30 border-emerald-500/50 hover:border-emerald-400 text-emerald-100",
+      "from-amber-600/30 to-orange-600/30 border-amber-500/50 hover:border-amber-400 text-amber-100",
+    ];
+
+    optContainer.innerHTML = data.options.map((opt, idx) => `
+      <button type="button" data-option-idx="${idx}" class="guest-bt-opt-btn w-full p-3.5 rounded-2xl bg-gradient-to-r ${buttonStyles[idx % 4]} border font-bold text-xs sm:text-sm text-left transition-all active:scale-95 shadow-md flex items-center justify-between cursor-pointer">
+        <span class="truncate pr-2">${opt}</span>
+        <span class="text-xs opacity-60">#${idx + 1}</span>
+      </button>
+    `).join("");
+
+    optContainer.querySelectorAll(".guest-bt-opt-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (hasAnsweredBt) return;
+        hasAnsweredBt = true;
+        const optIdx = parseInt(btn.getAttribute("data-option-idx"), 10);
+        const elapsedMs = Date.now() - btStartTime;
+
+        btn.classList.add("ring-2", "ring-white", "scale-[1.02]");
+        optContainer.querySelectorAll(".guest-bt-opt-btn").forEach((b) => {
+          if (b !== btn) b.classList.add("opacity-50", "pointer-events-none");
+        });
+
+        const currentGuestName = localStorage.getItem("guest_user_name") || document.getElementById("userNameInput")?.value || "Invité";
+        socket.emit("submit-blind-test-answer", {
+          eventId,
+          testId: activeGuestBtId,
+          answerIndex: optIdx,
+          answerTimeMs: elapsedMs,
+          userName: currentGuestName,
+        });
+
+        if (feedbackEl) {
+          feedbackEl.textContent = "⏱️ Réponse transmise ! Verdict au chrono...";
+          feedbackEl.className = "w-full py-2.5 px-3 rounded-xl text-xs font-black mb-3 bg-purple-500/20 text-purple-300 border border-purple-500/40";
+          feedbackEl.classList.remove("hidden");
+        }
+      });
+    });
+
+    if (guestBtTimerInterval) clearInterval(guestBtTimerInterval);
+    guestBtTimerInterval = setInterval(() => {
+      const elapsed = (Date.now() - btStartTime) / 1000;
+      remaining = Math.max(0, duration - elapsed);
+      if (timerBadge) timerBadge.textContent = `${Math.ceil(remaining)}s`;
+      if (timerBar) {
+        const pct = Math.max(0, (remaining / duration) * 100);
+        timerBar.style.width = `${pct}%`;
+      }
+      if (remaining <= 0) {
+        clearInterval(guestBtTimerInterval);
+        guestBtTimerInterval = null;
+      }
+    }, 100);
+  });
+
+  socket.on("blind-test-answer-ack", (ack) => {
+    const feedbackEl = document.getElementById("guestBtFeedback");
+    if (!feedbackEl) return;
+    feedbackEl.classList.remove("hidden");
+    if (ack.isCorrect) {
+      feedbackEl.textContent = "🎯 Bien joué ! Bonne réponse enregistrée !";
+      feedbackEl.className = "w-full py-2.5 px-3 rounded-xl text-xs font-black mb-3 bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-lg";
+    } else {
+      feedbackEl.textContent = "❌ Aïe, ce n'est pas le bon titre !";
+      feedbackEl.className = "w-full py-2.5 px-3 rounded-xl text-xs font-black mb-3 bg-red-500/25 text-red-300 border border-red-500/50";
+    }
+  });
+
+  socket.on("blind-test-results", (results) => {
+    if (guestBtTimerInterval) {
+      clearInterval(guestBtTimerInterval);
+      guestBtTimerInterval = null;
+    }
+
+    const optContainer = document.getElementById("guestBtOptionsContainer");
+    const feedbackEl = document.getElementById("guestBtFeedback");
+
+    if (optContainer && typeof results.correctIndex === "number") {
+      const allBtns = optContainer.querySelectorAll(".guest-bt-opt-btn");
+      allBtns.forEach((b) => {
+        const idx = parseInt(b.getAttribute("data-option-idx"), 10);
+        if (idx === results.correctIndex) {
+          b.className = "guest-bt-opt-btn w-full p-3.5 rounded-2xl bg-emerald-500/30 border-2 border-emerald-400 font-black text-xs sm:text-sm text-left shadow-lg text-emerald-100 flex items-center justify-between";
+        } else {
+          b.classList.add("opacity-35");
+        }
+      });
+    }
+
+    const currentGuestName = localStorage.getItem("guest_user_name") || document.getElementById("userNameInput")?.value || "";
+    const winners = Array.isArray(results.winners) ? results.winners : [];
+    const myWin = winners.find((w) => w.userName && w.userName.toLowerCase() === currentGuestName.toLowerCase());
+
+    if (feedbackEl) {
+      feedbackEl.classList.remove("hidden");
+      if (myWin) {
+        feedbackEl.textContent = `🏆 Podium ! Tu es rang #${myWin.rank} en ${myWin.timeSec}s ! 🎉`;
+        feedbackEl.className = "w-full py-3 px-3 rounded-xl text-xs font-black mb-3 bg-amber-500/30 text-amber-200 border-2 border-amber-400 shadow-xl";
+      } else {
+        const trackTitle = results.trackInfo?.title || "Ce morceau";
+        feedbackEl.textContent = `🎶 C'était bien : ${trackTitle}`;
+      }
+    }
+
+    setTimeout(() => {
+      document.getElementById("blindTestGuestModal")?.classList.add("hidden");
+    }, 8000);
+  });
+
+  document.getElementById("btnDismissGuestBt")?.addEventListener("click", () => {
+    document.getElementById("blindTestGuestModal")?.classList.add("hidden");
+  });

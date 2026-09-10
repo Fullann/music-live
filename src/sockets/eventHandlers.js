@@ -216,6 +216,41 @@ const DJ_MESSAGE_TTL_MS = 5 * 60 * 1000;
 const screenVisualizerCache = new Map(); // eventId → 'cyber-spectrum' | 'nebula-3d' | 'neon-waveform' | 'bass-ripple' | 'off'
 const karaokeCache = new Map(); // eventId → { enabled: boolean, autoKaraoke: boolean, lyricsSize: string }
 
+// Stockage en mémoire des sessions de Mini Blind-Test Flash actif
+const activeBlindTests = new Map(); // eventId → { id, question, options, correctIndex, mysteryAudioUrl, durationSec, startTime, answers, timer, trackInfo }
+
+function finishBlindTest(io, eventId) {
+  const bt = activeBlindTests.get(eventId);
+  if (!bt) return;
+  if (bt.timer) clearTimeout(bt.timer);
+
+  const correctAnswers = [];
+  bt.answers.forEach((ans) => {
+    if (ans.isCorrect) {
+      correctAnswers.push(ans);
+    }
+  });
+
+  correctAnswers.sort((a, b) => a.answerTimeMs - b.answerTimeMs);
+
+  const winners = correctAnswers.slice(0, 3).map((a, idx) => ({
+    rank: idx + 1,
+    userName: a.userName,
+    timeSec: (a.answerTimeMs / 1000).toFixed(2),
+  }));
+
+  io.to(eventId).emit("blind-test-results", {
+    id: bt.id,
+    correctIndex: bt.correctIndex,
+    trackInfo: bt.trackInfo,
+    totalAnswers: bt.answers.size,
+    correctCount: correctAnswers.length,
+    winners,
+  });
+
+  activeBlindTests.delete(eventId);
+}
+
 /** Refus récents éligibles à « Annuler » (fenêtre courte, mémoire processus) */
 const recentRejectUndo = new Map(); // requestId → rejectedAt (ms)
 const UNDO_REJECT_WINDOW_MS = 8000;
@@ -428,6 +463,23 @@ function setupSocketHandlers(io) {
 
       const curKaraoke = karaokeCache.get(eventId) || { enabled: false, autoKaraoke: false, lyricsSize: "normal" };
       socket.emit("karaoke-mode-updated", curKaraoke);
+
+      // Session Blind-Test Flash active si en cours
+      const activeBt = activeBlindTests.get(eventId);
+      if (activeBt) {
+        const elapsedSec = (Date.now() - activeBt.startTime) / 1000;
+        const remainingSec = Math.max(0, Math.ceil(activeBt.durationSec - elapsedSec));
+        if (remainingSec > 0) {
+          socket.emit("blind-test-started", {
+            id: activeBt.id,
+            question: activeBt.question,
+            options: activeBt.options,
+            durationSec: remainingSec,
+            mysteryAudioUrl: activeBt.mysteryAudioUrl,
+            trackInfo: activeBt.trackInfo ? { title: "Morceau Mystère", artist: "Blind-Test Flash" } : {},
+          });
+        }
+      }
     });
 
     // Demander une chanson
@@ -1596,6 +1648,106 @@ function setupSocketHandlers(io) {
       await logEventAction(eventId, perm, "set-karaoke-mode", null, payload);
     });
 
+    // Mini Blind-Test Flash: Démarrer un quiz musical
+    socket.on("start-blind-test", async (data) => {
+      const { eventId, question, options, correctIndex, mysteryAudioUrl, durationSec, trackInfo } = data || {};
+      const perm = await verifyActionPermission(socket, eventId, "playback");
+      if (!perm) return;
+
+      const opts = Array.isArray(options) ? options.map((o) => String(o || "").trim().slice(0, 100)).filter(Boolean) : [];
+      if (opts.length < 2) return;
+      const cIdx = parseInt(String(correctIndex), 10);
+      if (isNaN(cIdx) || cIdx < 0 || cIdx >= opts.length) return;
+
+      // Nettoyage session précédente
+      const prevBt = activeBlindTests.get(eventId);
+      if (prevBt && prevBt.timer) clearTimeout(prevBt.timer);
+
+      const dSec = Math.min(Math.max(parseInt(String(durationSec), 10) || 15, 5), 30);
+      const testId = uuidv4();
+      const testSession = {
+        id: testId,
+        eventId,
+        question: String(question || "Quel est ce morceau ?").trim().slice(0, 150),
+        options: opts,
+        correctIndex: cIdx,
+        mysteryAudioUrl: typeof mysteryAudioUrl === "string" ? mysteryAudioUrl : null,
+        durationSec: dSec,
+        startTime: Date.now(),
+        answers: new Map(),
+        trackInfo: trackInfo || { title: opts[cIdx], artist: "Morceau mystère" },
+        timer: setTimeout(() => {
+          finishBlindTest(io, eventId);
+        }, dSec * 1000),
+      };
+
+      activeBlindTests.set(eventId, testSession);
+
+      // Émission publique (sans correctIndex)
+      io.to(eventId).emit("blind-test-started", {
+        id: testId,
+        question: testSession.question,
+        options: testSession.options,
+        durationSec: dSec,
+        mysteryAudioUrl: testSession.mysteryAudioUrl,
+        trackInfo: { title: "Morceau Mystère", artist: "Blind-Test Flash" },
+      });
+
+      // Notification au DJ avec index de réponse
+      socket.emit("blind-test-dj-started", {
+        id: testId,
+        correctIndex: cIdx,
+        durationSec: dSec,
+      });
+
+      await logEventAction(eventId, perm, "start-blind-test", null, { testId, dSec });
+    });
+
+    // Mini Blind-Test Flash: Soumettre une réponse invité
+    socket.on("submit-blind-test-answer", (data) => {
+      const { eventId, testId, answerIndex, answerTimeMs, userName } = data || {};
+      const clientId = socket.clientId || socket.id;
+      if (!eventId || !clientId) return;
+
+      const bt = activeBlindTests.get(eventId);
+      if (!bt || (testId && bt.id !== testId)) return;
+      if (bt.answers.has(clientId)) return; // 1 seule réponse par participant
+
+      const ansIdx = parseInt(String(answerIndex), 10);
+      if (isNaN(ansIdx) || ansIdx < 0 || ansIdx >= bt.options.length) return;
+
+      const elapsed = Math.max(50, Math.min(Date.now() - bt.startTime, bt.durationSec * 1000));
+      const clientTimeMs = Math.max(50, Math.min(parseInt(String(answerTimeMs), 10) || elapsed, bt.durationSec * 1000));
+      const isCorrect = ansIdx === bt.correctIndex;
+
+      bt.answers.set(clientId, {
+        clientId,
+        userName: String(userName || "Invité").trim().slice(0, 30) || "Invité",
+        answerIndex: ansIdx,
+        answerTimeMs: clientTimeMs,
+        isCorrect,
+      });
+
+      socket.emit("blind-test-answer-ack", {
+        testId: bt.id,
+        answerIndex: ansIdx,
+        isCorrect,
+      });
+
+      io.to(eventId).emit("blind-test-activity", {
+        testId: bt.id,
+        totalAnswers: bt.answers.size,
+      });
+    });
+
+    // Mini Blind-Test Flash: Clôturer manuellement par le DJ
+    socket.on("end-blind-test", async (data) => {
+      const { eventId } = data || {};
+      const perm = await verifyActionPermission(socket, eventId, "playback");
+      if (!perm) return;
+      finishBlindTest(io, eventId);
+    });
+
     // Mise à jour du compteur spectateurs à la déconnexion
     socket.on("disconnect", () => {
       if (socket.eventId) {
@@ -1615,4 +1767,7 @@ module.exports.clearNowPlayingCache = (eventId) => {
   djMessageCache.delete(eventId);
   screenVisualizerCache.delete(eventId);
   karaokeCache.delete(eventId);
+  const bt = activeBlindTests.get(eventId);
+  if (bt && bt.timer) clearTimeout(bt.timer);
+  activeBlindTests.delete(eventId);
 };

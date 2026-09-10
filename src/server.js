@@ -329,9 +329,10 @@ app.get("/user/:eventId", async (req, res) => {
   }
 });
 
-app.get(["/event/:eventId/qr", "/event/:eventId/qrspectre"], (req, res) => {
+app.get(["/event/:eventId/qr", "/event/:eventId/qrspectre", "/event/:eventId/screen/:profile"], (req, res) => {
   res.sendFile(path.join(__dirname, "/views/qr-display.html"));
 });
+
 
 app.get("/event/:eventId/thank-you", (req, res) => {
   res.sendFile(path.join(__dirname, "/views/thank-you.html"));

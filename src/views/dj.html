@@ -67,6 +67,11 @@
       <span class="hidden sm:inline">Karaoké</span>
       <span id="quickKaraokeBadge" class="text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7)">OFF</span>
     </button>
+    <!-- Bouton Rapide Blind-Test Flash 15s -->
+    <button id="btnBlindTestFlash" class="btn btn-ghost btn-sm font-semibold flex items-center gap-1.5 transition-all" title="Lancer un mini Blind-Test Flash musical de 15s" style="color:#ec4899;border-color:rgba(236,72,153,0.35)">
+      <span>⚡</span>
+      <span class="hidden sm:inline">Blind-Test</span>
+    </button>
     <!-- Bouton Rapide Visualiseur Audio Grand Écran -->
     <button id="btnQuickVisualizer" class="btn btn-ghost btn-sm font-semibold flex items-center gap-1.5" title="Changer l'animation du visualiseur grand écran (/qrspectre)" style="color:#38bdf8;border-color:rgba(56,189,248,0.3)">
       <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h5l3 7 4-14 3 7h5"/></svg>
@@ -780,6 +785,14 @@
             <button id="openPublicDisplayFromQR" class="btn btn-cyan btn-sm shrink-0 font-bold">Ouvrir</button>
           </div>
         </div>
+        <div>
+          <label class="label">Profils Grand Écran Multi-Display</label>
+          <div class="grid grid-cols-3 gap-2 mt-1">
+            <button id="btnOpenScreenStandard" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold">Standard</button>
+            <button id="btnOpenScreenBar" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">🍸 Bar</button>
+            <button id="btnOpenScreenStage" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold" style="color:#c084fc;border-color:rgba(192,132,252,0.3)">🎤 Scène</button>
+          </div>
+        </div>
       </div>
       <button id="closeQRCodeBottom" class="btn btn-ghost btn-full font-semibold">Fermer</button>
     </div>
@@ -968,6 +981,62 @@
             <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Mode DJ</p>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Modal: Mini Blind-Test Flash DJ ──────────────────────── -->
+<div id="blindTestDjModal" class="hidden modal-backdrop">
+  <div class="modal max-w-md">
+    <div class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid var(--border)">
+      <div>
+        <h2 class="text-base font-bold flex items-center gap-2" style="color:var(--text-primary)">
+          <span>⚡ Mini Blind-Test Flash</span>
+        </h2>
+        <p class="text-xs" style="color:var(--text-muted)">15 secondes chrono pour faire deviner un morceau</p>
+      </div>
+      <button id="closeBlindTestDjModal" class="btn btn-ghost btn-icon btn-sm">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="label">Morceau à faire deviner</label>
+        <select id="blindTestTrackSelect" class="input text-xs">
+          <option value="auto">🎲 Aléatoire intelligent (Queue / Récent)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="label">Durée du compte à rebours</label>
+        <select id="blindTestDurationSelect" class="input text-xs">
+          <option value="15" selected>15 secondes (Idéal)</option>
+          <option value="10">10 secondes (Ultra rapide)</option>
+          <option value="20">20 secondes (Détendu)</option>
+        </select>
+      </div>
+
+      <div id="blindTestDjLiveStatus" class="hidden p-3 rounded-xl space-y-2" style="background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3)">
+        <div class="flex items-center justify-between text-xs font-bold">
+          <span style="color:#f472b6" class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
+            Quiz en cours…
+          </span>
+          <span id="blindTestDjTimeRemaining" style="color:var(--text-primary)">15s</span>
+        </div>
+        <p id="blindTestDjCorrectHint" class="text-xs font-semibold" style="color:var(--text-secondary)"></p>
+        <p id="blindTestDjVotesCount" class="text-xs font-bold" style="color:var(--text-muted)">0 réponses reçues</p>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button id="btnLaunchBlindTest" class="btn btn-full font-bold" style="background:linear-gradient(135deg, #ec4899, #8b5cf6);color:#fff">
+          ⚡ Lancer le Blind-Test (15s)
+        </button>
+        <button id="btnStopBlindTest" class="hidden btn btn-ghost font-bold text-xs" style="color:var(--red)">
+          Arrêter
+        </button>
       </div>
     </div>
   </div>

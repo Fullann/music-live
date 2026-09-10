@@ -462,8 +462,40 @@
   </div>
 </div>
 
+<!-- ─── Modal Blind-Test Flash Invité ────────────────────────── -->
+<div id="blindTestGuestModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xl transition-all select-none" style="background:rgba(10,8,22,0.88)">
+  <div class="w-full max-w-sm rounded-3xl p-5 sm:p-6 text-center border shadow-2xl flex flex-col items-center animate-in zoom-in-95 duration-200" style="background:rgba(20,18,36,0.96);border-color:rgba(236,72,153,0.35);box-shadow:0 0 50px rgba(236,72,153,0.25)">
+    
+    <!-- Header Modal -->
+    <div class="flex items-center justify-between w-full mb-3">
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-pink-500/20 text-pink-300 border border-pink-500/30">
+        <span>⚡</span> Blind-Test Flash
+      </span>
+      <span id="guestBtTimerBadge" class="text-xs font-black text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20">15s</span>
+    </div>
+
+    <!-- Barre de progression -->
+    <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden mb-4 p-[1px]">
+      <div id="guestBtTimerBar" class="h-full rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-amber-400 transition-all duration-150" style="width:100%"></div>
+    </div>
+
+    <h3 id="guestBtQuestion" class="text-lg font-black text-white mb-4">Quel est ce morceau ?</h3>
+
+    <!-- 4 Boutons de propositions -->
+    <div id="guestBtOptionsContainer" class="grid grid-cols-1 gap-2.5 w-full mb-4"></div>
+
+    <!-- Feedback réponse -->
+    <div id="guestBtFeedback" class="hidden w-full py-2.5 px-3 rounded-xl text-xs font-black mb-3"></div>
+
+    <button id="btnDismissGuestBt" class="text-xs text-white/50 hover:text-white transition font-semibold cursor-pointer">
+      Fermer
+    </button>
+  </div>
+</div>
+
 <!-- ── TOAST ──────────────────────────────────────────────────── -->
 <div id="toast" class="hidden fixed top-4 left-4 right-4 z-50 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl" style="background:var(--accent);color:#fff;text-align:center"></div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/time-utils.js?v=2.2.0"></script>

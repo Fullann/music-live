@@ -362,6 +362,54 @@ Récupère la liste des invités bloqués pour une soirée.
 
 ---
 
+### `start-blind-test`
+
+Lance une session de mini quiz musical express (DJ uniquement).
+
+```typescript
+{
+  eventId:         string;
+  question?:       string;
+  options:         string[];  // 4 choix de morceaux (1 correct + 3 leurres)
+  correctIndex:    number;    // index du bon morceau (0-3)
+  mysteryAudioUrl?: string | null;
+  durationSec?:    number;    // 10, 15 ou 20 secondes
+  trackInfo?: {
+    title:     string;
+    artist:    string;
+    imageUrl?: string;
+  };
+}
+```
+
+---
+
+### `submit-blind-test-answer`
+
+Soumet la réponse d'un invité au Blind-Test actif.
+
+```typescript
+{
+  eventId:      string;
+  testId?:      string;
+  answerIndex:  number;
+  answerTimeMs: number;
+  userName?:    string;
+}
+```
+
+---
+
+### `end-blind-test`
+
+Arrête manuellement le quiz en cours avant la fin du chronomètre (DJ uniquement).
+
+```typescript
+{ eventId: string }
+```
+
+---
+
 ## Événements SERVEUR → CLIENT
 
 ### `rate-limit-status`
@@ -701,6 +749,85 @@ Diffusé en direct à la room (console DJ, écran grand format) dès qu'un invit
 
 ```typescript
 { count: number }
+```
+
+---
+
+### `blind-test-started`
+
+Diffusé à tous les participants et écrans lorsqu'une session Blind-Test Flash commence (ne contient pas `correctIndex`).
+
+```typescript
+{
+  id:              string;
+  question:        string;
+  options:         string[];
+  durationSec:     number;
+  mysteryAudioUrl: string | null;
+  trackInfo:       { title: string; artist: string };
+}
+```
+
+---
+
+### `blind-test-dj-started`
+
+Envoyé uniquement au DJ avec l'index de la réponse correcte.
+
+```typescript
+{
+  id:           string;
+  correctIndex: number;
+  durationSec:  number;
+}
+```
+
+---
+
+### `blind-test-answer-ack`
+
+Accusé de réception immédiat envoyé au joueur ayant soumis sa réponse.
+
+```typescript
+{
+  testId:      string;
+  answerIndex: number;
+  isCorrect:   boolean;
+}
+```
+
+---
+
+### `blind-test-activity`
+
+Compteur en direct du nombre de réponses enregistrées diffusé à la room.
+
+```typescript
+{
+  testId:       string;
+  totalAnswers: number;
+}
+```
+
+---
+
+### `blind-test-results`
+
+Diffusé à toute la room à la fin du compte à rebours avec la révélation du morceau et le podium des 3 joueurs les plus rapides.
+
+```typescript
+{
+  id:           string;
+  correctIndex: number;
+  trackInfo:    { title: string; artist: string };
+  totalAnswers: number;
+  correctCount: number;
+  winners: [
+    { rank: 1, userName: string, timeSec: string },
+    { rank: 2, userName: string, timeSec: string },
+    { rank: 3, userName: string, timeSec: string }
+  ];
+}
 ```
 
 ---
