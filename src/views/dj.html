@@ -1,14 +1,161 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Régie Live DJ — Music Live</title>
+  <title>Régie Live DJ Studio — Music Live</title>
+  
+  <!-- Polices Google Premium -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Tailwind & App Design System -->
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
+  
+  <style>
+    :root {
+      --bg-base: #06080d;
+      --bg-surface: #0a0e17;
+      --bg-elevated: #111726;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(139, 92, 246, 0.35);
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.25);
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --pink: #ec4899;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: #f1f5f9;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Ambient studio background grid & glow */
+    .studio-bg {
+      background: 
+        radial-gradient(circle at 15% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 0%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #06080d 0%, #0a0e17 100%);
+      background-attachment: fixed;
+    }
+
+    /* Glassmorphism Cards */
+    .studio-deck {
+      background: rgba(11, 15, 25, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.6);
+      border-radius: 1.25rem;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .studio-deck:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Pro Audio Top Header */
+    .studio-header {
+      background: rgba(8, 11, 19, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Tool button styling */
+    .dj-tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border-radius: 0.625rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      color: #94a3b8;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .dj-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .dj-tool-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Channel Deck Headers */
+    .channel-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6875rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    /* Custom Scrollbars */
+    .deck-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .deck-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .deck-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    .deck-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    /* Equalizer wave micro-animation */
+    @keyframes eqBarPulse {
+      0%, 100% { height: 4px; }
+      50% { height: 18px; }
+    }
+    .eq-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: #8b5cf6;
+      animation: eqBarPulse 1.2s ease-in-out infinite;
+    }
+    .eq-bar:nth-child(2) { animation-delay: 0.2s; background: #06b6d4; }
+    .eq-bar:nth-child(3) { animation-delay: 0.4s; background: #10b981; }
+    .eq-bar:nth-child(4) { animation-delay: 0.1s; background: #ec4899; }
+
+    /* Modals backdrop */
+    .modal-backdrop {
+      background: rgba(3, 5, 9, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .modal {
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(139, 92, 246, 0.15);
+    }
+  </style>
+
   <script src="/js/theme.js?v=2.2.0"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -16,403 +163,522 @@
   <script src="/js/time-utils.js?v=2.2.0"></script>
   <script src="/js/csrf.js?v=2.2.0"></script>
 </head>
-<body class="font-grotesk" style="background:var(--bg-base);color:var(--text-primary)">
+<body class="studio-bg flex flex-col min-h-screen">
 
-<!-- ─── Top header ──────────────────────────────────────────── -->
-<header class="sticky top-0 z-30 flex items-center justify-between gap-3 px-4 sm:px-7 py-3.5" style="background:var(--bg-surface);border-bottom:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.25)">
-  <div class="flex items-center gap-3 min-w-0">
-    <!-- Retour Dashboard -->
-    <a href="/dashboard" class="btn btn-ghost btn-icon btn-sm shrink-0" title="Retour au Dashboard">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </a>
+<!-- ═════════════════════════════════════════════════════════════════════════
+     1. TOP MASTER CONSOLE HEADER
+══════════════════════════════════════════════════════════════════════════════ -->
+<header class="sticky top-0 z-40 studio-header px-3 sm:px-6 py-2.5 sm:py-3.5 transition-all">
+  <div class="max-w-[1720px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+    
+    <!-- LEFT: Back to Dashboard & Event Identification -->
+    <div class="flex items-center gap-3 min-w-0">
+      <a href="/dashboard" class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-slate-300 hover:text-white transition group" title="Retour au Dashboard">
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </a>
 
-    <!-- Brand icon -->
-    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md" style="background:linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%)">
-      <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-        <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-      </svg>
-    </div>
-
-    <!-- Event info -->
-    <div class="min-w-0">
-      <div class="flex items-center gap-2">
-        <p id="eventName" class="text-sm sm:text-base font-extrabold truncate" style="color:var(--text-primary)">Chargement...</p>
-        <span class="live-indicator-badge shrink-0 py-0.5 px-2 text-[10px]">
-          <span class="live-pulse-dot"></span>
-          LIVE
-        </span>
+      <!-- Brand Logo / Platter Icon -->
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/20" style="background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
       </div>
-      <div class="flex items-center gap-2 mt-0.5">
-        <p class="text-[11px] font-bold text-gradient-purple">Console Régie DJ</p>
-        <span id="spectatorBadge" class="hidden items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(139,92,246,0.3)">
-          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span id="spectatorCount">0</span> en ligne
-        </span>
+
+      <!-- Event Info & Status -->
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1 id="eventName" class="text-sm sm:text-base font-extrabold text-white truncate max-w-[260px] sm:max-w-md" style="font-family:'Syne', sans-serif">
+            Chargement...
+          </h1>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            LIVE
+          </span>
+        </div>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-[11px] font-bold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
+            Console Régie DJ
+          </span>
+          <span id="spectatorBadge" class="hidden items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span id="spectatorCount">0</span> public en ligne
+          </span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Actions Toolbar -->
-  <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-    <button id="showQRCode" class="btn btn-ghost btn-sm font-semibold" title="Partager le QR Code">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
-      <span class="hidden sm:inline">QR Code</span>
-    </button>
-    <button id="openPublicDisplay" class="btn btn-ghost btn-sm font-semibold" title="Ouvrir l'écran de projection public" style="color:var(--cyan);border-color:rgba(6,182,212,0.3)">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      <span class="hidden sm:inline">Grand Écran</span>
-    </button>
-    <!-- Bouton Rapide Mode Karaoké Grand Écran -->
-    <button id="btnQuickKaraoke" class="btn btn-ghost btn-sm font-semibold flex items-center gap-1.5 transition-all" title="Activer / Désactiver le karaoké en direct sur le grand écran (Touche K)" style="color:#c084fc;border-color:rgba(192,132,252,0.35)">
-      <span>🎤</span>
-      <span class="hidden sm:inline">Karaoké</span>
-      <span id="quickKaraokeBadge" class="text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7)">OFF</span>
-    </button>
-    <!-- Bouton Rapide Blind-Test Flash 15s -->
-    <button id="btnBlindTestFlash" class="btn btn-ghost btn-sm font-semibold flex items-center gap-1.5 transition-all" title="Lancer un mini Blind-Test Flash musical de 15s" style="color:#ec4899;border-color:rgba(236,72,153,0.35)">
-      <span>⚡</span>
-      <span class="hidden sm:inline">Blind-Test</span>
-    </button>
-    <!-- Bouton Rapide Visualiseur Audio Grand Écran -->
-    <button id="btnQuickVisualizer" class="btn btn-ghost btn-sm font-semibold flex items-center gap-1.5" title="Changer l'animation du visualiseur grand écran (/qrspectre)" style="color:#38bdf8;border-color:rgba(56,189,248,0.3)">
-      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h5l3 7 4-14 3 7h5"/></svg>
-      <span class="hidden md:inline">Animation :</span>
-      <span id="quickVisualizerLabel" class="font-bold">Spectre</span>
-    </button>
-    <button id="addSongBtn" class="btn btn-ghost btn-sm font-semibold" title="Ajouter manuellement une chanson">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="hidden sm:inline">Ajouter</span>
-    </button>
-    <a id="liveStatsBtn" href="#" target="_blank" class="btn btn-ghost btn-sm font-semibold" title="Stats live" style="color:var(--green);border-color:rgba(16,185,129,0.3)">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span class="hidden sm:inline">Stats</span>
-    </a>
-    <button id="showMessagePanel" class="btn btn-ghost btn-sm font-semibold" title="Message en direct aux invités" style="color:var(--cyan)">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="hidden md:inline">Message</span>
-    </button>
-    <button id="showSettings" class="btn btn-ghost btn-sm font-semibold" title="Paramètres de la soirée">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="hidden md:inline">Réglages</span>
-    </button>
-    <button id="btnShortcutsHelp" class="btn btn-ghost btn-sm font-semibold flex items-center gap-1.5" title="Guide des Raccourcis Clavier & MIDI (Touche ?)">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
-      <span class="hidden sm:inline">Raccourcis</span>
-      <kbd class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white">?</kbd>
-    </button>
-    <button id="btnExportSpotifyPlaylist" class="btn btn-sm font-bold flex items-center gap-1.5" style="background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)" title="Créer la playlist Spotify publique avec tous les morceaux joués">
-      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-      <span class="hidden sm:inline">Export Playlist</span>
-    </button>
-    <button id="endEvent" class="btn btn-danger btn-sm font-bold shadow-md shadow-red-500/20">Terminer la soirée</button>
-    <!-- Indicateur MIDI Connecté -->
-    <span id="djMidiStatus" class="hidden btn btn-sm font-bold" style="pointer-events:none;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3)">
-      <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-      <span id="djMidiName">MIDI Connecté</span>
-    </span>
-    <!-- Indicateur Réactions Public en Direct -->
-    <div id="djCrowdReactionsWrap" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all" style="background:var(--accent-dim);border:1px solid var(--accent-glow);color:var(--text-primary)">
-      <span id="djCrowdReactionEmoji" class="text-sm">🔥</span>
-      <span id="djCrowdReactionText" class="text-xs font-semibold" style="color:var(--text-secondary)">Ambiance</span>
+    <!-- RIGHT: Structured Toolbars -->
+    <div class="flex items-center gap-2 flex-wrap justify-between md:justify-end">
+      
+      <!-- CLUSTER 1: Show & Grand Écran (Cyan/Pink) -->
+      <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-white/5">
+        <!-- Raccourci Karaoké -->
+        <button id="btnQuickKaraoke" type="button" class="dj-tool-btn text-purple-300 hover:text-purple-200 hover:border-purple-500/40" title="Activer / Désactiver le karaoké en direct sur le grand écran (Touche K)">
+          <span>🎤</span>
+          <span class="hidden xl:inline">Karaoké</span>
+          <span id="quickKaraokeBadge" class="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-black bg-white/10 text-white/80">OFF</span>
+        </button>
+
+        <!-- Blind-Test Flash (15s) -->
+        <button id="btnBlindTestFlash" type="button" class="dj-tool-btn text-pink-400 hover:text-pink-300 hover:border-pink-500/40" title="Lancer un mini Blind-Test Flash musical de 15s">
+          <span class="text-sm">⚡</span>
+          <span class="hidden xl:inline">Blind-Test</span>
+        </button>
+
+        <!-- Visualiseur Audio -->
+        <button id="btnQuickVisualizer" type="button" class="dj-tool-btn text-sky-400 hover:text-sky-300 hover:border-sky-500/40" title="Changer l'animation du visualiseur grand écran (/qrspectre)">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h5l3 7 4-14 3 7h5"/></svg>
+          <span class="hidden 2xl:inline text-slate-400">Visuel:</span>
+          <span id="quickVisualizerLabel" class="font-bold">Spectre</span>
+        </button>
+
+        <!-- Grand Écran -->
+        <button id="openPublicDisplay" type="button" class="dj-tool-btn text-cyan-300 hover:text-cyan-200 hover:border-cyan-500/40" title="Ouvrir l'écran de projection public">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <span class="hidden sm:inline">Écran ↗</span>
+        </button>
+      </div>
+
+      <!-- CLUSTER 2: Outils Régie DJ -->
+      <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-white/5">
+        <button id="showQRCode" type="button" class="dj-tool-btn hover:text-emerald-400 hover:border-emerald-500/30" title="Partager le QR Code">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
+          <span class="hidden lg:inline">QR Code</span>
+        </button>
+
+        <button id="addSongBtn" type="button" class="dj-tool-btn hover:text-purple-300 hover:border-purple-500/30" title="Ajouter manuellement une chanson">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="hidden lg:inline">Ajouter</span>
+        </button>
+
+        <button id="showMessagePanel" type="button" class="dj-tool-btn hover:text-cyan-400 hover:border-cyan-500/30" title="Message en direct aux invités">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="hidden xl:inline">Message</span>
+        </button>
+
+        <a id="liveStatsBtn" href="#" target="_blank" class="dj-tool-btn hover:text-emerald-400 hover:border-emerald-500/30" title="Stats live">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span class="hidden lg:inline">Stats</span>
+        </a>
+
+        <button id="showSettings" type="button" class="dj-tool-btn hover:text-white" title="Paramètres de la soirée">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="hidden sm:inline">Réglages</span>
+        </button>
+
+        <button id="btnShortcutsHelp" type="button" class="dj-tool-btn" title="Guide des Raccourcis Clavier & MIDI (Touche ?)">
+          <kbd class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white font-bold">?</kbd>
+        </button>
+      </div>
+
+      <!-- CLUSTER 3: Export & Clôture -->
+      <div class="flex items-center gap-1.5">
+        <button id="btnExportSpotifyPlaylist" type="button" class="dj-tool-btn text-emerald-400 hover:text-emerald-300 border-emerald-500/30 bg-emerald-500/10" title="Créer la playlist Spotify publique avec tous les morceaux joués">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          <span class="hidden sm:inline">Export</span>
+        </button>
+
+        <button id="endEvent" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 hover:text-white transition shadow-sm shadow-rose-500/20 cursor-pointer">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+          <span class="hidden sm:inline">Clôturer</span>
+        </button>
+
+        <!-- MIDI Indicator -->
+        <span id="djMidiStatus" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+          <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+          <span id="djMidiName">MIDI Connecté</span>
+        </span>
+
+        <!-- Crowd Reactions -->
+        <div id="djCrowdReactionsWrap" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 transition-all">
+          <span id="djCrowdReactionEmoji" class="text-sm">🔥</span>
+          <span id="djCrowdReactionText" class="text-xs font-semibold">Ambiance</span>
+        </div>
+      </div>
+
     </div>
+
   </div>
 </header>
 
-<!-- ─── Bandeau Hors-Ligne / Réseau ────────────────────────────────── -->
-<div id="djNetworkBanner" class="hidden px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-2 transition-all duration-300 z-40" style="background:rgba(239,68,68,0.2);color:#fca5a5;border-bottom:1px solid rgba(239,68,68,0.3)">
-  <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+<!-- ═════════════════════════════════════════════════════════════════════════
+     2. BANNIÈRES D'ÉTAT & ALERTES RÉSEAU
+══════════════════════════════════════════════════════════════════════════════ -->
+<div id="djNetworkBanner" class="hidden px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-2 transition-all duration-300 z-40 bg-rose-500/20 text-rose-300 border-b border-rose-500/30">
+  <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
   <span id="djNetworkBannerText">📶 Mode Hors-Ligne — Connexion perdue. Les données sont conservées en local.</span>
 </div>
 
-<!-- ─── Spotify Player Bar ─────────────────────────────────────────── -->
-<div id="spotifyPlayer" class="hidden px-4 sm:px-7 py-4" style="background:radial-gradient(circle at 10% 50%, rgba(139,92,246,0.12) 0%, rgba(16,185,129,0.06) 50%, var(--bg-surface) 100%);border-bottom:1px solid var(--border)">
-  <div class="max-w-6xl mx-auto">
-    <div class="flex items-center gap-4 sm:gap-6">
-      <!-- Album Art / Vinyl Placeholder -->
+<!-- ═════════════════════════════════════════════════════════════════════════
+     3. ON-AIR SPOTIFY DECK BAR (LECTEUR DE DIFFUSION)
+══════════════════════════════════════════════════════════════════════════════ -->
+<div id="spotifyPlayer" class="hidden px-4 sm:px-6 py-3.5 border-b border-white/10" style="background: radial-gradient(circle at 10% 50%, rgba(139,92,246,0.15) 0%, rgba(6,182,212,0.08) 50%, #0a0e17 100%)">
+  <div class="max-w-[1720px] mx-auto flex items-center justify-between gap-4 sm:gap-6 flex-wrap">
+    
+    <!-- Track Artwork & Title -->
+    <div class="flex items-center gap-3.5 min-w-0 max-w-sm sm:max-w-md">
       <div class="relative shrink-0">
-        <img id="currentTrackImage" src="" alt="" class="w-14 h-14 rounded-xl object-cover hidden shrink-0 shadow-lg" style="box-shadow:0 0 20px rgba(0,0,0,0.5)" />
-        <div id="currentTrackPlaceholder" class="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center shadow-md" style="background:var(--bg-elevated);border:1px solid var(--border)">
-          <svg class="w-6 h-6 animate-spin-slow" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 0-10 10"/></svg>
+        <img id="currentTrackImage" src="" alt="" class="w-14 h-14 rounded-xl object-cover hidden shrink-0 shadow-lg border border-white/10" />
+        <div id="currentTrackPlaceholder" class="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center bg-slate-900 border border-white/10 shadow-md">
+          <div class="flex items-center gap-1">
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+            <span class="eq-bar"></span>
+          </div>
         </div>
       </div>
-
-      <!-- Track Info + Progress Bar -->
-      <div class="flex-1 min-w-0">
-        <div class="flex items-baseline justify-between gap-2 mb-1.5">
-          <div class="flex items-baseline gap-2 min-w-0">
-            <p id="currentTrackName" class="text-sm sm:text-base font-black truncate" style="color:var(--text-primary)">Aucune lecture en cours</p>
-            <p id="currentTrackArtist" class="text-xs truncate shrink-0" style="color:var(--text-secondary)">—</p>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span id="currentTime" class="text-xs font-mono font-semibold" style="color:var(--text-muted)">0:00</span>
-            <span class="text-xs" style="color:var(--text-muted)">/</span>
-            <span id="totalTime" class="text-xs font-mono font-semibold" style="color:var(--text-muted)">0:00</span>
-          </div>
-        </div>
+      <div class="min-w-0">
         <div class="flex items-center gap-2">
-          <div id="progressBar" class="progress-bar flex-1 cursor-pointer relative group h-2 rounded-full" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <div id="progressFill" class="progress-fill" style="width:0%"></div>
-            <div id="progressHover" class="absolute top-0 h-full hidden group-hover:block pointer-events-none rounded-full" style="background:rgba(139,92,246,0.3);width:0%;left:0"></div>
-          </div>
+          <span class="text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            En Diffusion
+          </span>
         </div>
-      </div>
-
-      <!-- Playback Controls -->
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <button id="btnPrevious" class="btn btn-ghost btn-icon btn-sm" title="Titre précédent">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/></svg>
-        </button>
-        <button id="playPauseBtn" class="btn btn-primary btn-icon w-11 h-11 rounded-2xl shadow-lg shadow-purple-500/30" title="Lecture / Pause">
-          <svg id="playIcon" class="w-5 h-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <svg id="pauseIcon" class="w-5 h-5 hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        </button>
-        <button id="btnNext" class="btn btn-ghost btn-icon btn-sm" title="Titre suivant">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>
-        </button>
-        <button id="btnReconnectPlayer" class="btn btn-ghost btn-icon btn-sm text-yellow-400 hover:text-yellow-300" title="Reconnexion d'urgence du lecteur Spotify">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-        </button>
+        <p id="currentTrackName" class="text-sm sm:text-base font-extrabold text-white truncate mt-0.5" style="font-family:'Syne', sans-serif">
+          Aucune lecture en cours
+        </p>
+        <p id="currentTrackArtist" class="text-xs text-slate-400 truncate font-medium">
+          —
+        </p>
       </div>
     </div>
+
+    <!-- Center Progress Bar -->
+    <div class="flex-1 min-w-[200px] max-w-2xl">
+      <div class="flex items-center justify-between text-xs font-mono font-bold text-slate-400 mb-1">
+        <span id="currentTime">0:00</span>
+        <span id="totalTime">0:00</span>
+      </div>
+      <div id="progressBar" class="relative group h-2.5 rounded-full bg-slate-800 border border-white/10 cursor-pointer overflow-hidden">
+        <div id="progressFill" class="h-full rounded-full bg-gradient-to-r from-purple-500 via-cyan-400 to-emerald-400 transition-all duration-150" style="width:0%"></div>
+        <div id="progressHover" class="absolute top-0 h-full hidden group-hover:block pointer-events-none rounded-full bg-white/20" style="width:0%;left:0"></div>
+      </div>
+    </div>
+
+    <!-- Playback Transport Buttons -->
+    <div class="flex items-center gap-2 shrink-0">
+      <button id="btnPrevious" type="button" class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition" title="Titre précédent">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"/></svg>
+      </button>
+
+      <button id="playPauseBtn" type="button" class="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-white shadow-xl shadow-purple-500/25 transition transform hover:scale-105 active:scale-95" title="Lecture / Pause (Espace)">
+        <svg id="playIcon" class="w-5 h-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg id="pauseIcon" class="w-5 h-5 hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+
+      <button id="btnNext" type="button" class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition" title="Titre suivant (N)">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"/></svg>
+      </button>
+
+      <button id="btnReconnectPlayer" type="button" class="w-9 h-9 rounded-xl flex items-center justify-center bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 transition ml-1" title="Reconnexion d'urgence du lecteur Spotify">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+      </button>
+    </div>
+
   </div>
 </div>
 
-<!-- ─── Main console layout ─────────────────────────────────────────── -->
-<div class="max-w-7xl mx-auto p-4 sm:p-7 space-y-5">
-  <div id="autoAcceptBanner" class="hidden px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2" style="background:var(--green-dim);border:1px solid rgba(16,185,129,0.3);color:var(--green)">
-    <span class="w-2 h-2 rounded-full" style="background:var(--green)"></span>
-    Mode automatique activé — toutes les demandes sont acceptées directement dans la queue
+<!-- ═════════════════════════════════════════════════════════════════════════
+     4. CONTENU PRINCIPAL DE LA RÉGIE
+══════════════════════════════════════════════════════════════════════════════ -->
+<main class="flex-1 max-w-[1720px] w-full mx-auto p-3 sm:p-6 space-y-4">
+
+  <!-- Alertes auto-accept, queue vide et erreurs -->
+  <div id="autoAcceptBanner" class="hidden px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span>Mode automatique activé : toutes les demandes des invités sont acceptées directement dans la queue.</span>
   </div>
 
-  <!-- Alerte queue vide / presque vide -->
-  <div id="emptyQueueAlert" class="hidden px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between gap-3" style="background:var(--amber-dim);border:1px solid rgba(245,158,11,0.3);color:var(--amber)">
-    <div class="flex items-center gap-2">
-      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span id="emptyQueueAlertText">File de lecture vide</span>
+  <div id="emptyQueueAlert" class="hidden px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-between gap-3 bg-amber-500/15 border border-amber-500/30 text-amber-300">
+    <div class="flex items-center gap-2.5">
+      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="emptyQueueAlertText">File de lecture vide : relancez de nouvelles demandes ou activez la playlist de secours.</span>
     </div>
-    <button onclick="this.closest('#emptyQueueAlert').classList.add('hidden')" class="shrink-0 opacity-70 hover:opacity-100">
+    <button onclick="this.closest('#emptyQueueAlert').classList.add('hidden')" class="opacity-70 hover:opacity-100 p-1">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
 
-  <!-- Erreur Spotify -->
-  <div id="spotifyErrorBanner" class="hidden px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-between gap-3" style="background:var(--red-dim);border:1px solid rgba(244,63,94,0.3);color:var(--red)">
-    <div class="flex items-center gap-2">
-      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <div id="spotifyErrorBanner" class="hidden px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-between gap-3 bg-rose-500/15 border border-rose-500/30 text-rose-300">
+    <div class="flex items-center gap-2.5">
+      <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span id="spotifyErrorText">Erreur Spotify</span>
     </div>
-    <button onclick="this.closest('#spotifyErrorBanner').classList.add('hidden')" class="shrink-0 opacity-70 hover:opacity-100">
+    <button onclick="this.closest('#spotifyErrorBanner').classList.add('hidden')" class="opacity-70 hover:opacity-100 p-1">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
 
-  <!-- Santé live (monitoring) -->
-  <div>
-    <div class="flex items-center justify-end">
-      <button id="liveHealthToggleBtn" class="btn btn-ghost btn-sm text-xs font-semibold gap-2 py-1 px-3"
-              title="État de santé et latence de la console">
-        <span id="liveHealthDot" class="w-2 h-2 rounded-full animate-pulse" style="background:var(--green)"></span>
-        <span>Santé Live</span>
-      </button>
-    </div>
-    <div id="liveHealthPanel" class="hidden mt-2 p-4 rounded-2xl dash-card" style="border:1px solid var(--border)">
-      <div class="flex items-center justify-between gap-3 mb-2.5">
-        <p class="text-sm font-extrabold" style="color:var(--text-primary)">Monitoring en Direct</p>
-        <span id="liveHealthUpdatedAt" class="text-xs font-mono" style="color:var(--text-muted)">—</span>
-      </div>
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-        <div class="rounded-xl p-3" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p style="color:var(--text-muted)">Spotify Token</p>
-          <p id="liveHealthSpotify" class="font-bold text-sm mt-0.5" style="color:var(--text-primary)">—</p>
-        </div>
-        <div class="rounded-xl p-3" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p style="color:var(--text-muted)">Latence Socket</p>
-          <p id="liveHealthSocketLatency" class="font-bold text-sm mt-0.5 text-gradient-cyan" style="color:var(--text-primary)">—</p>
-        </div>
-        <div class="rounded-xl p-3" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p style="color:var(--text-muted)">Backlog Queue</p>
-          <p id="liveHealthBacklog" class="font-bold text-sm mt-0.5 text-gradient-purple" style="color:var(--text-primary)">—</p>
-        </div>
-        <div class="rounded-xl p-3" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p style="color:var(--text-muted)">Erreurs Récentes</p>
-          <p id="liveHealthErrorsCount" class="font-bold text-sm mt-0.5" style="color:var(--text-primary)">0</p>
-        </div>
-      </div>
-      <div id="liveHealthErrorsList" class="mt-2.5 space-y-1 text-xs" style="color:var(--text-secondary)">
-        <p style="color:var(--text-muted)">Aucune erreur signalée</p>
-      </div>
-    </div>
   <!-- ── RETOUR VISUEL MINIATURE : Mini Monitor Grand Écran ── -->
-  <div id="screenMiniMonitor" class="dash-card p-3.5 sm:p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4" style="background:linear-gradient(135deg, rgba(30,27,75,0.45) 0%, rgba(15,23,42,0.65) 100%);border:1px solid rgba(139,92,246,0.3);box-shadow:0 4px 20px rgba(0,0,0,0.25)">
+  <div id="screenMiniMonitor" class="studio-deck p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-4 border border-purple-500/30 shadow-lg shadow-purple-950/30" style="background: linear-gradient(135deg, rgba(20,16,45,0.7) 0%, rgba(10,14,23,0.85) 100%)">
     <div class="flex items-center gap-3.5 min-w-0">
-      <div class="relative w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35)">
-        <svg class="w-6 h-6 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="relative w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-purple-500/20 border border-purple-500/40 shadow-inner">
+        <svg class="w-6 h-6 text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
         </svg>
-        <span id="miniMonitorLiveDot" class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse border-2 border-slate-900" title="Écran en ligne"></span>
+        <span id="miniMonitorLiveDot" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 animate-pulse border-2 border-slate-900" title="Écran de projection en ligne"></span>
       </div>
       <div class="min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs font-black uppercase tracking-wider text-purple-300">Mini Monitor Grand Écran</span>
-          <span id="miniMonitorStatusBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">Mode QR Standard</span>
+          <span class="text-xs font-black uppercase tracking-wider text-purple-300" style="font-family:'Syne', sans-serif">
+            Mini Monitor Grand Écran
+          </span>
+          <span id="miniMonitorStatusBadge" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            Mode QR Standard
+          </span>
         </div>
-        <p class="text-xs text-slate-300 mt-1 flex items-center gap-2 flex-wrap font-medium">
-          <span>Animation : <strong id="miniMonitorVisualizer" class="text-white font-bold">Spectre Cyber</strong></span>
-          <span class="opacity-40">•</span>
+        <p class="text-xs text-slate-300 mt-1 flex items-center gap-2.5 flex-wrap font-medium">
+          <span>Animation : <strong id="miniMonitorVisualizer" class="text-sky-300 font-bold font-mono">Spectre Cyber</strong></span>
+          <span class="opacity-30">•</span>
           <span>Spectateurs connectés : <strong id="miniMonitorViewers" class="text-emerald-400 font-mono font-bold">0</strong></span>
         </p>
       </div>
     </div>
+
+    <!-- Switches télécommande rapide -->
     <div class="flex items-center gap-2 shrink-0">
-      <button id="btnMiniMonitorToggleKaraoke" type="button" class="btn btn-ghost btn-xs font-bold px-2.5 py-1 text-purple-300 hover:text-purple-200 border-purple-500/30 hover:bg-purple-500/15 transition flex items-center gap-1.5" title="Basculer le mode Karaoké distant (K)">
+      <button id="btnMiniMonitorToggleKaraoke" type="button" class="dj-tool-btn text-purple-300 border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/20 font-bold text-xs" title="Basculer le mode Karaoké distant (K)">
         <span>🎤</span>
         <span id="miniMonitorKaraokeBtnText">Lancer Karaoké</span>
       </button>
-      <button id="btnMiniMonitorCycleVis" type="button" class="btn btn-ghost btn-xs font-bold px-2.5 py-1 text-sky-300 hover:text-sky-200 border-sky-500/30 hover:bg-sky-500/15 transition flex items-center gap-1" title="Changer l'animation grand écran">
-        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h5l3 7 4-14 3 7h5"/></svg>
+      <button id="btnMiniMonitorCycleVis" type="button" class="dj-tool-btn text-sky-300 border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 font-bold text-xs" title="Changer l'animation grand écran">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h5l3 7 4-14 3 7h5"/></svg>
         <span>Animation</span>
       </button>
-      <button id="btnMiniMonitorOpenDisplay" type="button" class="btn btn-ghost btn-xs font-bold px-2.5 py-1 text-slate-300 hover:text-white border-white/10 hover:bg-white/10 transition" title="Ouvrir la vue Grand Écran">
+      <button id="btnMiniMonitorOpenDisplay" type="button" class="dj-tool-btn text-slate-200 border-white/10 hover:border-white/20 font-bold text-xs" title="Ouvrir la vue Grand Écran">
         <span>Écran ↗</span>
+      </button>
+      
+      <!-- Toggle HUD Santé -->
+      <button id="liveHealthToggleBtn" type="button" class="dj-tool-btn text-slate-400 hover:text-white text-xs font-semibold" title="Monitoring technique du système">
+        <span id="liveHealthDot" class="w-2 h-2 rounded-full animate-pulse bg-emerald-400"></span>
+        <span class="hidden sm:inline">Santé</span>
       </button>
     </div>
   </div>
 
-  <!-- ── Two-Column DJ Live Decks ───────────────────────────── -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- HUD Monitoring Santé Live (repliable) -->
+  <div id="liveHealthPanel" class="hidden studio-deck p-4 border border-white/10">
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-300" style="font-family:'Syne', sans-serif">
+        Monitoring Technique & Latence en Direct
+      </p>
+      <span id="liveHealthUpdatedAt" class="text-xs font-mono text-slate-500">—</span>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+      <div class="rounded-xl p-3 bg-slate-900/60 border border-white/5">
+        <p class="text-slate-400">Spotify Token</p>
+        <p id="liveHealthSpotify" class="font-bold text-sm text-white mt-0.5">—</p>
+      </div>
+      <div class="rounded-xl p-3 bg-slate-900/60 border border-white/5">
+        <p class="text-slate-400">Latence Socket</p>
+        <p id="liveHealthSocketLatency" class="font-bold text-sm text-cyan-400 mt-0.5">—</p>
+      </div>
+      <div class="rounded-xl p-3 bg-slate-900/60 border border-white/5">
+        <p class="text-slate-400">Backlog Queue</p>
+        <p id="liveHealthBacklog" class="font-bold text-sm text-purple-400 mt-0.5">—</p>
+      </div>
+      <div class="rounded-xl p-3 bg-slate-900/60 border border-white/5">
+        <p class="text-slate-400">Erreurs Récentes</p>
+        <p id="liveHealthErrorsCount" class="font-bold text-sm text-white mt-0.5">0</p>
+      </div>
+    </div>
+    <div id="liveHealthErrorsList" class="mt-2.5 text-xs text-slate-400">
+      <p>Aucune erreur signalée</p>
+    </div>
+  </div>
 
-    <!-- ── DECK GAUCHE : Demandes en attente ────────────────── -->
-    <div class="dash-card overflow-hidden flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style="border-bottom:1px solid var(--border);background:var(--bg-surface)">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--amber-dim);color:var(--amber)">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  <!-- ═════════════════════════════════════════════════════════════════════════
+       5. LES DEUX DECKS RÉGIE (DEMANDES EN ATTENTE vs QUEUE DE LECTURE)
+  ══════════════════════════════════════════════════════════════════════════════ -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+
+    <!-- ── DECK GAUCHE : DEMANDES EN ATTENTE (CANAL 1 - INBOX) ──────────────── -->
+    <div class="studio-deck overflow-hidden flex flex-col border-amber-500/25">
+      
+      <!-- Header Deck Gauche -->
+      <div class="px-4 sm:px-5 py-4 border-b border-white/10 bg-gradient-to-r from-amber-500/10 via-slate-900/40 to-transparent flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-md">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Demandes en attente</h2>
-              <span id="pendingCount" class="badge badge-amber text-xs font-bold">0</span>
+              <span class="channel-badge bg-amber-500/20 text-amber-300 border border-amber-500/30">DECK A</span>
+              <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Demandes en attente</h2>
+              <span id="pendingCount" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">0</span>
             </div>
-            <p class="text-[11px]" style="color:var(--text-muted)">À valider ou rejeter par le DJ</p>
+            <p class="text-xs text-slate-400 mt-0.5">Propositions des invités à modérer</p>
           </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button type="button" id="btnAcceptAllPending" class="btn btn-success btn-sm font-bold shadow-sm">Tout accepter</button>
-          <button type="button" id="btnRejectAllPending" class="btn btn-danger btn-sm font-bold shadow-sm">Tout refuser</button>
-          <button id="sortByBPM" class="btn btn-ghost btn-sm font-semibold" title="Trier par BPM">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-            BPM
+
+        <!-- Quick actions modération en masse -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" id="btnAcceptAllPending" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 hover:text-white transition shadow-sm cursor-pointer">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Tout accepter</span>
           </button>
-          <button id="sortByCamelotPending" class="btn btn-ghost btn-sm font-semibold" title="Trier par clé harmonique Camelot">
-            🔑 Clé
+
+          <button type="button" id="btnRejectAllPending" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 hover:text-white transition shadow-sm cursor-pointer">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span>Tout refuser</span>
+          </button>
+
+          <button id="sortByBPM" type="button" class="dj-tool-btn text-xs font-semibold" title="Trier par BPM croissant/décroissant">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            <span>BPM</span>
+          </button>
+
+          <button id="sortByCamelotPending" type="button" class="dj-tool-btn text-xs font-semibold" title="Trier par clé harmonique Camelot">
+            <span>🔑 Clé</span>
           </button>
         </div>
       </div>
-      <div id="pendingRequests" class="divide-y flex-1 min-h-[220px]" style="border-color:var(--border)">
-        <div class="px-5 py-12 text-center text-sm" style="color:var(--text-muted)">Aucune demande en attente</div>
+
+      <!-- Liste des demandes en attente -->
+      <div id="pendingRequests" class="deck-scroll divide-y divide-white/5 flex-1 min-h-[380px] max-h-[640px] overflow-y-auto">
+        <div class="px-5 py-20 text-center text-sm text-slate-500">
+          <div class="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-white/5 border border-white/10 text-slate-500">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <p class="font-bold text-slate-400">Aucune demande en attente</p>
+          <p class="text-xs text-slate-600 mt-1">Invitez votre public à scanner le QR Code pour proposer des titres</p>
+        </div>
       </div>
     </div>
 
-    <!-- ── DECK DROITE : Queue de lecture ──────────────────── -->
-    <div class="dash-card overflow-hidden flex flex-col">
-      <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4" style="border-bottom:1px solid var(--border);background:var(--bg-surface)">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--accent-dim);color:var(--accent)">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <!-- ── DECK DROITE : QUEUE DE LECTURE (CANAL 2 - ON AIR) ───────────────── -->
+    <div class="studio-deck overflow-hidden flex flex-col border-purple-500/25">
+      
+      <!-- Header Deck Droite -->
+      <div class="px-4 sm:px-5 py-4 border-b border-white/10 bg-gradient-to-r from-purple-500/10 via-slate-900/40 to-transparent flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-md">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Queue de lecture</h2>
-              <span id="queueCount" class="badge badge-accent text-xs font-bold">0</span>
+              <span class="channel-badge bg-purple-500/20 text-purple-300 border border-purple-500/30">DECK B</span>
+              <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Queue de lecture</h2>
+              <span id="queueCount" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">0</span>
             </div>
-            <p class="text-[11px]" style="color:var(--text-muted)">Ordre de diffusion des titres</p>
+            <p class="text-xs text-slate-400 mt-0.5">Ordre de diffusion des titres programmés</p>
           </div>
         </div>
-        <div class="flex items-center gap-2.5">
-          <div id="autoPlayToggle" class="hidden items-center gap-2 px-2.5 py-1 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <label class="flex items-center gap-1.5 cursor-pointer select-none">
+
+        <!-- Controls Queue -->
+        <div class="flex items-center gap-2">
+          <!-- Toggle Auto-Play -->
+          <div id="autoPlayToggle" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" id="autoPlay" class="sr-only" checked />
               <span class="toggle-track"></span>
-              <span class="text-xs font-bold" style="color:var(--text-secondary)">Auto-Play</span>
+              <span class="text-xs font-bold text-slate-300">Auto-Play</span>
             </label>
           </div>
-          <button id="sortByVotes" class="btn btn-ghost btn-sm font-semibold" title="Trier par votes">
+
+          <button id="sortByVotes" type="button" class="dj-tool-btn text-xs font-semibold" title="Trier la queue par nombre de votes">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Votes
+            <span>Votes</span>
           </button>
-          <button id="sortByCamelotQueue" class="btn btn-ghost btn-sm font-semibold" title="Trier par clé harmonique Camelot">
-            🔑 Clé
+
+          <button id="sortByCamelotQueue" type="button" class="dj-tool-btn text-xs font-semibold" title="Trier par clé harmonique Camelot">
+            <span>🔑 Clé</span>
           </button>
         </div>
       </div>
-      <p class="px-5 py-2 text-[11px] font-semibold flex items-center gap-1.5" style="color:var(--text-muted);border-bottom:1px solid var(--border);background:rgba(255,255,255,0.01)">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
-        Glisser-déposer pour réorganiser manuellement l'ordre
-      </p>
-      <div id="queue" class="divide-y flex-1 min-h-[220px]" style="border-color:var(--border)">
-        <div class="px-5 py-12 text-center text-sm" style="color:var(--text-muted)">Queue de lecture vide</div>
+
+      <!-- Drag & Drop Instruction bar -->
+      <div class="px-5 py-2 text-[11px] font-semibold text-slate-400 border-b border-white/5 bg-slate-950/40 flex items-center justify-between">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+          Glissez-déposez les cartes pour réorganiser l'ordre de passage
+        </span>
+        <span class="text-[10px] uppercase font-mono text-slate-500">Sortable.js</span>
       </div>
+
+      <!-- Liste de la Queue -->
+      <div id="queue" class="deck-scroll divide-y divide-white/5 flex-1 min-h-[380px] max-h-[640px] overflow-y-auto">
+        <div class="px-5 py-20 text-center text-sm text-slate-500">
+          <div class="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-white/5 border border-white/10 text-slate-500">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <p class="font-bold text-slate-400">Queue de lecture vide</p>
+          <p class="text-xs text-slate-600 mt-1">Validez des demandes depuis le Deck A ou ajoutez des morceaux manuellement</p>
+        </div>
+      </div>
+
     </div>
 
   </div>
-</div>
 
-<!-- ─── Modal: Réglages de la soirée ────────────────────────── -->
-<div id="settingsPanel" class="hidden modal-backdrop">
-  <div class="modal max-w-2xl max-h-[90vh] flex flex-col">
-    <div class="flex items-center justify-between px-6 py-5 shrink-0" style="border-bottom:1px solid var(--border)">
+</main>
+
+<!-- ═════════════════════════════════════════════════════════════════════════
+     6. TOUS LES MODALS DU STUDIO (PARAMÈTRES, QR, BLIND-TEST, RACCOURCIS...)
+══════════════════════════════════════════════════════════════════════════════ -->
+
+<!-- Modal: Réglages de la soirée -->
+<div id="settingsPanel" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 shrink-0 border-b border-white/10">
       <div>
-        <h2 class="text-base font-bold" style="color:var(--text-primary)">Paramètres de la soirée</h2>
-        <p class="text-xs" style="color:var(--text-muted)">Configuration des votes, modération, sondages et effets</p>
+        <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Paramètres de la soirée</h2>
+        <p class="text-xs text-slate-400">Configuration des votes, modération, sondages et effets visuels</p>
       </div>
-      <button id="closeSettings" class="btn btn-ghost btn-icon btn-sm">
+      <button id="closeSettings" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <div class="p-6 space-y-6 overflow-y-auto flex-1">
+    <div class="p-6 space-y-6 overflow-y-auto flex-1 deck-scroll">
 
       <!-- Demandes & Modération -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--accent)">Demandes & Modération</p>
+        <p class="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Demandes & Modération</p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Votes</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Réactions invités</p>
+              <p class="text-sm font-bold text-white">Votes</p>
+              <p class="text-xs text-slate-400 mt-0.5">Réactions et votes des invités</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="votesToggle" class="sr-only" checked />
               <span class="toggle-track"></span>
             </label>
           </div>
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+
+          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Doublons</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Même titre autorisé</p>
+              <p class="text-sm font-bold text-white">Doublons</p>
+              <p class="text-xs text-slate-400 mt-0.5">Autoriser le même titre plusieurs fois</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="duplicatesToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+
+          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Auto-accept</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Sans validation DJ</p>
+              <p class="text-sm font-bold text-white">Auto-accept</p>
+              <p class="text-xs text-slate-400 mt-0.5">Sans validation préalable du DJ</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="autoAcceptToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+
+          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Filtre Explicite (Parental)</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Mariages / Soirées familiales</p>
+              <p class="text-sm font-bold text-white">Filtre Explicite (Parental)</p>
+              <p class="text-xs text-slate-400 mt-0.5">Mariages et soirées familiales</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="filterExplicitToggle" class="sr-only" />
@@ -421,66 +687,61 @@
           </div>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p class="text-sm font-bold mb-3" style="color:var(--text-primary)">Limitation des demandes par invité</p>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+          <p class="text-sm font-bold text-white mb-3">Limitation des demandes par invité</p>
           <div class="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <label class="label">Max demandes</label>
-              <input type="number" id="rateLimitMax" min="1" max="20" value="3" class="input" />
+              <label class="label text-xs">Max demandes</label>
+              <input type="number" id="rateLimitMax" min="1" max="20" value="3" class="input text-xs" />
             </div>
             <div>
-              <label class="label">Fenêtre (minutes)</label>
-              <input type="number" id="rateLimitWindow" min="5" max="60" value="15" class="input" />
+              <label class="label text-xs">Fenêtre (minutes)</label>
+              <input type="number" id="rateLimitWindow" min="5" max="60" value="15" class="input text-xs" />
             </div>
           </div>
-          <button id="btnUpdateRateLimit" class="btn btn-primary btn-sm btn-full font-bold">Mettre à jour</button>
+          <button id="btnUpdateRateLimit" type="button" class="btn btn-primary btn-sm btn-full font-bold">Mettre à jour</button>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-          <div class="flex items-center justify-between mb-2">
-            <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Anti-répétition des morceaux</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Délai minimum avant de pouvoir redemander le même titre</p>
-            </div>
-          </div>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+          <p class="text-sm font-bold text-white">Anti-répétition des morceaux</p>
+          <p class="text-xs text-slate-400 mt-0.5 mb-3">Délai minimum avant de pouvoir redemander le même titre</p>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
             <div>
-              <label class="label">Délai (minutes)</label>
+              <label class="label text-xs">Délai (minutes)</label>
               <input type="number" id="repeatCooldownMinutes" min="0" max="240" value="0" class="input text-xs" placeholder="0 = désactivé" />
             </div>
             <button type="button" id="btnSaveRepeatCooldown" class="btn btn-primary btn-sm font-bold">Enregistrer</button>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-center justify-between gap-3 mb-2">
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Mode urgence DJ (Gel temporaire)</p>
-            <span id="requestsFreezeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full"
-                  style="background:var(--amber-dim);color:var(--amber)">Demandes gelées</span>
+            <p class="text-sm font-bold text-white">Mode urgence DJ (Gel temporaire)</p>
+            <span id="requestsFreezeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Demandes gelées</span>
           </div>
-          <p class="text-xs mb-3" style="color:var(--text-muted)">Gèle temporairement les nouvelles demandes (les votes restent actifs).</p>
+          <p class="text-xs text-slate-400 mb-3">Gèle temporairement les nouvelles demandes (les votes restent actifs).</p>
           <div class="grid grid-cols-3 gap-2">
-            <button id="btnFreeze5" class="btn btn-ghost btn-sm font-semibold">5 min</button>
-            <button id="btnFreeze10" class="btn btn-ghost btn-sm font-semibold">10 min</button>
-            <button id="btnFreezeOff" class="btn btn-primary btn-sm font-bold">Désactiver</button>
+            <button id="btnFreeze5" type="button" class="btn btn-ghost btn-sm font-semibold">5 min</button>
+            <button id="btnFreeze10" type="button" class="btn btn-ghost btn-sm font-semibold">10 min</button>
+            <button id="btnFreezeOff" type="button" class="btn btn-primary btn-sm font-bold">Désactiver</button>
           </div>
         </div>
       </div>
 
       <!-- Sondages Live -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--green)">Sondage Live Public</p>
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-          <div id="livePollSection" class="hidden mb-3 p-3 rounded-xl" style="background:var(--green-dim);border:1px solid rgba(16,185,129,0.3)">
+        <p class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">Sondage Live Public</p>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+          <div id="livePollSection" class="hidden mb-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
             <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="text-xs font-bold" style="color:var(--green)">⚡ Sondage en cours</span>
-              <button id="btnClosePoll" class="btn btn-danger btn-sm text-xs py-1">Clôturer</button>
+              <span class="text-xs font-bold text-emerald-300">⚡ Sondage en cours</span>
+              <button id="btnClosePoll" type="button" class="btn btn-danger btn-sm text-xs py-1">Clôturer</button>
             </div>
             <div id="livePollResults" class="space-y-1.5 text-xs"></div>
           </div>
           <div class="space-y-2.5">
             <div>
-              <label class="label">Question du sondage</label>
+              <label class="label text-xs">Question du sondage</label>
               <input type="text" id="pollQuestionInput" placeholder="Ex: Quel style pour la prochaine heure ?" class="input text-xs" />
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -489,19 +750,19 @@
               <input type="text" id="pollOption3" placeholder="Option 3 (optionnel)" class="input text-xs" />
               <input type="text" id="pollOption4" placeholder="Option 4 (optionnel)" class="input text-xs" />
             </div>
-            <button id="btnLaunchPoll" class="btn btn-success btn-sm btn-full font-bold">Lancer le sondage en direct</button>
+            <button id="btnLaunchPoll" type="button" class="btn btn-success btn-sm btn-full font-bold">Lancer le sondage en direct</button>
           </div>
         </div>
       </div>
 
       <!-- Dons & Cagnotte -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--amber)">Dons & Cagnotte</p>
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <p class="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">Dons & Cagnotte</p>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-start justify-between gap-4 mb-3">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Activer les dons</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Affiche un bouton de don chez les invités</p>
+              <p class="text-sm font-bold text-white">Activer les dons</p>
+              <p class="text-xs text-slate-400 mt-0.5">Affiche un bouton de don chez les invités</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="donationsEnabledToggle" class="sr-only" />
@@ -510,54 +771,54 @@
           </div>
           <div class="space-y-2.5">
             <div>
-              <label class="label">Lien de paiement / cagnotte (Lydia, Paypal...)</label>
+              <label class="label text-xs">Lien de paiement / cagnotte (Lydia, Paypal...)</label>
               <input type="url" id="donationsUrlInput" placeholder="https://..." class="input text-xs" />
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="label">Objectif (€)</label>
+                <label class="label text-xs">Objectif (€)</label>
                 <input type="number" id="donationsTargetInput" min="0" value="0" class="input text-xs" />
               </div>
               <div>
-                <label class="label">Récolté (€)</label>
+                <label class="label text-xs">Récolté (€)</label>
                 <input type="number" id="donationsRaisedTotalInput" min="0" value="0" class="input text-xs" />
               </div>
             </div>
-            <button id="btnSaveDonation" class="btn btn-primary btn-sm btn-full font-bold">Enregistrer les réglages de dons</button>
-            <div id="donationSaveFeedback" class="hidden text-xs font-bold text-center py-1.5 rounded-lg" style="background:var(--green-dim);color:var(--green)">Réglages sauvegardés !</div>
+            <button id="btnSaveDonation" type="button" class="btn btn-primary btn-sm btn-full font-bold">Enregistrer les réglages de dons</button>
+            <div id="donationSaveFeedback" class="hidden text-xs font-bold text-center py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">Réglages sauvegardés !</div>
           </div>
         </div>
       </div>
 
-      <!-- Message de fin de soirée -->
+      <!-- Message de Fin -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-secondary)">Message de Fin</p>
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p class="text-xs mb-2" style="color:var(--text-muted)">Affiché aux invités quand la soirée est clôturée</p>
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Message de Fin</p>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+          <p class="text-xs text-slate-400 mb-2">Affiché aux invités quand la soirée est clôturée</p>
           <textarea id="thankYouMessage" rows="2" class="input resize-none mb-3 text-xs" placeholder="Merci d'avoir participé ! On espère que vous avez passé un excellent moment."></textarea>
           <div class="flex justify-end gap-2">
-            <button id="btnResetMessage" class="btn btn-ghost btn-sm font-semibold">Réinitialiser</button>
-            <button id="btnSaveMessage" class="btn btn-primary btn-sm font-bold">Enregistrer</button>
+            <button id="btnResetMessage" type="button" class="btn btn-ghost btn-sm font-semibold">Réinitialiser</button>
+            <button id="btnSaveMessage" type="button" class="btn btn-primary btn-sm font-bold">Enregistrer</button>
           </div>
         </div>
       </div>
 
       <!-- Projection & Scène -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--cyan)">Lecture & Effets Écran</p>
+        <p class="text-xs font-bold uppercase tracking-wider text-cyan-400 font-mono">Lecture & Effets Écran</p>
 
-        <!-- Animation Visualiseur Audio Grand Écran (Spectre Cyber, Nébuleuse 3D, Ondes, etc.) -->
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <!-- Animation Visualiseur -->
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-start justify-between gap-4 mb-3">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Animation Visualiseur Audio (Grand Écran)</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Animations interactives canvas sur /event/:id/qrspectre</p>
+              <p class="text-sm font-bold text-white">Animation Visualiseur Audio (Grand Écran)</p>
+              <p class="text-xs text-slate-400 mt-0.5">Animations interactives canvas sur /event/:id/qrspectre</p>
             </div>
-            <span id="screenVisualizerCurrentBadge" class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3)">Spectre Cyber</span>
+            <span id="screenVisualizerCurrentBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30">Spectre Cyber</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
             <div>
-              <label class="label">Style d'animation</label>
+              <label class="label text-xs">Style d'animation</label>
               <select id="screenVisualizerSelect" class="input text-xs">
                 <option value="cyber-spectrum">Spectre Cyber (Equalizer néon)</option>
                 <option value="radial-spectrum">Spectre Circulaire Néon (Halo central)</option>
@@ -571,23 +832,23 @@
           </div>
         </div>
 
-        <!-- Mode Karaoké Grand Écran -->
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <!-- Mode Karaoké -->
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-start justify-between gap-4 mb-3">
             <div>
-              <p class="text-sm font-bold flex items-center gap-1.5" style="color:var(--text-primary)">
+              <p class="text-sm font-bold text-white flex items-center gap-1.5">
                 <span>🎤 Mode Karaoké & Paroles Synchronisées</span>
               </p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Affichage grand format des paroles défilantes en direct</p>
+              <p class="text-xs text-slate-400 mt-0.5">Affichage grand format des paroles défilantes en direct</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="karaokeRemoteToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,0.06)">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-white/5">
             <div>
-              <label class="label">Taille des paroles</label>
+              <label class="label text-xs">Taille des paroles</label>
               <select id="karaokeLyricsSizeSelect" class="input text-xs">
                 <option value="normal">Normale</option>
                 <option value="large">Grande (recommandé TV)</option>
@@ -596,19 +857,20 @@
             </div>
             <div class="flex flex-col justify-end">
               <label class="flex items-center gap-2 cursor-pointer select-none pb-2">
-                <input type="checkbox" id="karaokeAutoPerTrack" class="w-4 h-4" style="accent-color:#c084fc" />
-                <span class="text-xs font-semibold" style="color:var(--text-secondary)">Auto-Karaoké dès que dispo</span>
+                <input type="checkbox" id="karaokeAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-xs font-semibold text-slate-300">Auto-Karaoké dès que dispo</span>
               </label>
             </div>
           </div>
-          <button type="button" id="btnSaveKaraokeSettings" class="btn btn-sm btn-full font-bold mt-2" style="background:rgba(192,132,252,0.2);color:#c084fc;border:1px solid rgba(192,132,252,0.4)">Appliquer les réglages Karaoké</button>
+          <button type="button" id="btnSaveKaraokeSettings" class="btn btn-sm btn-full font-bold mt-2 bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30">Appliquer les réglages Karaoké</button>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <!-- Effets visuels de projection -->
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-start justify-between gap-4 mb-3">
             <div>
-              <p class="text-sm font-bold" style="color:var(--text-primary)">Effets visuels de projection</p>
-              <p class="text-xs mt-0.5" style="color:var(--text-muted)">Animations colorées synchronisées sur l'écran public</p>
+              <p class="text-sm font-bold text-white">Effets visuels de projection</p>
+              <p class="text-xs text-slate-400 mt-0.5">Animations colorées synchronisées sur l'écran public</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="projectionVisualsToggle" class="sr-only" />
@@ -617,7 +879,7 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
             <div>
-              <label class="label">Style d'effet</label>
+              <label class="label text-xs">Style d'effet</label>
               <select id="projectionVisualsMode" class="input text-xs">
                 <option value="aurora">Aurora (doux)</option>
                 <option value="pulse">Pulse (rythmé)</option>
@@ -634,39 +896,39 @@
             <button type="button" id="btnSaveProjectionVisuals" class="btn btn-cyan btn-sm font-bold">Appliquer</button>
           </div>
           <label class="flex items-center gap-2 mt-3 cursor-pointer select-none">
-            <input type="checkbox" id="projectionVisualsAutoPerTrack" class="w-4 h-4" style="accent-color:var(--accent)" />
-            <span class="text-xs" style="color:var(--text-secondary)">Changer automatiquement d'effet à chaque musique</span>
+            <input type="checkbox" id="projectionVisualsAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+            <span class="text-xs text-slate-300">Changer automatiquement d'effet à chaque musique</span>
           </label>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-center justify-between mb-1">
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Crossfade (Fondu enchaîné)</p>
-            <span id="crossfadeValue" class="text-xs font-bold text-gradient-purple">0 s</span>
+            <p class="text-sm font-bold text-white">Crossfade (Fondu enchaîné)</p>
+            <span id="crossfadeValue" class="text-xs font-bold text-purple-400 font-mono">0 s</span>
           </div>
-          <input type="range" id="crossfadeSlider" min="0" max="12" step="1" value="0" class="w-full mt-2" style="accent-color:var(--accent)" />
+          <input type="range" id="crossfadeSlider" min="0" max="12" step="1" value="0" class="w-full mt-2" />
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-center justify-between mb-1">
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Playlist de secours Spotify</p>
-            <span id="fallbackPlaylistBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:var(--green-dim);color:var(--green)">Active</span>
+            <p class="text-sm font-bold text-white">Playlist de secours Spotify</p>
+            <span id="fallbackPlaylistBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Active</span>
           </div>
-          <p class="text-xs mb-3" style="color:var(--text-muted)">Joue un titre aléatoire quand la queue est vide.</p>
+          <p class="text-xs text-slate-400 mb-3">Joue un titre aléatoire quand la queue est vide.</p>
           <input type="text" id="fallbackPlaylistInput" class="input mb-2 text-xs" placeholder="URL ou URI playlist Spotify..." autocomplete="off" />
-          <div id="fallbackPlaylistPreview" class="hidden mb-2 rounded-xl p-2.5" style="background:var(--bg-surface);border:1px solid var(--border)">
+          <div id="fallbackPlaylistPreview" class="hidden mb-2 rounded-xl p-2.5 bg-slate-900 border border-white/5">
             <div class="flex items-center gap-2.5">
               <img id="fallbackPlaylistPreviewImg" src="" alt="" class="w-10 h-10 rounded-lg object-cover shrink-0" />
               <div class="min-w-0 flex-1">
-                <p id="fallbackPlaylistPreviewName" class="text-xs font-bold truncate" style="color:var(--text-primary)">Playlist</p>
-                <p id="fallbackPlaylistPreviewMeta" class="text-[10px] truncate" style="color:var(--text-muted)"></p>
+                <p id="fallbackPlaylistPreviewName" class="text-xs font-bold text-white truncate">Playlist</p>
+                <p id="fallbackPlaylistPreviewMeta" class="text-[10px] text-slate-400 truncate"></p>
               </div>
               <a id="fallbackPlaylistPreviewLink" href="#" target="_blank" class="btn btn-ghost btn-sm text-xs">Ouvrir</a>
             </div>
           </div>
           <div class="flex gap-2">
-            <button id="btnSaveFallbackPlaylist" class="btn btn-primary btn-sm flex-1 font-bold">Enregistrer</button>
-            <button id="btnClearFallbackPlaylist" class="btn btn-ghost btn-sm" title="Retirer la playlist">
+            <button id="btnSaveFallbackPlaylist" type="button" class="btn btn-primary btn-sm flex-1 font-bold">Enregistrer</button>
+            <button id="btnClearFallbackPlaylist" type="button" class="btn btn-ghost btn-sm" title="Retirer la playlist">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -675,75 +937,76 @@
 
       <!-- Équipe & Sécurité -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--red)">Équipe & Sécurité</p>
+        <p class="text-xs font-bold uppercase tracking-wider text-rose-400 font-mono">Équipe & Sécurité</p>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-center justify-between gap-3 mb-2">
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Invités bloqués</p>
-            <span id="bannedCount" class="badge badge-neutral text-xs">0</span>
+            <p class="text-sm font-bold text-white">Invités bloqués</p>
+            <span id="bannedCount" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-white/10 text-white">0</span>
           </div>
-          <div id="bannedList" class="space-y-1.5 text-xs" style="color:var(--text-secondary)">
-            <p style="color:var(--text-muted)">Aucun invité bloqué</p>
+          <div id="bannedList" class="space-y-1.5 text-xs text-slate-400">
+            <p>Aucun invité bloqué</p>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-          <p class="text-sm font-bold mb-1" style="color:var(--text-primary)">Mode co-DJ / Modérateurs</p>
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+          <p class="text-sm font-bold text-white mb-1">Mode co-DJ / Modérateurs</p>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 mb-2">
             <select id="coDjRoleSelect" class="input text-xs">
               <option value="moderation">Modération seulement</option>
               <option value="queue_message">Queue + message</option>
               <option value="playback">Lecture Spotify</option>
             </select>
-            <button id="btnGenerateCoDjLink" class="btn btn-primary btn-sm font-bold">Générer lien</button>
+            <button id="btnGenerateCoDjLink" type="button" class="btn btn-primary btn-sm font-bold">Générer lien</button>
           </div>
-          <div id="coDjLinksList" class="space-y-1 text-xs" style="color:var(--text-secondary)">
-            <p style="color:var(--text-muted)">Aucun lien co-DJ</p>
+          <div id="coDjLinksList" class="space-y-1 text-xs text-slate-400">
+            <p>Aucun lien co-DJ</p>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Lien modérateur direct</p>
-            <span id="modBadgeActive" class="hidden text-xs font-bold px-2 py-0.5 rounded-full" style="background:var(--amber-dim);color:var(--amber)">Actif</span>
+            <p class="text-sm font-bold text-white">Lien modérateur direct</p>
+            <span id="modBadgeActive" class="hidden text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Actif</span>
           </div>
           <div id="modLinkBox" class="hidden space-y-2">
             <div class="flex gap-2">
               <input id="modLinkInput" type="text" readonly class="input text-xs font-mono flex-1 cursor-text" />
-              <button id="btnCopyModLink" class="btn btn-ghost btn-sm shrink-0 font-bold">Copier</button>
+              <button id="btnCopyModLink" type="button" class="btn btn-ghost btn-sm shrink-0 font-bold">Copier</button>
             </div>
-            <button id="btnRevokeModToken" class="btn btn-danger btn-sm btn-full font-bold">Révoquer</button>
+            <button id="btnRevokeModToken" type="button" class="btn btn-danger btn-sm btn-full font-bold">Révoquer</button>
           </div>
-          <button id="btnGenerateModToken" class="btn btn-primary btn-sm btn-full font-bold">Générer un lien modérateur</button>
+          <button id="btnGenerateModToken" type="button" class="btn btn-primary btn-sm btn-full font-bold">Générer un lien modérateur</button>
         </div>
 
-        <div class="p-4 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
+        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Journal des actions</p>
-            <button id="btnRefreshActionLogs" class="btn btn-ghost btn-sm text-xs">Rafraîchir</button>
+            <p class="text-sm font-bold text-white">Journal des actions</p>
+            <button id="btnRefreshActionLogs" type="button" class="btn btn-ghost btn-sm text-xs">Rafraîchir</button>
           </div>
-          <div id="actionLogsList" class="space-y-1 text-xs max-h-36 overflow-y-auto" style="color:var(--text-secondary)">
-            <p style="color:var(--text-muted)">Aucune action récente</p>
+          <div id="actionLogsList" class="space-y-1 text-xs max-h-36 overflow-y-auto text-slate-400">
+            <p>Aucune action récente</p>
           </div>
         </div>
       </div>
 
     </div>
-    <div class="px-6 py-4 shrink-0" style="border-top:1px solid var(--border)">
-      <button id="closeSettingsBottom" class="btn btn-ghost btn-full font-bold">Fermer les réglages</button>
+    
+    <div class="px-6 py-4 shrink-0 border-t border-white/10">
+      <button id="closeSettingsBottom" type="button" class="btn btn-ghost btn-full font-bold">Fermer les réglages</button>
     </div>
   </div>
 </div>
 
-<!-- ─── Modal: Bloquer un invité ───────────────────────────── -->
-<div id="banModal" class="hidden modal-backdrop">
-  <div class="modal max-w-sm">
-    <div class="px-6 py-5" style="border-bottom:1px solid var(--border)">
-      <h3 class="text-base font-bold" style="color:var(--text-primary)">Bloquer un invité</h3>
-      <p id="banModalName" class="text-sm mt-1" style="color:var(--text-secondary)"></p>
+<!-- Modal: Bloquer un invité -->
+<div id="banModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-sm">
+    <div class="px-6 py-5 border-b border-white/10">
+      <h3 class="text-base font-bold text-white">Bloquer un invité</h3>
+      <p id="banModalName" class="text-sm text-slate-400 mt-1"></p>
     </div>
     <div class="p-5 space-y-3">
-      <p class="text-xs" style="color:var(--text-muted)">Choisir la durée du blocage :</p>
+      <p class="text-xs text-slate-400">Choisir la durée du blocage :</p>
       <div class="grid grid-cols-2 gap-2">
         <button class="btn btn-ghost btn-sm font-semibold" data-ban-duration="15">15 minutes</button>
         <button class="btn btn-ghost btn-sm font-semibold" data-ban-duration="30">30 minutes</button>
@@ -755,233 +1018,230 @@
       </button>
     </div>
     <div class="px-5 pb-5">
-      <button id="cancelBanModal" class="btn btn-ghost btn-sm btn-full font-semibold">Annuler</button>
+      <button id="cancelBanModal" type="button" class="btn btn-ghost btn-sm btn-full font-semibold">Annuler</button>
     </div>
   </div>
 </div>
 
-<!-- ─── Modal: QR Code ─────────────────────────────────────────────── -->
-<div id="qrCodePanel" class="hidden modal-backdrop">
-  <div class="modal max-w-sm">
-    <div class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid var(--border)">
-      <h2 class="text-base font-bold" style="color:var(--text-primary)">Partager la soirée</h2>
-      <button id="closeQRCode" class="btn btn-ghost btn-icon btn-sm">
+<!-- Modal: QR Code -->
+<div id="qrCodePanel" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-sm">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10">
+      <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Partager la soirée</h2>
+      <button id="closeQRCode" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="p-6 text-center">
-      <div class="inline-block p-4 rounded-2xl mb-4 shadow-xl" style="background:#fff">
+      <div class="inline-block p-4 rounded-2xl mb-4 shadow-2xl bg-white border-4 border-purple-500/30">
         <img id="qrCodeImage" src="" alt="QR Code" class="w-52 h-52 object-contain" />
       </div>
       <div class="space-y-3 mb-5 text-left">
         <div>
-          <label class="label">Lien direct invités</label>
+          <label class="label text-xs">Lien direct invités</label>
           <div class="input-group">
             <input type="text" id="userLinkInput" readonly class="input text-xs font-mono" />
-            <button id="copyLinkBtn" class="btn btn-ghost btn-sm shrink-0 font-bold">Copier</button>
+            <button id="copyLinkBtn" type="button" class="btn btn-ghost btn-sm shrink-0 font-bold">Copier</button>
           </div>
         </div>
         <div>
-          <label class="label">Écran public grand format</label>
+          <label class="label text-xs">Écran public grand format</label>
           <div class="input-group">
             <input type="text" id="publicDisplayLinkInput" readonly class="input text-xs font-mono" />
-            <button id="openPublicDisplayFromQR" class="btn btn-cyan btn-sm shrink-0 font-bold">Ouvrir</button>
+            <button id="openPublicDisplayFromQR" type="button" class="btn btn-cyan btn-sm shrink-0 font-bold">Ouvrir</button>
           </div>
         </div>
         <div>
-          <label class="label">Profils Grand Écran Multi-Display</label>
+          <label class="label text-xs">Profils Grand Écran Multi-Display</label>
           <div class="grid grid-cols-3 gap-2 mt-1">
             <button id="btnOpenScreenStandard" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold">Standard</button>
-            <button id="btnOpenScreenBar" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold" style="color:var(--amber);border-color:rgba(245,158,11,0.3)">🍸 Bar</button>
-            <button id="btnOpenScreenStage" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold" style="color:#c084fc;border-color:rgba(192,132,252,0.3)">🎤 Scène</button>
+            <button id="btnOpenScreenBar" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold text-amber-400 border-amber-500/30 hover:bg-amber-500/10">🍸 Bar</button>
+            <button id="btnOpenScreenStage" type="button" class="btn btn-ghost btn-sm text-[11px] font-bold text-purple-300 border-purple-500/30 hover:bg-purple-500/10">🎤 Scène</button>
           </div>
         </div>
       </div>
-      <button id="closeQRCodeBottom" class="btn btn-ghost btn-full font-semibold">Fermer</button>
+      <button id="closeQRCodeBottom" type="button" class="btn btn-ghost btn-full font-semibold">Fermer</button>
     </div>
   </div>
 </div>
 
-<!-- ─── Modal: Message aux invités ────────────────────────── -->
-<div id="messagePanel" class="hidden modal-backdrop">
-  <div class="modal max-w-md">
-    <div class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid var(--border)">
+<!-- Modal: Message aux invités -->
+<div id="messagePanel" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10">
       <div>
-        <h2 class="text-base font-bold" style="color:var(--text-primary)">Message en direct</h2>
-        <p class="text-xs" style="color:var(--text-muted)">Affiché en bannière chez tous vos invités</p>
+        <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Message en direct</h2>
+        <p class="text-xs text-slate-400">Diffusé instantanément en bannière chez tous vos invités</p>
       </div>
-      <button id="closeMessagePanel" class="btn btn-ghost btn-icon btn-sm">
+      <button id="closeMessagePanel" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="p-6 space-y-4">
-      <textarea id="djMessageInput" rows="3" maxlength="200" placeholder="Ex : Dernières demandes — on passe sur un set Electro dans 10 min !" class="input w-full resize-none text-sm"></textarea>
+      <textarea id="djMessageInput" rows="3" maxlength="200" placeholder="Ex : Dernières demandes — on passe sur un set Électro dans 10 min !" class="input w-full resize-none text-sm"></textarea>
       <div class="flex items-center justify-between">
-        <span id="djMessageCount" class="text-xs font-mono" style="color:var(--text-muted)">0 / 200</span>
-        <button id="sendDjMessage" class="btn btn-primary btn-sm font-bold">
+        <span id="djMessageCount" class="text-xs font-mono text-slate-500">0 / 200</span>
+        <button id="sendDjMessage" type="button" class="btn btn-primary btn-sm font-bold flex items-center gap-1.5">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           Diffuser
         </button>
       </div>
-      <div id="djMessageFeedback" class="hidden rounded-xl px-3 py-2 text-xs font-bold text-center" style="background:var(--green-dim);color:var(--green)">
+      <div id="djMessageFeedback" class="hidden rounded-xl px-3 py-2 text-xs font-bold text-center bg-emerald-500/20 text-emerald-300">
         Message diffusé avec succès !
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── Modal: Ajouter une chanson manuellement ─────────────── -->
-<div id="addSongPanel" class="hidden modal-backdrop">
-  <div class="modal max-w-xl">
-    <div class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid var(--border)">
+<!-- Modal: Ajouter une chanson manuellement -->
+<div id="addSongPanel" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-xl">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10">
       <div>
-        <h2 class="text-base font-bold" style="color:var(--text-primary)">Ajouter une chanson</h2>
-        <p class="text-xs" style="color:var(--text-muted)">Recherche Spotify instantanée par le DJ</p>
+        <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Ajouter une chanson</h2>
+        <p class="text-xs text-slate-400">Recherche Spotify instantanée par le DJ</p>
       </div>
-      <button id="closeAddSong" class="btn btn-ghost btn-icon btn-sm">
+      <button id="closeAddSong" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="p-6">
       <div class="relative mb-4">
-        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style="color:var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="djSearchInput" placeholder="Rechercher un titre, artiste..." class="input" style="padding-left:2.5rem" autocomplete="off" />
       </div>
-      <div id="djSearchResults" class="space-y-1.5 max-h-80 overflow-y-auto"></div>
-      <button id="closeAddSongBottom" class="btn btn-ghost btn-full mt-4 font-semibold">Fermer</button>
+      <div id="djSearchResults" class="space-y-1.5 max-h-80 overflow-y-auto deck-scroll"></div>
+      <button id="closeAddSongBottom" type="button" class="btn btn-ghost btn-full mt-4 font-semibold">Fermer</button>
     </div>
   </div>
 </div>
 
-<!-- ─── Preview Audio (hidden) ─────────────────────────────── -->
+<!-- Preview Audio (hidden) -->
 <audio id="previewAudio" preload="none" crossorigin="anonymous"></audio>
 
-<!-- ─── Mini-player preview (flottant) ─────────────────────── -->
-<div id="previewBar" class="hidden fixed bottom-4 left-4 right-4 z-40 rounded-2xl shadow-2xl"
-     style="background:var(--bg-surface);border:1px solid var(--accent);max-width:560px;margin:0 auto">
-  <div class="flex items-center gap-3 px-4 py-3">
-    <img id="previewArt" src="" alt="" class="w-10 h-10 rounded-xl object-cover shrink-0" />
+<!-- Mini-player preview (flottant) -->
+<div id="previewBar" class="hidden fixed bottom-4 left-4 right-4 z-50 rounded-2xl shadow-2xl p-3 border border-purple-500/40" style="background:rgba(11,15,25,0.95);backdrop-filter:blur(20px);max-width:560px;margin:0 auto">
+  <div class="flex items-center gap-3">
+    <img id="previewArt" src="" alt="" class="w-11 h-11 rounded-xl object-cover shrink-0 shadow-md" />
     <div class="flex-1 min-w-0">
-      <p id="previewTitle" class="text-sm font-semibold truncate" style="color:var(--text-primary)"></p>
-      <p id="previewArtist" class="text-xs truncate" style="color:var(--text-secondary)"></p>
-      <div class="mt-1.5 h-1 rounded-full overflow-hidden" style="background:var(--bg-elevated)">
-        <div id="previewProgressBar" class="h-full rounded-full transition-none" style="width:0%;background:var(--accent)"></div>
+      <p id="previewTitle" class="text-sm font-bold text-white truncate"></p>
+      <p id="previewArtist" class="text-xs text-slate-400 truncate"></p>
+      <div class="mt-1.5 h-1.5 rounded-full overflow-hidden bg-slate-800">
+        <div id="previewProgressBar" class="h-full rounded-full bg-purple-500 transition-none" style="width:0%"></div>
       </div>
     </div>
-    <button id="previewPlayPauseBtn" class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--accent)">
-      <svg id="previewPlayIcon" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <svg id="previewPauseIcon" class="w-4 h-4 text-white hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    <button id="previewPlayPauseBtn" type="button" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-purple-600 hover:bg-purple-500 text-white transition shadow-lg shadow-purple-500/30">
+      <svg id="previewPlayIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <svg id="previewPauseIcon" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
     </button>
     <div id="previewOutputWrap" class="hidden shrink-0">
-      <select id="previewOutputSelect" class="text-xs rounded-lg px-2 py-1.5 border"
-              style="background:var(--bg-elevated);color:var(--text-primary);border-color:var(--border);max-width:120px"></select>
+      <select id="previewOutputSelect" class="text-xs rounded-lg px-2 py-1.5 border bg-slate-900 text-white border-white/10 max-w-[120px]"></select>
     </div>
-    <button id="previewCloseBtn" class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:var(--bg-elevated);color:var(--text-muted)">
-      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <button id="previewCloseBtn" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
 </div>
 
-<!-- ─── Modal: Raccourcis Clavier & Contrôleur MIDI ─────────── -->
-<div id="shortcutsHelpModal" class="hidden modal-backdrop">
-  <div class="modal max-w-xl max-h-[90vh] flex flex-col">
-    <div class="flex items-center justify-between px-6 py-5 shrink-0" style="border-bottom:1px solid var(--border)">
+<!-- Modal: Raccourcis Clavier & Contrôleur MIDI -->
+<div id="shortcutsHelpModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-xl max-h-[90vh] flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 shrink-0 border-b border-white/10">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:var(--accent-dim);color:var(--accent)">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-500/20 text-purple-300 border border-purple-500/30">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
         </div>
         <div>
-          <h2 class="text-base font-bold" style="color:var(--text-primary)">Raccourcis Clavier & Contrôleur MIDI</h2>
-          <p class="text-xs" style="color:var(--text-muted)">Pilotez toute votre régie DJ instantanément</p>
+          <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Raccourcis Clavier & Contrôleur MIDI</h2>
+          <p class="text-xs text-slate-400">Pilotez votre régie instantanément sans souris</p>
         </div>
       </div>
-      <button id="closeShortcutsHelp" class="btn btn-ghost btn-icon btn-sm">
+      <button id="closeShortcutsHelp" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <div class="p-6 space-y-6 overflow-y-auto flex-1">
-      <!-- Clavier -->
+    <div class="p-6 space-y-6 overflow-y-auto flex-1 deck-scroll">
       <div>
-        <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:var(--accent)">⌨️ Raccourcis Clavier</p>
+        <p class="text-xs font-bold uppercase tracking-wider mb-3 text-purple-400 font-mono">⌨️ Raccourcis Clavier</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Play / Pause Spotify</span>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Play / Pause Spotify</span>
             <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-white">Espace</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Accepter 1ère demande</span>
-            <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-green-400">Entrée</kbd>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Accepter 1ère demande</span>
+            <kbd class="px-2 py-1 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Entrée</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Refuser 1ère demande</span>
-            <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-red-400">Suppr / Backspace</kbd>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Refuser 1ère demande</span>
+            <kbd class="px-2 py-1 rounded font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">Suppr / Backspace</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Titre Suivant</span>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Titre Suivant</span>
             <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-white">N ou →</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Titre Précédent</span>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Titre Précédent</span>
             <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-white">P ou ←</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Gel d'urgence 5 min</span>
-            <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-cyan-400">F</kbd>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Gel d'urgence 5 min</span>
+            <kbd class="px-2 py-1 rounded font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">F</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Ouvrir Réglages</span>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Ouvrir Réglages</span>
             <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-white">S</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Ouvrir Message Invités</span>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Ouvrir Message Invités</span>
             <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-white">M</kbd>
           </div>
-          <div class="flex items-center justify-between p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <span style="color:var(--text-secondary)">Karaoké Grand Écran</span>
-            <kbd class="px-2 py-1 rounded font-mono font-bold bg-white/10 text-purple-300">K</kbd>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Karaoké Grand Écran</span>
+            <kbd class="px-2 py-1 rounded font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">K</kbd>
           </div>
         </div>
       </div>
 
-      <!-- Contrôleur MIDI (Pads 1 à 8) -->
+      <!-- MIDI Pads -->
       <div>
         <div class="flex items-center justify-between mb-3">
-          <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--accent)">🎛️ Mapping Contrôleur MIDI (Web MIDI API)</p>
-          <span class="text-[11px]" style="color:var(--text-muted)">Détection automatique USB</span>
+          <p class="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">🎛️ Mapping Contrôleur MIDI (Web MIDI API)</p>
+          <span class="text-[11px] text-slate-500">Détection USB Plug & Play</span>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-center font-bold">
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-purple-400 text-sm mb-1">PAD 1</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Play / Pause</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs text-center font-bold">
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-purple-400 font-mono text-sm mb-1">PAD 1</p>
+            <p class="text-[11px] text-slate-400">Play / Pause</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-green-400 text-sm mb-1">PAD 2</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Accepter 1er</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-emerald-400 font-mono text-sm mb-1">PAD 2</p>
+            <p class="text-[11px] text-slate-400">Accepter 1er</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-red-400 text-sm mb-1">PAD 3</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Refuser 1er</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-rose-400 font-mono text-sm mb-1">PAD 3</p>
+            <p class="text-[11px] text-slate-400">Refuser 1er</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-cyan-400 text-sm mb-1">PAD 4</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Titre Suivant</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-cyan-400 font-mono text-sm mb-1">PAD 4</p>
+            <p class="text-[11px] text-slate-400">Titre Suivant</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-yellow-400 text-sm mb-1">PAD 5</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Titre Précédent</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-amber-400 font-mono text-sm mb-1">PAD 5</p>
+            <p class="text-[11px] text-slate-400">Titre Précédent</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-pink-400 text-sm mb-1">PAD 6</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Gel Urgence</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-pink-400 font-mono text-sm mb-1">PAD 6</p>
+            <p class="text-[11px] text-slate-400">Gel Urgence</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-purple-400 text-sm mb-1">PAD 7</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Sondage</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-purple-400 font-mono text-sm mb-1">PAD 7</p>
+            <p class="text-[11px] text-slate-400">Sondage</p>
           </div>
-          <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-            <p class="text-emerald-400 text-sm mb-1">PAD 8</p>
-            <p class="text-[11px] font-medium" style="color:var(--text-secondary)">Mode DJ</p>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <p class="text-emerald-400 font-mono text-sm mb-1">PAD 8</p>
+            <p class="text-[11px] text-slate-400">Mode DJ</p>
           </div>
         </div>
       </div>
@@ -989,55 +1249,55 @@
   </div>
 </div>
 
-<!-- ─── Modal: Mini Blind-Test Flash DJ ──────────────────────── -->
-<div id="blindTestDjModal" class="hidden modal-backdrop">
-  <div class="modal max-w-md">
-    <div class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid var(--border)">
+<!-- Modal: Mini Blind-Test Flash DJ -->
+<div id="blindTestDjModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-md">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-white/10">
       <div>
-        <h2 class="text-base font-bold flex items-center gap-2" style="color:var(--text-primary)">
+        <h2 class="text-base font-extrabold text-white flex items-center gap-2" style="font-family:'Syne', sans-serif">
           <span>⚡ Mini Blind-Test Flash</span>
         </h2>
-        <p class="text-xs" style="color:var(--text-muted)">15 secondes chrono pour faire deviner un morceau</p>
+        <p class="text-xs text-slate-400">15 secondes chrono pour faire deviner un morceau</p>
       </div>
-      <button id="closeBlindTestDjModal" class="btn btn-ghost btn-icon btn-sm">
+      <button id="closeBlindTestDjModal" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     
     <div class="p-6 space-y-4">
       <div>
-        <label class="label">Morceau à faire deviner</label>
+        <label class="label text-xs">Morceau à faire deviner</label>
         <select id="blindTestTrackSelect" class="input text-xs">
           <option value="auto">🎲 Aléatoire intelligent (Queue / Récent)</option>
         </select>
       </div>
 
       <div>
-        <label class="label">Durée du compte à rebours</label>
+        <label class="label text-xs">Durée du compte à rebours</label>
         <select id="blindTestDurationSelect" class="input text-xs">
-          <option value="15" selected>15 secondes (Idéal)</option>
+          <option value="15" selected>15 secondes (Idéal transition)</option>
           <option value="10">10 secondes (Ultra rapide)</option>
           <option value="20">20 secondes (Détendu)</option>
         </select>
       </div>
 
-      <div id="blindTestDjLiveStatus" class="hidden p-3 rounded-xl space-y-2" style="background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3)">
+      <div id="blindTestDjLiveStatus" class="hidden p-3.5 rounded-xl space-y-2 bg-pink-500/10 border border-pink-500/30">
         <div class="flex items-center justify-between text-xs font-bold">
-          <span style="color:#f472b6" class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
+          <span class="text-pink-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-pink-500 animate-ping"></span>
             Quiz en cours…
           </span>
-          <span id="blindTestDjTimeRemaining" style="color:var(--text-primary)">15s</span>
+          <span id="blindTestDjTimeRemaining" class="text-white font-mono text-sm">15s</span>
         </div>
-        <p id="blindTestDjCorrectHint" class="text-xs font-semibold" style="color:var(--text-secondary)"></p>
-        <p id="blindTestDjVotesCount" class="text-xs font-bold" style="color:var(--text-muted)">0 réponses reçues</p>
+        <p id="blindTestDjCorrectHint" class="text-xs font-semibold text-slate-300"></p>
+        <p id="blindTestDjVotesCount" class="text-xs font-bold text-slate-400">0 réponses reçues</p>
       </div>
 
       <div class="flex gap-2 pt-2">
-        <button id="btnLaunchBlindTest" class="btn btn-full font-bold" style="background:linear-gradient(135deg, #ec4899, #8b5cf6);color:#fff">
+        <button id="btnLaunchBlindTest" type="button" class="btn btn-full font-bold shadow-lg shadow-pink-500/25" style="background:linear-gradient(135deg, #ec4899, #8b5cf6);color:#fff">
           ⚡ Lancer le Blind-Test (15s)
         </button>
-        <button id="btnStopBlindTest" class="hidden btn btn-ghost font-bold text-xs" style="color:var(--red)">
+        <button id="btnStopBlindTest" type="button" class="hidden btn btn-ghost font-bold text-xs text-rose-400 hover:text-rose-300">
           Arrêter
         </button>
       </div>
@@ -1045,11 +1305,15 @@
   </div>
 </div>
 
-<!-- ─── Toast notification ─────────────────────────────────── -->
-<div id="toast" class="hidden fixed top-20 right-4 z-50 px-4 py-3 rounded-2xl text-sm font-bold shadow-2xl" style="background:var(--accent);color:#fff;max-width:320px;box-shadow:0 10px 30px var(--accent-glow)"></div>
-<div id="rejectUndoBar" class="hidden fixed bottom-4 left-4 right-4 z-[60] max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 rounded-2xl shadow-2xl" style="background:var(--bg-surface);border:1px solid var(--border)">
-  <span class="text-sm font-semibold" style="color:var(--text-primary)">Demande refusée.</span>
-  <button type="button" id="rejectUndoBtn" class="btn btn-ghost btn-sm font-bold" style="color:var(--accent)">Annuler</button>
+<!-- Toast notifications -->
+<div id="toast" class="hidden fixed top-20 right-4 z-50 px-4 py-3 rounded-2xl text-sm font-bold shadow-2xl bg-purple-600 text-white max-w-xs shadow-purple-500/30"></div>
+
+<!-- Floating Undo Reject Bar -->
+<div id="rejectUndoBar" class="hidden fixed bottom-6 left-4 right-4 z-[60] max-w-md mx-auto flex items-center justify-between gap-3 px-5 py-3.5 rounded-2xl shadow-2xl bg-slate-900 border border-purple-500/40 text-white">
+  <span class="text-sm font-semibold">Demande refusée.</span>
+  <button type="button" id="rejectUndoBtn" class="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30 transition">
+    Annuler (Undo)
+  </button>
 </div>
 
 <span id="spotifyStatus" class="hidden"></span>

@@ -2277,7 +2277,7 @@
       <div class="p-4 hover:bg-white/[0.02] transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-3.5 min-w-0">
           ${request.image_url 
-            ? `<img src="${request.image_url}" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-md">` 
+            ? `<img src="${request.image_url}" onerror="this.onerror=null;this.src='/images/vinyl-record.jpg'" class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-md border border-white/10">` 
             : `<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background:var(--bg-elevated);border:1px solid var(--border)"><svg class="w-6 h-6 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`
           }
           <div class="flex-1 min-w-0">
@@ -2429,7 +2429,7 @@
           <span class="block w-3.5 h-0.5 rounded-full" style="background:currentColor"></span>
         </div>
         <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black shrink-0" style="background:var(--accent-dim);color:var(--accent)">${index+1}</div>
-        ${request.image_url ? `<img src="${request.image_url}" class="w-11 h-11 rounded-xl object-cover shrink-0 hidden sm:block shadow-sm">` : ""}
+        ${request.image_url ? `<img src="${request.image_url}" onerror="this.onerror=null;this.src='/images/vinyl-record.jpg'" class="w-11 h-11 rounded-xl object-cover shrink-0 shadow-sm border border-white/10">` : `<div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-slate-900 border border-white/10"><svg class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`}
         <div class="flex-1 min-w-0">
           <p class="text-sm font-extrabold truncate flex items-center gap-1.5" style="color:var(--text-primary)">
             <span class="truncate">${request.song_name}</span>

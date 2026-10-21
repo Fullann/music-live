@@ -32,6 +32,11 @@ L'interface DJ a été entièrement repensée sous la forme d'un studio matérie
 </p>
 
 <p align="center">
+  <img src="docs/screenshots/dj-console-live.png" alt="Console Régie DJ Live - Double Decks" width="100%" />
+  <em>Console Régie DJ Live : Double deck physique (Deck A : Inbox de modération / Deck B : Queue On-Air), mini monitor OLED grand écran et commandes broadcast.</em>
+</p>
+
+<p align="center">
   <img src="docs/screenshots/dashboard-hitparade.png" alt="Hit-Parade des morceaux les plus demandés" width="100%" />
   <em>Hit-Parade & Tops : Classement des titres les plus plébiscités avec ratios de votes positifs et fréquence des demandes de la foule.</em>
 </p>
