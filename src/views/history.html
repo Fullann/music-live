@@ -1,162 +1,232 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Historique des Soirées — Music Live</title>
+  <title>Historique des Sets & Sessions — Music Live</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
+
+  <style>
+    body {
+      background-color: #09090e;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--text-primary);
+    }
+    .gaffer-tape {
+      background: #e6dfc8;
+      color: #111;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+    }
+    .studio-box {
+      background: #0f0f16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+    .kpi-card {
+      background: #14141f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 1.15rem;
+    }
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.12s ease;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    .side-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .side-link.active {
+      background: rgba(212, 255, 0, 0.08);
+      color: #d4ff00;
+      border-left-color: #d4ff00;
+      font-weight: 700;
+    }
+    .side-link.danger {
+      color: var(--red);
+    }
+    .side-link.danger:hover {
+      background: var(--red-dim);
+    }
+  </style>
 </head>
-<body style="background:var(--bg-base);color:var(--text-primary)">
+<body class="antialiased min-h-screen">
 
 <div class="flex h-screen overflow-hidden">
 
-  <!-- ── Sidebar ─────────────────────────────────────────── -->
-  <aside class="hidden lg:flex flex-col w-64 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-    <!-- Logo App -->
-    <div class="flex items-center gap-3.5 px-6 py-5" style="border-bottom:1px solid var(--border)">
-      <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%);box-shadow:0 0 20px var(--accent-glow)">
-        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-        </svg>
-      </div>
-      <div>
-        <span class="font-extrabold text-base tracking-tight" style="color:var(--text-primary)">Music Live</span>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--accent)"></span>
-          <p class="text-[10px] uppercase font-bold tracking-widest text-gradient-purple">Console DJ</p>
+  <!-- ── SIDEBAR DESKTOP ──────────────────────────────────────── -->
+  <aside class="hidden lg:flex flex-col w-64 shrink-0 border-r"
+         style="background: #0f0f16; border-color: rgba(255,255,255,0.1);">
+    
+    <!-- Logo -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
+      <a href="/dashboard" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center border border-white/20"
+             style="background: #000; color: #d4ff00;">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
         </div>
-      </div>
+        <div>
+          <span class="font-display font-black text-sm uppercase tracking-tight text-white">MUSIC<span style="color:#d4ff00">LIVE</span></span>
+          <span class="block font-mono-code text-[9px] text-neutral-400">ARCHIVES RÉGIE</span>
+        </div>
+      </a>
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
     </div>
 
-    <!-- Profil DJ connecté -->
-    <a href="/profile" class="mx-3 my-3 p-3 rounded-xl flex items-center gap-3 transition-all hover:bg-white/[0.04] group" style="background:var(--bg-elevated);border:1px solid var(--border)">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black text-white uppercase shrink-0 shadow-sm" style="background:linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%)">
-        DJ
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-[10px] uppercase tracking-wider font-bold" style="color:var(--text-muted)">DJ Connecté</p>
-        <p id="sidebarDjName" class="text-sm font-bold truncate group-hover:text-purple-400 transition" style="color:var(--text-primary)">—</p>
-      </div>
-      <svg class="w-4 h-4 text-muted group-hover:translate-x-0.5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </a>
+    <!-- DJ Profile Quick -->
+    <div class="p-3">
+      <a href="/profile" class="p-2.5 rounded-xl border border-white/10 flex items-center gap-3 transition hover:border-white/30"
+         style="background: #14141f;">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono-code font-black text-xs text-black shrink-0"
+             style="background: #d4ff00;">
+          DJ
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="font-mono-code text-[9px] uppercase text-neutral-400">DJ CONNECTÉ</p>
+          <p id="sidebarDjName" class="font-grotesk text-xs font-bold text-white truncate">—</p>
+        </div>
+      </a>
+    </div>
 
-    <nav class="flex-1 p-3 space-y-1.5 pt-2">
-      <a href="/dashboard" class="nav-item">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
+    <nav class="flex-1 px-3 space-y-1">
+      <a href="/dashboard" class="side-link">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Console Live & Hub</span>
       </a>
-      <a href="/history" class="nav-item active">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Historique
+      <a href="/history" class="side-link active">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Historique des Sets</span>
       </a>
-      <a href="/profile" class="nav-item">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-        Mon Profil
+      <a href="/profile" class="side-link">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profil & Paramètres</span>
       </a>
     </nav>
-    <div class="p-3" style="border-top:1px solid var(--border)">
-      <button id="btnLogout" class="nav-item danger w-full">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Déconnexion
+
+    <div class="p-3 border-t border-white/10">
+      <button id="btnLogout" class="side-link danger w-full">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Déconnexion</span>
       </button>
     </div>
   </aside>
 
-  <!-- ── Main ─────────────────────────────────────────────── -->
+  <!-- ── MAIN CONTENT ─────────────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
-
-    <header class="flex items-center gap-4 px-6 py-4 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
-      <a href="/dashboard" class="btn btn-ghost btn-icon btn-sm" title="Retour au Dashboard">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </a>
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2">
-          <h1 class="text-base sm:text-lg font-extrabold tracking-tight" style="color:var(--text-primary)">Historique des Sessions</h1>
-          <span class="badge badge-accent hidden sm:inline-flex">Archives</span>
+    
+    <header class="h-16 px-4 sm:px-8 border-b border-white/10 flex items-center justify-between shrink-0"
+            style="background: #0f0f16;">
+      <div class="flex items-center gap-3">
+        <a href="/dashboard" class="p-2 rounded-lg border border-white/10 bg-[#14141f] text-neutral-300 hover:text-white" title="Retour au Dashboard">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-display font-black text-base sm:text-lg uppercase tracking-tight text-white">
+              Historique des Sessions & Sets
+            </h1>
+            <span class="gaffer-tape">ARCHIVES</span>
+          </div>
+          <p id="djName" class="font-mono-code text-xs text-neutral-400">Chargement...</p>
         </div>
-        <p id="djName" class="text-xs" style="color:var(--text-secondary)">Chargement...</p>
       </div>
-      <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Alterner mode clair / sombre">
-        <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-      <button id="btnLogoutTop" class="btn btn-danger btn-sm" title="Se déconnecter" aria-label="Se déconnecter">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        <span class="hidden sm:inline">Déconnexion</span>
-      </button>
+
+      <div class="flex items-center gap-2">
+        <button data-theme-toggle class="p-2 rounded-lg border border-white/10 text-neutral-300 hover:text-white" title="Alterner thème">
+          <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button id="btnLogoutTop" class="p-2 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20" title="Déconnexion">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
-
-      <!-- Stats KPIs -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
+      
+      <!-- 3 KPIs -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <span class="stat-label">Soirées terminées</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--accent-dim);color:var(--accent)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">SOIRÉES CLÔTURÉES</span>
+            <span class="font-mono-code text-xs text-purple-400">ARCHIVE</span>
           </div>
-          <p id="totalEndedEvents" class="stat-value text-gradient-purple">—</p>
-          <p class="text-[11px]" style="color:var(--text-muted)">Sessions passées enregistrées</p>
+          <p id="totalEndedEvents" class="font-display font-black text-2xl sm:text-3xl text-white">—</p>
+          <p class="font-grotesk text-[11px] text-neutral-400 mt-1">Sessions terminées enregistrées</p>
         </div>
 
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <span class="stat-label">Durée totale</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--cyan-dim);color:var(--cyan)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">DURÉE TOTALE MIXÉE</span>
+            <span class="font-mono-code text-xs text-cyan-400">TEMPS</span>
           </div>
-          <p id="totalDuration" class="stat-value text-gradient-cyan">—</p>
-          <p class="text-[11px]" style="color:var(--text-muted)">Temps total mixé au public</p>
+          <p id="totalDuration" class="font-display font-black text-2xl sm:text-3xl text-cyan-400">—</p>
+          <p class="font-grotesk text-[11px] text-neutral-400 mt-1">Heures passées aux platines</p>
         </div>
 
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <span class="stat-label">Chansons totales</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--green-dim);color:var(--green)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </div>
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">CHANSONS DIFFUSÉES</span>
+            <span class="font-mono-code text-xs text-emerald-400">AUDIO</span>
           </div>
-          <p id="totalSongsPlayed" class="stat-value" style="color:var(--green)">—</p>
-          <p class="text-[11px]" style="color:var(--text-muted)">Titres diffusés avec succès</p>
+          <p id="totalSongsPlayed" class="font-display font-black text-2xl sm:text-3xl text-emerald-400">—</p>
+          <p class="font-grotesk text-[11px] text-neutral-400 mt-1">Titres joués devant le public</p>
         </div>
       </div>
 
-      <!-- Ended events list -->
-      <div class="dash-card overflow-hidden">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4.5" style="border-bottom:1px solid var(--border)">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent-dim);color:var(--accent)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div>
-              <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Toutes les Soirées Archivées</h2>
-              <p class="text-[11px]" style="color:var(--text-secondary)">Accédez aux statistiques, réouvrez une session ou exportez vos données</p>
-            </div>
+      <!-- Events List Card -->
+      <div class="studio-box rounded-2xl overflow-hidden border">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b border-white/10">
+          <div>
+            <h2 class="font-display font-black text-base uppercase tracking-tight text-white">
+              Toutes les soirées archivées
+            </h2>
+            <p class="font-grotesk text-xs text-neutral-400">Accédez aux statistiques, réouvrez une session ou analysez les votes</p>
           </div>
           <div class="w-full sm:w-64">
-            <input type="text" id="historySearchInput" placeholder="Rechercher une soirée..." class="input text-xs py-2" />
+            <input type="text" id="historySearchInput" placeholder="Rechercher une soirée..."
+                   class="w-full bg-black border border-white/20 text-white rounded-lg px-3 py-2 text-xs font-grotesk focus:outline-none focus:border-[#d4ff00]" />
           </div>
         </div>
-        <div id="endedEventsList" class="divide-y" style="border-color:var(--border)">
-          <div class="px-6 py-12 text-center text-sm" style="color:var(--text-muted)">Chargement de vos archives...</div>
+
+        <div id="endedEventsList" class="divide-y divide-white/10">
+          <div class="p-8 text-center font-mono-code text-sm text-neutral-400">Chargement de vos archives...</div>
         </div>
+
       </div>
 
     </main>
   </div>
+
 </div>
 
 <script src="/js/csrf.js"></script>
@@ -197,18 +267,19 @@
     if (!events || events.length === 0) {
       container.innerHTML = `
         <div class="p-12 text-center flex flex-col items-center justify-center gap-3">
-          <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:var(--bg-elevated);border:1px solid var(--border)">
-            <svg class="w-7 h-7" style="color:var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-black border border-white/15 text-neutral-400">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
           <div>
-            <p class="text-sm font-bold" style="color:var(--text-primary)">Aucune soirée archivée</p>
-            <p class="text-xs mt-1" style="color:var(--text-muted)">Vos futures soirées terminées apparaîtront automatiquement ici.</p>
+            <p class="font-grotesk text-sm font-bold text-white">Aucune soirée archivée</p>
+            <p class="font-grotesk text-xs text-neutral-400 mt-1">Vos futures soirées clôturées apparaîtront automatiquement ici.</p>
           </div>
         </div>`;
       return;
     }
+
     container.innerHTML = events.map((event) => {
       const startDate = new Date(event.created_at);
       const endDate   = new Date(event.ended_at);
@@ -220,29 +291,28 @@
       const rate = total > 0 ? Math.round((played / total) * 100) : 0;
 
       return `
-      <div class="px-6 py-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition cursor-pointer group" onclick="viewEventDetails('${event.id}')">
+      <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition cursor-pointer group" onclick="viewEventDetails('${event.id}')">
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2.5 mb-1.5">
-            <h3 class="font-extrabold text-base truncate group-hover:text-purple-400 transition" style="color:var(--text-primary)">${event.name}</h3>
-            <span class="badge badge-neutral shrink-0 text-[11px] font-mono">${window.TimeUtils.formatMinutes(duration)}</span>
+          <div class="flex items-center gap-2.5 mb-1">
+            <h3 class="font-grotesk font-extrabold text-base text-white truncate group-hover:text-[#d4ff00] transition">${event.name}</h3>
+            <span class="font-mono-code text-[10px] px-2 py-0.5 rounded bg-black border border-white/10 text-neutral-300">${window.TimeUtils.formatMinutes(duration)}</span>
           </div>
-          <p class="text-xs mb-3" style="color:var(--text-muted)">Mixé le ${dateStr}</p>
-          <div class="flex flex-wrap items-center gap-3 text-xs">
-            <span class="badge badge-green font-semibold">${played} jouées</span>
-            <span class="badge badge-red font-semibold">${rejected} refusées</span>
-            <span class="badge badge-neutral font-semibold">${total} demandes</span>
-            <span class="text-xs font-bold text-gradient-purple ml-1">${rate}% satisfaction</span>
+          <p class="font-grotesk text-xs text-neutral-400 mb-2">Mixé le ${dateStr}</p>
+          <div class="flex flex-wrap items-center gap-2 font-mono-code text-xs">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${played} jouées</span>
+            <span class="px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">${rejected} refusées</span>
+            <span class="px-2 py-0.5 rounded bg-black border border-white/10 text-neutral-300">${total} demandes</span>
+            <span class="text-xs font-bold text-purple-400 ml-1">${rate}% satisfaction</span>
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <button class="btn btn-ghost btn-sm font-semibold" title="Rouvrir cette soirée"
+          <button class="px-3 py-1.5 rounded-lg border border-white/15 text-xs font-mono-code font-bold text-neutral-300 hover:text-white"
                   onclick="event.stopPropagation();reopenEvent('${event.id}', '${event.name.replace(/'/g, "\\'")}')">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
             Rouvrir
           </button>
-          <button class="btn btn-primary btn-sm font-bold shadow-md shadow-purple-500/20" onclick="event.stopPropagation();viewEventDetails('${event.id}')">
-            Statistiques
-            <svg class="w-3.5 h-3.5 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <button class="px-3.5 py-1.5 rounded-lg text-xs font-mono-code font-bold text-black uppercase" style="background:#d4ff00"
+                  onclick="event.stopPropagation();viewEventDetails('${event.id}')">
+            Statistiques →
           </button>
         </div>
       </div>`;

@@ -1,71 +1,115 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Music Live — Connexion</title>
+  <title>Connexion Régie DJ — Music Live</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
+
+  <style>
+    body {
+      background-color: #08080c;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(212, 255, 0, 0.04) 0%, transparent 60%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 36px 36px, 36px 36px;
+    }
+    .gaffer-tape {
+      background: #e6dfc8;
+      color: #111;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+    }
+    .login-box {
+      background: #0f0f16;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+  </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4" style="background:var(--bg-base)">
+<body class="min-h-screen flex items-center justify-center p-4 text-white">
 
   <div class="w-full max-w-sm fade-in">
 
-    <!-- Brand -->
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5" style="background:var(--accent-dim);border:1px solid rgba(124,92,252,0.3)">
-        <svg class="w-7 h-7" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-        </svg>
-      </div>
-      <h1 class="text-3xl font-bold tracking-tight" style="color:var(--text-primary)">Music Live</h1>
-      <p class="text-sm mt-2" style="color:var(--text-secondary)">Gérez vos soirées musicales</p>
-    </div>
-
-    <!-- Card -->
-    <div class="card p-8">
-
-      <!-- Message d'erreur -->
-      <div id="errorMessage" class="hidden rounded-xl p-4 mb-6" style="background:var(--red-dim);border:1px solid rgba(239,68,68,0.2)">
-        <p class="text-sm" id="errorText" style="color:#f87171"></p>
-      </div>
-
-      <!-- Bouton Spotify -->
-      <a href="/api/auth/spotify/login"
-         class="flex items-center justify-center gap-3 w-full rounded-xl font-semibold text-white transition-all duration-200"
-         style="background:#1DB954;padding:14px 20px;font-size:0.9375rem;letter-spacing:0.01em;"
-         onmouseover="this.style.background='#1aa34a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 16px rgba(29,185,84,0.4)'"
-         onmouseout="this.style.background='#1DB954';this.style.transform='none';this.style.boxShadow='none'">
-        <!-- Icône Spotify -->
-        <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0" fill="currentColor">
-          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-        </svg>
-        Se connecter avec Spotify
+    <!-- Brand Header -->
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex flex-col items-center gap-3 group">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center border border-white/20 shadow-xl group-hover:rotate-45 transition-transform duration-300"
+             style="background: #000; color: #d4ff00;">
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <span class="gaffer-tape mb-1">ACCÈS RÉGIE OFFICIEL</span>
+          <h1 class="font-display font-black text-2xl uppercase tracking-tight text-white mt-1">
+            MUSIC<span style="color:#d4ff00">LIVE</span>
+          </h1>
+        </div>
       </a>
-
-      <p class="text-center text-xs mt-6 leading-relaxed" style="color:var(--text-muted)">
-        Votre compte Spotify est utilisé uniquement pour vous identifier.<br>
-        Aucune donnée n'est partagée sans votre consentement.
+      <p class="font-grotesk text-xs text-neutral-400 mt-1">
+        Connectez votre compte Spotify pour piloter votre soirée
       </p>
     </div>
 
+    <!-- Card Châssis -->
+    <div class="login-box p-7 rounded-2xl border">
+
+      <!-- Message d'erreur -->
+      <div id="errorMessage" class="hidden rounded-xl p-3.5 mb-5 font-mono-code text-xs bg-red-500/10 border border-red-500/30 text-red-400">
+        <p id="errorText"></p>
+      </div>
+
+      <!-- Bouton Spotify Connect -->
+      <a href="/api/auth/spotify/login"
+         class="w-full py-3.5 px-4 rounded-xl font-mono-code font-bold text-xs sm:text-sm uppercase tracking-wider text-black flex items-center justify-center gap-3 shadow-lg hover:brightness-110 active:scale-98 transition"
+         style="background: #1DB954;">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0 fill-current">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
+        <span>Se connecter avec Spotify</span>
+      </a>
+
+      <div class="mt-5 pt-4 border-t border-white/10 font-grotesk text-center text-xs text-neutral-400 leading-relaxed">
+        Votre compte Spotify est utilisé pour vous identifier et diffuser les morceaux via le SDK officiel en haute qualité.
+      </div>
+    </div>
+
     <!-- Footer info -->
-    <p class="text-center text-xs mt-6" style="color:var(--text-muted)">
-      Première connexion ? Un compte est créé automatiquement.
+    <p class="text-center font-mono-code text-[11px] text-neutral-500 mt-6">
+      Première session ? Votre compte régie se crée automatiquement.
     </p>
+
+    <div class="text-center mt-3">
+      <a href="/" class="font-mono-code text-xs text-neutral-400 hover:text-white underline">
+        ← Retour à l'accueil
+      </a>
+    </div>
+
   </div>
 
   <!-- Fixed theme toggle -->
-  <button data-theme-toggle class="fixed bottom-4 right-4 btn btn-ghost btn-icon" title="Passer en mode clair" style="background:var(--bg-surface);border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.15)">
-    <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <button data-theme-toggle class="fixed bottom-4 right-4 p-2.5 rounded-xl border border-white/10 bg-[#12121a] hover:border-white/30 text-white shadow-xl"
+          title="Alterner thème clair / sombre">
+    <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
 
   <script>
-    // Afficher l'erreur si présente dans l'URL
     const params = new URLSearchParams(window.location.search);
     const err = params.get("error");
     if (err) {

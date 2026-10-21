@@ -135,34 +135,76 @@ function setDashboardTab(tab) {
     btn.classList.toggle("active", btn.dataset.tab === tab);
   });
 
+  const banner = document.getElementById("overviewHeroBanner");
+  const kpis = document.getElementById("overviewKpiSection");
   const secActive = document.getElementById("sectionActiveEvents");
   const secPast = document.getElementById("sectionPastEvents");
   const secTop = document.getElementById("sectionTopSongs");
 
+  const titleEl = document.getElementById("dashboardTabTitle");
+  const descEl = document.getElementById("dashboardTabDesc");
+
+  const tabMeta = {
+    all: {
+      title: "Vue d'Ensemble & Régie",
+      desc: "Pilotage centralisé, métriques d'audience et accès rapide à vos sessions"
+    },
+    active: {
+      title: "Sessions Live & Régie Direct",
+      desc: "Contrôle en direct des soirées ouvertes aux votes des invités"
+    },
+    past: {
+      title: "Archives & Soirées Passées",
+      desc: "Historique détaillé des sets terminés, durées et statistiques d'écoutes"
+    },
+    top: {
+      title: "Hit-Parade & Titres Phares",
+      desc: "Classement des morceaux les plus diffusés et plébiscités par le public"
+    }
+  };
+
+  if (titleEl && tabMeta[tab]) titleEl.textContent = tabMeta[tab].title;
+  if (descEl && tabMeta[tab]) descEl.textContent = tabMeta[tab].desc;
+
   if (tab === "all") {
+    banner?.classList.remove("hidden");
+    kpis?.classList.remove("hidden");
     secActive?.classList.remove("hidden");
     secPast?.classList.remove("hidden");
     secTop?.classList.remove("hidden");
   } else if (tab === "active") {
+    banner?.classList.add("hidden");
+    kpis?.classList.remove("hidden");
     secActive?.classList.remove("hidden");
     secPast?.classList.add("hidden");
     secTop?.classList.add("hidden");
   } else if (tab === "past") {
+    banner?.classList.add("hidden");
+    kpis?.classList.add("hidden");
     secActive?.classList.add("hidden");
     secPast?.classList.remove("hidden");
     secTop?.classList.add("hidden");
   } else if (tab === "top") {
+    banner?.classList.add("hidden");
+    kpis?.classList.add("hidden");
     secActive?.classList.add("hidden");
     secPast?.classList.add("hidden");
     secTop?.classList.remove("hidden");
   }
+
+  closeMobileSidebar();
 }
 
 // ── Rendu des soirées actives (Live Decks) ──
 function renderActiveEvents(events) {
   const container = document.getElementById("activeEventsList");
+  const count = (events || []).length;
   const badgeCount = document.getElementById("activeBadgeCount");
-  if (badgeCount) badgeCount.textContent = (events || []).length;
+  if (badgeCount) badgeCount.textContent = count;
+  const sideCount = document.getElementById("sidebarActiveCount");
+  if (sideCount) sideCount.textContent = count;
+  const mobCount = document.getElementById("mobileSidebarActiveCount");
+  if (mobCount) mobCount.textContent = count;
 
   if (!events || events.length === 0) {
     container.innerHTML = `
@@ -312,8 +354,13 @@ function renderActiveEvents(events) {
 // ── Rendu des soirées passées avec accès direct aux statistiques ──
 function renderPastEvents(events) {
   const container = document.getElementById("pastEventsList");
+  const count = (events || []).length;
   const badgeCount = document.getElementById("pastBadgeCount");
-  if (badgeCount) badgeCount.textContent = (events || []).length;
+  if (badgeCount) badgeCount.textContent = count;
+  const sideCount = document.getElementById("sidebarPastCount");
+  if (sideCount) sideCount.textContent = count;
+  const mobCount = document.getElementById("mobileSidebarPastCount");
+  if (mobCount) mobCount.textContent = count;
 
   if (!events || events.length === 0) {
     container.innerHTML = `
@@ -547,6 +594,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Filtres d'onglets
   document.querySelectorAll(".dash-tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => setDashboardTab(btn.dataset.tab));
+  });
+
+  // Filtre instantané des soirées passées
+  document.getElementById("pastEventsSearchInput")?.addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    const filtered = (djData?.pastEvents || []).filter(ev => 
+      (ev.name || "").toLowerCase().includes(q)
+    );
+    renderPastEvents(filtered);
+  });
+
+  // Filtre instantané du Hit-Parade
+  document.getElementById("topSongsSearchInput")?.addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    const filtered = (djData?.topSongs || []).filter(s => 
+      (s.song_name || "").toLowerCase().includes(q) || (s.artist || "").toLowerCase().includes(q)
+    );
+    renderTopSongs(filtered);
   });
 
   // Chargement initial

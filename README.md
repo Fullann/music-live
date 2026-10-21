@@ -1,462 +1,422 @@
-# 🎵 Music Live App
+# 🎵 Music Live — Studio DJ Professionnel & Expérience Live Interactive
 
-Une application web temps réel permettant aux participants d'une soirée de proposer des musiques au DJ via QR code, avec système de votes et lecture automatique Spotify.
+Une plateforme web temps réel ultra-moderne conçue pour les DJs, les organisateurs d'événements et le public en direct. Music Live permet aux participants de scanner un QR Code pour proposer des musiques au DJ, voter en direct, chanter en Karaoké synchronisé et s'affronter lors de Blind-Tests Flash (15s), avec mix harmonique (Roue de Camelot) et projection multi-écrans à 60 FPS.
 
-![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
-![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
-![Tests](https://img.shields.io/badge/tests-69%20passing-brightgreen.svg)
-![License](https://img.shields.io/badge/license-MIT-orange.svg)
+---
 
-## ✨ Fonctionnalités
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.4.0-3b82f6.svg?style=for-the-badge" alt="Version 2.4.0" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18.0.0-10b981.svg?style=for-the-badge&logo=node.js&logoColor=white" alt="Node >= 18" />
+  <img src="https://img.shields.io/badge/tests-69%20passing%20(100%25)-059669.svg?style=for-the-badge&logo=checkmarx&logoColor=white" alt="69 Tests Passants" />
+  <img src="https://img.shields.io/badge/realtime-Socket.IO%204-010101.svg?style=for-the-badge&logo=socket.io" alt="Socket.IO" />
+  <img src="https://img.shields.io/badge/audio-Web%20Audio%20API-a855f7.svg?style=for-the-badge" alt="Web Audio API" />
+  <img src="https://img.shields.io/badge/license-MIT-f59e0b.svg?style=for-the-badge" alt="Licence MIT" />
+</p>
 
-### 👥 Pour les Participants
-- 📱 **Accès QR Code** : Scan et accès instantané sans compte
-- 🎤 **Option Karaoké ("Je veux chanter au micro ! 🎤")** : Demande spéciale alertant le DJ pour préparer un micro sur scène
-- ⚡ **Mini Blind-Test Flash (15s)** : Interface de quiz interactive tactile avec 4 choix colorés, chronomètre animé, feedback immédiat et célébration sur le podium
-- 🔍 **Recherche Spotify** : Recherche de musiques en temps réel
-- 📊 **Système de Votes** : Vote pour/contre les musiques proposées
-- ⏱️ **Suivi Temps Réel** : Statut des demandes (en attente/accepté/refusé)
-- 📜 **Historique de la soirée** : Liste des demandes déjà faites sur cet appareil
-- 📈 **Onglet Tendances** : Top artistes et titres les plus demandés (`/api/events/:id/trends`)
-- 📲 **PWA** : Manifest dynamique + service worker (`/manifest-user.json?e=…`, `/sw-user.js`) pour « Ajouter à l’écran d’accueil »
-- 🎯 **Timer Prédictif** : Estimation du temps avant lecture
-- 🎧 **Preview Audio** : Écoute d'extraits des morceaux
+---
 
-### 🎧 Pour les DJs
-- 🎛️ **Dashboard & Console Live** : Vue d'ensemble et contrôle en temps réel des événements
-- 🖥️ **Mini Monitor Grand Écran** : Aperçu en direct du statut de projection (animation, mode QR vs Karaoké, spectateurs en ligne)
-- ⚡ **Mini Blind-Test Flash Régie** : Déclenchement en 1 clic d'un quiz musical de transition (15s) avec sélection automatique de 3 leurres cohérents et podium en direct
-- ✨ **Suggestions Roue de Camelot & BPM** : Surlignage émeraude et badges explicatifs (`Mix Parfait`, `Relatif`, `Voisins`, `Energy Boost`) sur les morceaux de la queue compatibles pour des transitions sans dissonance
-- 🖥️ **Régie Multi-Display** : Raccourcis directs vers les profils d'écrans dédiés (`/screen/bar`, `/screen/stage`, `/qr`)
-- 🎤 **Indicateur Paroles LRCLIB** : Petite icône 🎤 violette pour les titres disposant de paroles synchronisées prêtes pour le karaoké
-- 🎙️ **Badge Demande Micro** : Signalement immédiat des invités souhaitant chanter sur scène
-- 🎮 **Contrôle Écran Distant** : Bascule du mode Karaoké et changement des animations du visualiseur audio en un clic ou raccourci clavier (<kbd>K</kbd>, <kbd>V</kbd>)
-- 👤 **Page Profil** (`/profile`) : Nom d’affichage, stats globales, déconnexion Spotify
-- ✅ **Gestion Queue** : Acceptation/refus des demandes
-- ⚡ **Actions en masse** : Tout accepter / tout refuser les demandes en attente
-- ↩️ **Annuler un refus** : Barre « Annuler » quelques secondes après un refus (socket `undo-reject-request`)
-- 🔄 **Réorganisation** : Drag & drop pour modifier l'ordre
-- 🔁 **Anti-répétition** : Délai configurable avant de reproposer un morceau déjà joué (`repeat_cooldown_minutes`, basé sur `played_at`)
-- 📈 **Statistiques Live** : Nombre de demandes, votes, taux d'acceptation
-- 🛡️ **Anti-abus intelligent** : Score par invité (spam/doublons/refus), throttle progressif et quota dynamique
-- 📊 **Analytics live avancées** : Heatmap horaire, top tempos, taux de skip, engagement votes + export CSV
-- 🎵 **Lecture Automatique** : Intégration Spotify Player
-- 📊 **Historique Détaillé** : Stats complètes des événements passés
-- 🖼️ **QR personnalisé** : SVG avec nom de soirée + logo optionnel (`src/public/images/qr-logo.png`)
-- ⚙️ **Paramètres Avancés** : 
-  - Auto-accept des demandes
-  - Activation/désactivation des votes
-  - Gestion des doublons
-  - Rate limiting configurable
-  - Animations visualiseur audio et options de paroles grand écran
+## 📸 Galerie & Visite Guidée de l'Application
 
-### 🌐 Pour le Grand Écran & Projection (`/event/:id/qr`, `/qrspectre`, `/screen/bar`, `/screen/stage`)
-- ⏱️ **Décompte d'Intro Visuel Karaoké (3... 2... 1... CHANTEZ !)** : Anneau radial SVG dégressif à 5s et flash dynamique calé sur le 1er timestamp LRCLIB
-- 🔥 **Jauge d'Énergie Live (Hype Meter) & Pyrotechnie** : Accumulateur de réactions de la salle avec décroissance naturelle et feux d'artifice de 150 particules multicolores et dorées à 100% ("Ambiance en fusion")
-- 🎧 **Affichage Grand Écran Blind-Test Flash** : Disque vinyle mystère en rotation rapide, compte à rebours géant 15s et podium animé des 3 plus rapides
+### 🎛️ 1. Console Régie DJ & Nouveau Hub Dashboard
+
+L'interface DJ a été entièrement repensée sous la forme d'un studio matériel professionnel avec barre de navigation latérale par onglets, surveillance en temps réel et contrôle de diffusion immédiat.
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-overview.png" alt="Console Régie DJ - Vue d'ensemble" width="100%" />
+  <em>Vue d'ensemble du Dashboard : Sidebar latérale, KPIs de session (taux d'acceptation, demandes en cours, morceaux joués), deck de contrôle live et événements actifs.</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-live-session.png" alt="Session en direct & Barre d'actions" width="100%" />
+  <em>Onglet Soirée en direct : Barre d'action rapide vers la Régie live, le Grand Écran, les profils Bar/Scène, le QR Code de participation et l'égaliseur temps réel.</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-hitparade.png" alt="Hit-Parade des morceaux les plus demandés" width="100%" />
+  <em>Hit-Parade & Tops : Classement des titres les plus plébiscités avec ratios de votes positifs et fréquence des demandes de la foule.</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-past-events.png" alt="Historique des soirées passées" width="100%" />
+  <em>Historique complet des événements : Moteur de recherche instantané par mot-clé, date ou lieu avec accès aux archives et métriques détaillées.</em>
+</p>
+
+---
+
+### 🎚️ 2. Nouvelle Page d'Accueil Interactive (Expérience Platine & Synthétiseur)
+
+Fini les pages d'accueil génériques : la nouvelle vitrine plonge l'utilisateur dans une ambiance de régie audio analogique avec platine vinyle tactile, soundboard matériel propulsé par la Web Audio API et générateur de pass en direct.
+
+<p align="center">
+  <img src="docs/screenshots/home-page-hero.png" alt="Platine Vinyle Interactive & Hero" width="100%" />
+  <em>Platine Vinyle interactive : Sélecteur de vitesse 33/45 RPM, tonalité harmonique Camelot (8A / C Minor), compteur BPM dynamique et lecture d'ambiance.</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/home-soundboard.png" alt="Boîte à Sons FX Web Audio API" width="100%" />
+  <em>Soundboard matériel intégré : Génération d'ondes de synthétiseur sans latence (Airhorn, Laser Synth, Rewind FX, Sub 808 Drop) avec oscilloscope actif.</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/home-ticket-generator.png" alt="Générateur de Pass Soirée Live" width="85%" />
+  <em>Générateur de pass VIP interactif : Personnalisation du nom de l'invité, sélection de la soirée et génération instantanée du ticket néon avec QR d'accès.</em>
+</p>
+
+---
+
+### 🔐 3. Rack d'Authentification DJ & Spotify Connect
+
+<p align="center">
+  <img src="docs/screenshots/auth-login.png" alt="Écran de Connexion DJ Rack Hardware" width="100%" />
+  <em>Interface de connexion DJ façon rack 19" : Connexion sécurisée avec intégration Spotify Connect, voyants LED de statut et session protégée.</em>
+</p>
+
+---
+
+## ✨ Fonctionnalités Clés
+
+### 🎧 Pour la Régie & les DJs
+
+- 🎛️ **Dashboard Studio avec Sidebar Latérale** : Navigation sans rechargement entre Vue d'ensemble, Soirée en direct, Historique filtrable et Hit-parade.
+- ✨ **Suggestions Harmoniques (Roue de Camelot & BPM)** : Calcul mathématique automatique des compatibilités tonales (`Mix Parfait`, `Relatif`, `Voisins`, `Energy Boost`) pour des transitions parfaites sans fausse note.
+- ⚡ **Mini Blind-Test Flash Régie (15s)** : Déclenchement en 1 clic d'un quiz interactif entre deux morceaux avec 3 leurres cohérents générés automatiquement et podium des gagnants au centième de seconde.
+- ↩️ **Annulation de Refus Immédiate (Undo)** : Barre flottante permettant d'annuler un refus accidentel et de réintégrer la demande dans la file.
+- ⚡ **Actions en Masse** : Tout accepter ou tout refuser les demandes en attente en un seul geste.
+- 🔁 **Anti-Répétition Intelligent** : Délai de temporisation configurable (`repeat_cooldown_minutes`) empêchant de reproposer un titre déjà diffusé récemment.
+- 🛡️ **Moteur Anti-Abus & Karma Invité** : Détection dynamique du spam, limitation progressive du quota par invité sans bloquer les participants bienveillants.
+- 🎤 **Indicateur Paroles Synchronisées (LRCLIB)** : Repérage instantané des titres compatibles karaoké via le badge micro violet.
+- 🎙️ **Alerte Demande de Chant au Micro** : Notification visuelle lorsqu'un invité souhaite monter sur scène chanter le morceau.
+- 🎮 **Télécommande Écran Grand Format** : Changement à distance des modes de visualiseur audio et bascule du mode karaoké (raccourcis <kbd>K</kbd>, <kbd>V</kbd>).
+- 📊 **Statistiques Live & Export CSV** : Heatmap horaire d'affluence, top artistes, taux de skip et export des données pour analyse post-soirée.
+
+---
+
+### 👥 Pour le Public & les Invités
+
+- 📱 **Zéro Application à Installer** : Scan immédiat du QR Code pour accéder à l'interface de la soirée sans création de compte.
+- 🔍 **Moteur de Recherche Spotify Ultra-Rapide** : Recherche instantanée avec pochettes d'albums, artistes et écoute d'extraits audio (previews 30s).
+- 📊 **Système de Votes Collaboratif** : Vote pour ou contre les propositions de la salle avec recalcul temps réel des positions.
+- 🎤 **Option « Je veux chanter au micro ! »** : Case à cocher dédiée pour avertir le DJ de préparer un micro lors de la diffusion.
+- ⚡ **Quiz Blind-Test Flash Tactile** : Écran de jeu synchronisé à 15 secondes avec boutons tactiles colorés, vibration et score live.
+- 📲 **Support PWA (Progressive Web App)** : Manifest dynamique (`/manifest-user.json?e=…`) et service worker pour ajouter l'événement sur l'écran d'accueil du smartphone.
+- 📜 **Historique Personnel de Soirée** : Suivi des morceaux soumis et consultation de l'avancement dans la file d'attente.
+- 🎯 **Compte à Rebours Prédictif** : Estimation du délai avant passage sur la base de la durée des morceaux précédents.
+
+---
+
+### 🖥️ Pour la Projection & le Grand Écran (`/screen/bar`, `/screen/stage`, `/qr`)
+
+- 🌌 **Visualiseur Audio Canvas 60 FPS** : Modes graphiques animés (Spectre Cyber, Halo Néon, Nébuleuse 3D, Barres Dynamiques) réactifs au micro d'ambiance ou à l'entrée ligne via la Web Audio API.
+- ⏱️ **Décompte d'Intro Karaoké (3... 2... 1... CHANTEZ !)** : Anneau radial SVG dégressif calé sur le premier timestamp de parole pour que le chanteur ne rate jamais le début du couplet.
+- 🎤 **Paroles Synchronisées Grand Format** : Défilement cinétique fluide amorti (`cubic-bezier`) sans saccades avec surlignage lumineux de la strophe en cours.
+- 🔥 **Jauge d'Énergie Live (Hype Meter)** : Accumulateur de réactions de la salle déclenchant une pluie de feux d'artifice à 150 particules dorées à 100% (« Ambiance en Fusion ! »).
 - 🖥️ **Profils Multi-Display Dédiés** :
-  - `/screen/bar` : Grand QR Code agrandi (280-320px) et mise en avant de la file d'attente pour inciter aux commandes
-  - `/screen/stage` : Visualiseur 3D haute saturation et paroles karaoké en immersion totale plein écran
-- 🌌 **Visualiseur Audio Canvas 60 FPS** : Modes Spectre Cyber, Halo Circulaire Néon, Nébuleuse 3D, Onde Néon, etc.
-- 🎙️ **Mode Entrée Ligne / Micro Réel** : Réactivité aux basses et à l'ambiance sonore réelle de la salle via Web Audio API
-- 🎤 **Mode Karaoké Grand Format** : Paroles synchronisées LRCLIB avec défilement cinétique amorti (`cubic-bezier`) sans saccades
-- 📱 **Mini QR Code Incrusté** : QR de participation discret en bas à droite pour continuer à recevoir des morceaux pendant le chant
-- 📶 **Reconnexion Transparente Wi-Fi** : Pilule douce sans rechargement brutal de page et resynchronisation d'état immédiate
-- 🔒 **Anti-Veille Écran** : Screen Wake Lock API pour maintenir le projecteur/TV allumé en continu
-- 🖥️ **Plein Écran Natif** : Bouton dédié, double-clic ou touche <kbd>F</kbd>
+  - **`/screen/bar`** : Affichage optimisé pour le bar avec QR Code agrandi (300px) et mise en avant de la file d'attente pour inciter aux commandes.
+  - **`/screen/stage`** : Affichage immersif pour écran de scène et vidéoprojecteur avec visualiseur haute saturation et paroles karaoké plein écran.
+- 🔒 **Screen Wake Lock API** : Empêche la mise en veille ou l'économiseur d'écran de s'activer sur les téléviseurs et projecteurs.
 
-## 🚀 Technologies
+---
 
-### Backend
-- **Node.js** + **Express** : Serveur HTTP et API REST
-- **Socket.IO** : Communication temps réel bidirectionnelle
-- **MySQL** : Base de données relationnelle
-- **Redis** : Session store (production)
+## 🛠️ Stack Technique
 
-### Sécurité
-- **Helmet** : Protection contre les vulnérabilités web
-- **Bcrypt** : Hachage sécurisé des mots de passe
-- **Express Rate Limit** : Protection DDoS et brute force
-- **Express Validator** : Validation des entrées
-- **Sanitize HTML** : Protection XSS
+### Backend & Temps Réel
+- **Node.js (>= 18.0.0)** & **Express.js** : Serveur HTTP performant, compression gzip et architecture modulaire.
+- **Socket.IO 4** : Échanges bidirectionnels ultra-faible latence (queue, votes, pilotage d'écrans, blind-test).
+- **MySQL 8.0** : Base de données relationnelle optimisée avec index composites pour supporter les pics d'affluence.
+- **Redis 6+** : Gestionnaire de sessions distribué pour les environnements de production.
 
-### Intégrations
-- **Spotify Web API** : Recherche et métadonnées
-- **Spotify Web Playback SDK** : Lecture dans le navigateur
-- **QRCode** : Génération de QR codes (SVG brandé : titre + logo optionnel)
+### Audio & Frontend
+- **Web Audio API** : Synthétiseur de sons direct, analyseurs FFT et détection des transitoires.
+- **Spotify Web API & Playback SDK** : Recherche de métadonnées, tonalité musicale, tempo BPM et lecture audio.
+- **LRCLIB API** : Base de données de paroles synchronisées mot-à-mot / ligne-à-ligne.
+- **Canvas 2D / 60 FPS** : Moteur de rendu graphique hardware sans dépendance externe lourde.
+
+### Sécurité & Robustesse
+- **Bcrypt (12 rounds)** : Hachage fort des mots de passe régie.
+- **Helmet** : En-têtes HTTP sécurisés et Content Security Policy (CSP) stricte.
+- **Double-Submit CSRF Token** : Protection contre les requêtes falsifiées intersites.
+- **Express Rate Limit Multi-Paliers** : Protections distinctes pour l'API générale, l'authentification et les soumissions d'invités.
+- **Sanitize HTML & Express-Validator** : Assainissement systématique contre les attaques XSS.
+
+---
 
 ## 📋 Prérequis
 
-- Node.js >= 18.0.0
-- MySQL >= 8.0
-- Redis >= 6.0 (optionnel, recommandé en production)
-- Compte Spotify Developer (pour API)
+- **Node.js** >= 18.0.0 (recommandé : Node 20 LTS)
+- **MySQL** >= 8.0 (ou MariaDB >= 10.5)
+- **Redis** >= 6.0 (optionnel en développement local, recommandé en production)
+- **Compte Spotify Developer** (gratuit, pour obtenir les identifiants d'API)
 
-## 🛠️ Installation
+---
 
-### 1. Cloner le repository
+## 🚀 Installation & Démarrage Rapide
+
+### 1. Cloner le dépôt
+
 ```bash
 git clone https://github.com/Fullann/music-live.git
 cd music-live
 ```
 
 ### 2. Installer les dépendances
+
 ```bash
 npm install
 ```
 
-### 3. Configuration de la base de données
-```bash
-# Se connecter à MySQL
-mysql -u root -p
+### 3. Créer la base de données MySQL
 
-# Créer la base de données
+Connectez-vous à votre serveur MySQL et exécutez le script d'initialisation :
+
+```sql
 CREATE DATABASE music_live CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'djuser'@'localhost' IDENTIFIED BY 'votre_mot_de_passe';
+CREATE USER 'djuser'@'localhost' IDENTIFIED BY 'VotreMotDePasseSecurise';
 GRANT ALL PRIVILEGES ON music_live.* TO 'djuser'@'localhost';
 FLUSH PRIVILEGES;
-
-# Importer le schéma
-mysql -u djuser -p music_live < db/db.sql
 ```
 
-### 4. Configuration Spotify
-1. Aller sur [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Créer une nouvelle application
-3. Ajouter `http://localhost:3000/callback` aux Redirect URIs
-4. Noter le Client ID et Client Secret
+Puis importez le schéma initial et les migrations d'optimisation :
 
-### 5. Variables d'environnement
+```bash
+# Importer le schéma de base
+mysql -u djuser -p music_live < db/db.sql
+
+# Appliquer les index composites et optimisations
+mysql -u djuser -p music_live < db/migration_optimizations.sql
+```
+
+### 4. Obtenir les identifiants Spotify API
+
+1. Rendez-vous sur le [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Créez une nouvelle application (ex: `Music Live Console`).
+3. Dans les paramètres de l'application, ajoutez l'URL de redirection :
+   `http://localhost:3000/callback` (ou votre domaine en production).
+4. Récupérez le **Client ID** et le **Client Secret**.
+
+### 5. Configurer l'environnement (`.env`)
+
+Copiez le fichier d'exemple et renseignez vos informations :
+
 ```bash
 cp .env.example .env
-# Éditer .env avec vos valeurs
 ```
+
+Exemple de configuration type :
 
 ```env
-SPOTIFY_CLIENT_ID=
-SPOTIFY_CLIENT_SECRET=
-SPOTIFY_REDIRECT_URI=
+# Serveur
 PORT=3000
+NODE_ENV=development
+BASE_URL=http://localhost:3000
 
-# Configuration MySQL
-DB_HOST=localhost
+# Clés Spotify Developer
+SPOTIFY_CLIENT_ID=votre_spotify_client_id
+SPOTIFY_CLIENT_SECRET=votre_spotify_client_secret
+SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
+
+# Base de données MySQL
+DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_USER=user
-DB_PASSWORD=password
-DB_NAME=
+DB_USER=djuser
+DB_PASSWORD=VotreMotDePasseSecurise
+DB_NAME=music_live
 
-# Rate Limiting
-RATE_LIMIT_MAX_REQUESTS=3
-RATE_LIMIT_WINDOW_MINUTES=15
+# Sessions & Chiffrement
+SESSION_SECRET=un_secret_tres_long_et_aleatoire_de_minimum_32_caracteres
 
-SESSION_SECRET=4ac8819610014adfe9fbdc35e1872ff5e7c5d33278d98a3d3402b459588256d3
-
-# Redis
-REDIS_HOST=localhost
+# Redis (Optionnel en dev, recommandé en prod)
+REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=
+
+# Règles de Modération & Rate Limiting
+RATE_LIMIT_MAX_REQUESTS=3
+RATE_LIMIT_WINDOW_MINUTES=15
 ```
 
-### 6. Lancer l'application
+### 6. Lancer le serveur
+
 ```bash
-# Développement (avec nodemon)
+# Mode développement (avec rechargement automatique nodemon)
 npm run dev
 
-# Production
+# Mode production
 npm start
 ```
 
-L'application sera accessible sur `http://localhost:3000`
+L'application est immédiatement accessible sur `http://localhost:3000` !
 
-## 📁 Structure du Projet
+---
+
+## 🗂️ Structure du Projet
 
 ```
 music-live/
+├── db/                             # Schémas et migrations de base de données
+│   ├── db.sql                      # Schéma initial (tables djs, events, songs, votes...)
+│   └── migration_optimizations.sql # Index haute concurrence et colonnes avancées
+├── docs/                           # Documentation et médias
+│   └── screenshots/                # Captures d'écran HD de l'application
+├── scripts/                        # Scripts de validation CI et maintenance
+│   ├── ci-syntax-check.js          # Vérificateur de syntaxe Node sans exécution
+│   └── check-database-schema.js    # Contrôle de cohérence de schéma SQL
 ├── src/
-│   ├── config/          # Configuration (DB, Redis, Session)
-│   ├── controllers/     # Logique métier
-│   ├── middlewares/     # Auth, Sécurité, Validation
-│   ├── routes/          # Routes API
-│   ├── services/        # Services métier (Queue, RateLimit)
-│   ├── sockets/         # Gestion WebSocket
-│   ├── validators/      # Schémas de validation
-│   ├── views/           # Pages HTML
-│   ├── public/          # CSS, JS, SW PWA (`sw-user.js`)
-│   └── server.js        # Point d'entrée
-├── db/                  # Schéma + migrations SQL
-├── .env                 # Variables d'environnement
-├── .env.example         # Template .env
-└── package.json
+│   ├── config/                     # Configuration DB, Redis, Sessions, Spotify
+│   ├── controllers/                # Contrôleurs API (Auth, Événements, DJ, Spotify)
+│   ├── middlewares/                # Sécurité (Helmet, CSRF, Auth, Rate-Limiters)
+│   ├── public/                     # Ressources statiques front-end
+│   │   ├── css/                    # Feuilles de style modernes (hub dashboard, home...)
+│   │   ├── js/                     # Scripts clients (dashboard, audio, visualiseur...)
+│   │   └── sw-user.js              # Service Worker PWA pour invités
+│   ├── routes/                     # Définition des routes Express
+│   ├── services/                   # Moteur métier (Queue, Camelot, AbuseService, LRCLIB)
+│   ├── sockets/                    # Gestionnaires d'événements Socket.IO temps réel
+│   ├── validators/                 # Schémas de validation des requêtes (express-validator)
+│   ├── views/                      # Vues HTML (dashboard, home, qr-display, user, login...)
+│   └── server.js                   # Point d'entrée de l'application
+├── tests/                          # Suite de tests unitaires et d'intégration
+│   └── unit/                       # 69 tests automatisés via node:test
+├── .env.example                    # Fichier modèle des variables d'environnement
+├── package.json                    # Dépendances et scripts NPM
+└── README.md                       # Documentation du projet
 ```
 
-## 🔐 API Endpoints
+---
 
-### Authentification
-```
-GET    /api/auth/spotify/login   - OAuth Spotify (connexion DJ)
-POST   /api/auth/logout          - Déconnexion session
-GET    /api/auth/me              - Profil DJ connecté
-PATCH  /api/auth/me              - Mettre à jour le nom d’affichage
-GET    /api/auth/stats           - Stats globales (soirées, demandes)
-POST   /api/auth/spotify/disconnect - Révoquer les jetons Spotify stockés (table djs)
-```
+## 🔌 API & Événements Temps Réel
 
-### Événements
-```
-POST   /api/events                          - Créer événement
-GET    /api/events/:eventId                 - Info événement (+ queue)
-GET    /api/events/:eventId/trends          - Tendances publiques (top artistes / titres)
-GET    /api/events/:eventId/guest-history/:clientId - Historique des demandes d’un invité
-PATCH  /api/events/:eventId/settings       - Réglages (votes, anti-répétition…) — DJ propriétaire
-GET    /api/events/:eventId/qrcode          - QR Code (data URL SVG brandé)
-GET    /api/events/:eventId/stats           - Statistiques
-GET    /api/events/:eventId/live-stats      - Stats live (propriétaire)
-GET    /api/events/:eventId/live-stats.csv  - Export CSV des stats live (propriétaire)
-POST   /api/events/:eventId/end             - Terminer événement
-POST   /api/events/:eventId/toggle-votes    - Activer/désactiver votes
-POST   /api/events/:eventId/toggle-duplicates - Autoriser doublons
-POST   /api/events/:eventId/toggle-auto-accept - Auto-accept
-```
+### Points d'Entrée API REST Principaux
 
-### Monitoring & PWA (hors `/api`)
-```
-GET    /health                   - Santé app : { status, uptime, db, redis }
-GET    /manifest-user.json?e=<UUID> - Manifest Web App (page invité)
-GET    /sw-user.js               - Service worker minimal (enregistré par la page invité)
-```
+| Méthode | Route | Description | Accès |
+|---|---|---|---|
+| `GET` | `/health` | Sonde de santé système (Uptime, MySQL, Redis) | Public |
+| `POST` | `/api/auth/register` | Inscription d'un nouveau compte DJ | Public |
+| `POST` | `/api/auth/login` | Connexion classique DJ | Public |
+| `GET` | `/api/auth/spotify/login` | Démarrage du flux OAuth Spotify Connect | Authentifié |
+| `GET` | `/api/auth/me` | Profil et statistiques du DJ connecté | Authentifié |
+| `GET` | `/api/dj/dashboard` | Données du hub DJ (événements actifs, KPIs) | DJ |
+| `GET` | `/api/dj/history` | Archives et métriques des soirées passées | DJ |
+| `POST` | `/api/events` | Création d'une nouvelle soirée | DJ |
+| `GET` | `/api/events/:eventId` | Informations de soirée et file d'attente | Public |
+| `PATCH` | `/api/events/:eventId/settings` | Modification des paramètres (cooldown, votes...) | DJ Propriétaire |
+| `GET` | `/api/events/:eventId/qrcode` | Génération du QR Code SVG personnalisé | Public |
+| `GET` | `/api/events/:eventId/live-stats` | Statistiques live (heatmap, skips, tops) | DJ Propriétaire |
+| `GET` | `/api/events/:eventId/live-stats.csv`| Export CSV des métriques de la soirée | DJ Propriétaire |
+| `GET` | `/api/spotify/search` | Recherche de morceaux dans le catalogue Spotify | Public |
 
-### Dashboard DJ
-```
-GET    /api/dj/dashboard                    - Events actifs + stats
-GET    /api/dj/history                      - Events terminés
-GET    /api/dj/:eventId/detailed-stats      - Stats détaillées
-```
+---
 
-### Spotify
-```
-GET    /api/spotify/search                  - Recherche musiques
-GET    /api/spotify/status/:eventId         - Statut connexion
-GET    /api/spotify/login/:eventId          - URL auth Spotify
-GET    /api/spotify/token/:eventId          - Token pour player
-POST   /api/spotify/play/:eventId           - Lire musique
-```
+### Événements WebSocket Bidirectionnels
 
-## 🔌 WebSocket Events
+#### Émis par le Client vers le Serveur
 
-### Client → Server
 ```javascript
-'join-event'             // Rejoindre un événement
-'request-song'           // Demander une musique (avec option isKaraoke)
-'vote'                   // Voter (up/down)
-'accept-request'         // (DJ) Accepter une demande
-'reject-request'         // (DJ) Refuser une demande
-'undo-reject-request'    // (DJ) Annuler un refus récent → repasse en pending
-'accept-all-pending'     // (DJ) Accepter toutes les demandes en attente
-'reject-all-pending'     // (DJ) Refuser toutes les demandes en attente
-'reorder-queue'          // (DJ) Réorganiser queue
-'mark-played'            // (DJ) Marquer comme jouée
-'mark-skipped'           // (DJ) Marquer un skip (next avant ~85%)
-'update-event-settings'  // (DJ) Incl. repeatCooldownMinutes (anti-répétition)
-'set-screen-visualizer'  // (DJ) Changer l'effet visuel grand écran à distance
-'set-karaoke-mode'       // (DJ) Activer / configurer le karaoké grand écran
-'start-blind-test'       // (DJ) Lancer un mini Blind-Test Flash (15s)
-'submit-blind-test-answer' // (Invité) Soumettre une réponse au Blind-Test
-'end-blind-test'         // (DJ) Clôturer manuellement le Blind-Test
+socket.emit('join-event', { eventId, clientId });          // Rejoindre la room de la soirée
+socket.emit('request-song', { eventId, track, isKaraoke }); // Soumettre un titre (avec option chant)
+socket.emit('vote', { eventId, songId, direction });       // Voter pour (+1) ou contre (-1) un morceau
+socket.emit('accept-request', { eventId, songId });        // (DJ) Valider un morceau pour la playlist
+socket.emit('reject-request', { eventId, songId });        // (DJ) Refuser une proposition
+socket.emit('undo-reject-request', { eventId, songId });   // (DJ) Annuler le refus d'un titre
+socket.emit('accept-all-pending', { eventId });            // (DJ) Tout accepter en un clic
+socket.emit('reject-all-pending', { eventId });            // (DJ) Tout refuser en un clic
+socket.emit('reorder-queue', { eventId, songIds });        // (DJ) Réorganiser l'ordre de passage
+socket.emit('mark-played', { eventId, songId });           // (DJ) Marquer comme diffusé
+socket.emit('set-screen-visualizer', { eventId, mode });   // (DJ) Changer l'effet visuel du grand écran
+socket.emit('set-karaoke-mode', { eventId, enabled });     // (DJ) Basculer l'affichage des paroles
+socket.emit('start-blind-test', { eventId });              // (DJ) Déclencher un Blind-Test Flash (15s)
+socket.emit('submit-blind-test-answer', { eventId, opt }); // (Invité) Envoyer une réponse au quiz
 ```
 
-### Server → Client
+#### Diffusés par le Serveur aux Clients
+
 ```javascript
-'queue-updated'               // Queue mise à jour
-'new-request'               // Nouvelle demande (ou retour pending après undo)
-'request-accepted'          // Demande acceptée
-'request-rejected'          // Demande refusée
-'reject-undone'             // Refus annulé côté room
-'your-request-pending-again'// Invité : sa demande est à nouveau en attente
-'request-error'             // Erreur demande (incl. repeat-cooldown / abuse-throttle)
-'vote-updated'              // Votes mis à jour
-'event-ended'               // Événement terminé
-'screen-visualizer-updated' // Mode d'animation grand écran synchronisé
-'karaoke-mode-updated'      // État et taille des paroles karaoké synchronisés
-'blind-test-started'        // Session Blind-Test démarrée (options diffusées aux invités)
-'blind-test-dj-started'     // Confirmation au DJ avec bonne réponse
-'blind-test-answer-ack'     // Accusé de réception de réponse invité
-'blind-test-activity'       // Compteur de réponses live
-'blind-test-results'        // Révélation du morceau et podium des gagnants
+socket.on('queue-updated', (data) => {});           // File d'attente synchronisée en temps réel
+socket.on('new-request', (request) => {});          // Nouvelle proposition reçue
+socket.on('reject-undone', (data) => {});           // Refus annulé, morceau réintégré dans la file
+socket.on('vote-updated', (data) => {});            // Score et votes actualisés
+socket.on('screen-visualizer-updated', (d) => {});  // Nouvel effet d'animation grand écran actif
+socket.on('karaoke-mode-updated', (d) => {});       // Activation / désactivation du mode Karaoké
+socket.on('blind-test-started', (quiz) => {});      // Début du compte à rebours 15s du Blind-Test
+socket.on('blind-test-results', (podium) => {});    // Révélation du titre et classement des gagnants
+socket.on('request-error', (err) => {});            // Notification d'erreur (cooldown, abus, quotas)
 ```
 
-## 🎨 Interface Utilisateur
+---
 
-### Pages Publiques
-- `/login` - Connexion DJ
-- `/register` - Inscription DJ
-- `/user/:eventId` - Interface participant (scan QR)
-- `/thank-you` - Page de fin d'événement
+## 🧪 Tests & Assurance Qualité
 
-### Pages DJ (authentifiées)
-- `/dashboard` - Liste événements actifs
-- `/profile` - Profil DJ (nom, stats, Spotify)
-- `/dj/:eventId` - Console DJ (gestion queue, blind-test, monitor d'écrans)
-- `/event/:eventId/qr` - Affichage Grand Écran Standard
-- `/event/:eventId/screen/bar` - Affichage Grand Écran Profil Bar (Grand QR & queue)
-- `/event/:eventId/screen/stage` - Affichage Grand Écran Profil Scène (Visualiseur 3D & Karaoké)
-- `/history` - Historique événements
-- `/event/:eventId/stats` - Statistiques détaillées
+Le projet intègre une suite de **69 tests unitaires automatisés** utilisant le runner natif Node.js (`node:test`) pour une exécution ultra-rapide sans surcoût de transpilation.
 
-## 🔒 Sécurité
-
-- ✅ Hachage bcrypt avec 12 rounds
-- ✅ Helmet avec CSP configuré
-- ✅ Rate limiting multi-niveaux
-- ✅ Sanitization des inputs
-- ✅ Validation stricte des données
-- ✅ Sessions sécurisées (httpOnly, sameSite)
-- ✅ Protection CSRF (double-submit cookie + vérification serveur)
-- ✅ Requêtes SQL préparées
-- ✅ HTTPS obligatoire en production
-
-## 📊 Rate Limiting
-
-| Type | Limite | Fenêtre | Routes |
-|------|--------|---------|--------|
-| Global | 500 req | 15 min | Toutes (prod) — `GET /health` exclu |
-| Auth | 10 req | 15 min | Login/Register |
-| API | 60 req | 1 min | /api/* |
-| User Requests | 3 req | 15 min | Demandes musique (configurable) |
-
-## 🚀 Déploiement
-
-### Avec Docker (recommandé)
 ```bash
-# TODO: Créer docker-compose.yml
-docker-compose up -d
+# Exécuter l'ensemble de la suite de tests
+npm test
+
+# Vérifier la syntaxe de l'ensemble des fichiers du projet
+npm run ci:syntax
+
+# Lancer le pipeline CI complet (syntaxe + tests unitaires)
+npm run ci
 ```
 
-### Manuel
-1. Configurer MySQL + Redis sur le serveur
-2. Cloner et installer dépendances
-3. Configurer `.env` pour production
-4. Build (si applicable)
-5. Utiliser PM2 pour process management
+### Principaux modules couverts par les tests :
+- ✅ **Harmonie Musicale Camelot** : Calcul des clés compatibles, shifts énergétiques et sauts de demi-ton.
+- ✅ **Moteur Anti-Abus & Pénalités** : Détection de spam, temporisation progressive et recalcul de karma.
+- ✅ **Batching des Votes Haute Concurrence** : Agrégation en mémoire et persistance sécurisée en base.
+- ✅ **Décompte d'Intro Karaoké (3-2-1 Chantez !)** : Synchronisation millimétrée avec l'API LRCLIB.
+- ✅ **Moteur de Blind-Test Flash** : Génération des leurres plausibles et départage au centième de seconde.
+- ✅ **Résolution Multi-Écrans** : Distribution des profils d'affichage (`/screen/bar` vs `/screen/stage`).
+- ✅ **Génération SVG des QR Codes** : Rendu vectoriel personnalisé avec intégration de logo.
+
+---
+
+## 🚢 Déploiement en Production
+
+### 1. Process Manager PM2 (Recommandé)
+
 ```bash
+# Installer PM2 globalement
 npm install -g pm2
-pm2 start src/server.js --name music-live
+
+# Démarrer l'application sous PM2
+NODE_ENV=production pm2 start src/server.js --name "music-live" -i max
+
+# Configurer le redémarrage automatique au boot du serveur
 pm2 startup
 pm2 save
 ```
 
-### Déploiement automatique (GitHub Actions + o2switch FTPS)
+### 2. Déploiement Continu Automatique (GitHub Actions + FTPS)
 
-Le workflow est fourni dans `.github/workflows/deploy-o2switch.yml`.
+Un workflow GitHub Actions préconfiguré est disponible dans `.github/workflows/deploy-o2switch.yml`. Il valide la syntaxe et les tests unitaires avant de déployer automatiquement chaque commit de la branche `main` vers votre hébergeur (ex: o2switch, cPanel ou serveur dédié).
 
-Il déploie automatiquement sur push `main` (et manuellement via `workflow_dispatch`) via FTPS.
-
-#### 1) Secrets GitHub à créer
-
-Dans `Settings > Secrets and variables > Actions`, ajoute:
-- `SFTP_HOST` : hôte FTP/FTPS o2switch
-- `SFTP_PORT` : port FTP/FTPS (souvent `21`)
-- `SFTP_USER` : utilisateur FTP
-- `SFTP_PASSWORD` : mot de passe FTP
-- `SFTP_TARGET_DIR` : dossier cible (ex: `/www/`)
-
-#### 2) Préparer le serveur o2switch
-
-```bash
-# Créer le .env en production (non versionné)
-nano /chemin/vers/votre/app/.env
-
-# Installer PM2 (si pas déjà fait)
-npm install -g pm2
-```
-
-#### 3) Premier lancement PM2 (une seule fois)
-
-```bash
-cd /chemin/vers/votre/app
-npm ci --omit=dev
-pm2 start src/server.js --name music-live
-pm2 save
-```
-
-Ensuite, chaque push sur `main` déclenche le déploiement automatique.
-
-### Variables d'environnement Production
-- `NODE_ENV=production`
-- `BASE_URL=https://votre-domaine.com`
-- Cookie `secure: true` automatique
-- Redis obligatoire
-- HTTPS requis
-
-### Monitoring
-- Sonde HTTP recommandée : `GET https://votre-domaine.com/health`
-- Réponse typique : `{ "status": "ok", "uptime": 12345, "db": "ok", "redis": "ok" | "skipped" }`
-- Code **503** si MySQL ou Redis (production) est en erreur
-
-## 🧪 Tests
-
-La suite de tests automatisée utilise le runner natif `node:test` et `node:assert/strict` :
-
-```bash
-# Lancer tous les tests unitaires
-npm test
-```
-
-Actuellement **69 tests unitaires passent avec 100% de succès** :
-- Pénalités et seuils du service anti-abus
-- Batching haute concurrence des votes et réactions
-- Détection harmonique et Roue de Camelot (`getCamelotInfo`, `getHarmonicMatch`)
-- Analyseur de paroles LRCLIB
-- Génération de QR codes brandés SVG
-- Assainissement et middlewares de sécurité
-- Décompte d'intro visuel Karaoké (3-2-1 Chantez)
-- Jauge d'énergie Hype Meter et pyrotechnie
-- Moteur de Blind-Test Flash et classement au centième de seconde
-- Résolution des profils d'affichage multi-écrans (`bar`, `stage`, `standard`)
-- Utilitaires temporels et validateurs Express
-
-## 📈 Roadmap
-
-- [x] Endpoint `/health` pour monitoring externe (UptimeRobot, Better Stack…)
-- [x] Tests unitaires complets (69 tests unitaires natifs `node:test`)
-- [x] CI/CD automatique FTPS vers o2switch avec GitHub Actions
-- [x] Roue de Camelot & suggestions harmoniques en queue DJ
-- [x] Mode Karaoké distant avec décompte d'intro et scroll cinétique
-- [x] Jauge d'Énergie Live (Hype Meter) & feux d'artifice 100%
-- [x] Mini Blind-Test Flash de transition (15s)
-- [x] Profils d'Écrans Multiples (`/screen/bar` vs `/screen/stage`)
-- [ ] Docker Compose complet
-- [ ] Monitoring avec Sentry
-- [ ] Mode playlist automatique
-- [ ] Support multi-langues
-- [ ] Application mobile (React Native)
-- [ ] Intégration YouTube Music
-- [ ] Thèmes personnalisables
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues !
-
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/amazing-feature`)
-3. Commit les changements (`git commit -m 'Add amazing feature'`)
-4. Push (`git push origin feature/amazing-feature`)
-5. Ouvrir une Pull Request
-
-## 📝 License
-
-MIT License - voir [LICENSE](LICENSE)
-
-## 👨‍💻 Auteur
-
-Créé pour gérer les demandes musicales lors des soirées de la société de gym.
-
-## 🙏 Remerciements
-
-- Spotify Web API
-- Socket.IO
-- Express.js
-- Toute la communauté open source
+Configurez simplement vos secrets dans **Settings > Secrets and variables > Actions** :
+- `SFTP_HOST` : Adresse IP ou nom de domaine de votre serveur.
+- `SFTP_USER` : Nom d'utilisateur FTP/SFTP.
+- `SFTP_PASSWORD` : Mot de passe sécurisé.
+- `SFTP_TARGET_DIR` : Dossier racine de votre application (ex: `/public_html/` ou `/nodeapps/music-live/`).
 
 ---
 
-⭐ Si ce projet t'aide, n'hésite pas à lui donner une étoile sur GitHub !
+## 🤝 Contribution
+
+Les contributions et retours d'expérience sont les bienvenus !
+
+1. **Forkez** le projet.
+2. Créez une branche dédiée à votre fonctionnalité (`git checkout -b feature/nouvelle-fonctionnalite`).
+3. Validez que tous les tests passent : `npm run ci`.
+4. Commitez vos modifications (`git commit -m 'feat: ajout nouvelle fonctionnalité'`).
+5. Poussez votre branche (`git push origin feature/nouvelle-fonctionnalite`).
+6. Ouvrez une **Pull Request** détaillée.
+
+---
+
+## 📝 Licence
+
+Ce projet est distribué sous licence **MIT**. Consultez le fichier [LICENSE](LICENSE) pour plus d'informations.
+
+---
+
+<p align="center">
+  Développé avec passion pour faire vibrer les soirées et animer les dancefloors ! 🎛️⚡<br />
+  <strong>Si vous appréciez ce projet, pensez à lui laisser une ⭐ sur GitHub !</strong>
+</p>

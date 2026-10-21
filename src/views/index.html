@@ -4,397 +4,668 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Music Live — La régie DJ participative & interactive</title>
-  <meta name="description" content="Permettez à vos invités de proposer des musiques et voter en direct via QR code sans aucune application. La régie garde le contrôle total avec Spotify." />
+  <meta name="description" content="La régie DJ où vos invités scannent un QR code, votent en direct pour leurs titres favoris, et le DJ garde le contrôle total sans aucune application à installer." />
+  
+  <!-- Polices de caractères haute personnalité : Syne (Display éditorial), Space Grotesk (Club flyer), JetBrains Mono (Studio hardware) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
+
   <style>
-    /* Éléments de style matériel audio & studio pro */
-    .deck-grid-bg {
+    :root {
+      --font-display: 'Syne', sans-serif;
+      --font-grotesk: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --acid-volt: #d4ff00;
+      --acid-volt-dim: rgba(212, 255, 0, 0.12);
+      --hazard-orange: #ff4d00;
+      --hazard-orange-dim: rgba(255, 77, 0, 0.14);
+      --spotify-green: #1db954;
+      --console-dark: #0a0a0f;
+      --console-panel: #111118;
+      --console-border: rgba(255, 255, 255, 0.11);
+      --console-metal: #181824;
+      --grid-line: rgba(255, 255, 255, 0.05);
+    }
+
+    html.light {
+      --acid-volt: #b0d400;
+      --acid-volt-dim: rgba(176, 212, 0, 0.15);
+      --console-dark: #f5f5f7;
+      --console-panel: #ffffff;
+      --console-border: rgba(0, 0, 0, 0.12);
+      --console-metal: #ebebf0;
+      --grid-line: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Typographie club & affiches de concert */
+    .font-display { font-family: var(--font-display); }
+    .font-grotesk { font-family: var(--font-grotesk); }
+    .font-mono-code { font-family: var(--font-mono); }
+
+    /* Fond tramé technique façon studio audio pro */
+    .sound-studio-bg {
+      background-color: var(--console-dark);
       background-image: 
-        radial-gradient(circle at 50% 0%, rgba(124, 92, 252, 0.12) 0%, transparent 60%),
-        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 32px 32px, 32px 32px;
-    }
-    html.light .deck-grid-bg {
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(124, 92, 252, 0.08) 0%, transparent 60%),
-        linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 32px 32px, 32px 32px;
+        radial-gradient(circle at 10% 20%, rgba(212, 255, 0, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 77, 0, 0.03) 0%, transparent 40%),
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     }
 
-    /* Égaliseur audio animé */
-    .eq-bar {
-      display: inline-block;
-      width: 3px;
-      border-radius: 2px;
-      background: var(--green);
-      animation: eqBounce 1.2s ease-in-out infinite alternate;
-    }
-    .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
-    .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
-    .eq-bar:nth-child(3) { height: 18px; animation-delay: 0.15s; }
-    .eq-bar:nth-child(4) { height: 10px; animation-delay: 0.45s; }
-    .eq-bar:nth-child(5) { height: 16px; animation-delay: 0.25s; }
-
-    @keyframes eqBounce {
-      0% { transform: scaleY(0.3); opacity: 0.7; }
-      50% { transform: scaleY(1); opacity: 1; }
-      100% { transform: scaleY(0.4); opacity: 0.8; }
+    /* Bordures métalliques biseautées et faders DJ */
+    .chassis-box {
+      background: var(--console-panel);
+      border: 1px solid var(--console-border);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      position: relative;
     }
 
-    /* Glass card pro audio */
-    .pro-panel {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.5);
+    /* Fausse vis de montage rack audio */
+    .screw {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #3a3a4c 30%, #15151f 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      position: absolute;
     }
-    html.light .pro-panel {
-      box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.08);
-    }
-
-    .fader-groove {
-      background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0.05) 100%);
-    }
-
-    /* Tactile button feedback */
-    .tactile-btn {
-      transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .tactile-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Badge pulsation temps réel */
-    @keyframes livePing {
-      0% { transform: scale(1); opacity: 0.9; }
-      70% { transform: scale(2.2); opacity: 0; }
-      100% { transform: scale(1); opacity: 0; }
-    }
-    .live-indicator::before {
+    .screw::after {
       content: '';
       position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: inherit;
-      animation: livePing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+      top: 50%;
+      left: 15%;
+      right: 15%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translateY(-50%) rotate(45deg);
     }
+
+    /* Étiquette gaffer adhésive */
+    .gaffer-tape {
+      background: #e6dfc8;
+      color: #111;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      transform: rotate(-1.5deg);
+      display: inline-block;
+      border-left: 2px dashed rgba(0,0,0,0.3);
+      border-right: 2px dashed rgba(0,0,0,0.3);
+    }
+
+    /* Pads de MPC / Launchpad rétroéclairés */
+    .launchpad-btn {
+      position: relative;
+      background: #1c1c28;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 3px solid #0d0d14;
+      border-radius: 10px;
+      transition: all 0.08s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .launchpad-btn:hover {
+      border-color: var(--acid-volt);
+      transform: translateY(-1px);
+    }
+    .launchpad-btn:active, .launchpad-btn.active-flash {
+      transform: translateY(2px);
+      border-bottom-width: 1px;
+      background: var(--acid-volt) !important;
+      color: #000 !important;
+      box-shadow: 0 0 20px var(--acid-volt);
+    }
+
+    /* VU-mètre à segments LED */
+    .vu-meter-bar {
+      width: 5px;
+      height: 60px;
+      background: #111116;
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      padding: 2px;
+    }
+    .vu-segment {
+      width: 100%;
+      height: 4px;
+      border-radius: 1px;
+      background: #22222d;
+      transition: background 0.06s ease;
+    }
+    .vu-segment.green.lit { background: #10b981; box-shadow: 0 0 4px #10b981; }
+    .vu-segment.yellow.lit { background: #f59e0b; box-shadow: 0 0 4px #f59e0b; }
+    .vu-segment.red.lit { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+    /* Disque Vinyle en rotation */
+    .vinyl-platter {
+      animation: spinVinyl 3.2s linear infinite;
+      animation-play-state: paused;
+    }
+    .vinyl-platter.playing {
+      animation-play-state: running;
+    }
+    @keyframes spinVinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Ticket / Pass Concert avec découpe en dents de scie */
+    .ticket-stub {
+      background: #111118;
+      border: 1px solid var(--console-border);
+      position: relative;
+    }
+    .ticket-stub::before, .ticket-stub::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      background: var(--console-dark);
+      border-radius: 50%;
+      transform: translateY(-50%);
+      border: 1px solid var(--console-border);
+      z-index: 10;
+    }
+    .ticket-stub::before { left: -13px; }
+    .ticket-stub::after { right: -13px; }
+
+    /* Bouton tactile pro */
+    .pro-tactile {
+      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, filter 0.15s ease;
+    }
+    .pro-tactile:active {
+      transform: scale(0.97) translateY(1px);
+    }
+
+    /* Barres d'égalisation vivantes */
+    .live-eq {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 16px;
+    }
+    .live-eq span {
+      width: 3px;
+      background: var(--acid-volt);
+      border-radius: 1px;
+      animation: eqJive 0.8s ease-in-out infinite alternate;
+    }
+    .live-eq span:nth-child(1) { height: 35%; animation-delay: 0.1s; }
+    .live-eq span:nth-child(2) { height: 90%; animation-delay: 0.25s; }
+    .live-eq span:nth-child(3) { height: 60%; animation-delay: 0.15s; }
+    .live-eq span:nth-child(4) { height: 100%; animation-delay: 0.4s; }
+    .live-eq span:nth-child(5) { height: 45%; animation-delay: 0.2s; }
+
+    @keyframes eqJive {
+      0% { transform: scaleY(0.25); }
+      50% { transform: scaleY(1); }
+      100% { transform: scaleY(0.4); }
+    }
+
+    /* Ticker défilant style scène / LED matrix */
+    .led-marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      display: flex;
+    }
+    .led-marquee-inner {
+      display: flex;
+      gap: 3rem;
+      animation: marqueeScroll 24s linear infinite;
+    }
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Accordéon FAQ épuré */
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .faq-icon { transform: rotate(45deg); }
   </style>
 </head>
-<body class="deck-grid-bg antialiased selection:bg-[#7c5cfc]/30 selection:text-white" style="background-color: var(--bg-base); color: var(--text-primary); min-height: 100vh;">
 
-  <!-- ── 1. HEADER NAV ────────────────────────────────────────── -->
-  <header class="sticky top-0 z-40 backdrop-blur-md transition-colors duration-200" style="background: rgba(10, 10, 15, 0.85); border-bottom: 1px solid var(--border)">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+<body class="sound-studio-bg antialiased selection:bg-[#d4ff00] selection:text-black text-white min-h-screen">
+
+  <!-- ── 1. TICKER LED LIVE BANNER (Style Festival / Régie Live) ──── -->
+  <div class="border-b py-2 overflow-hidden text-xs font-mono-code font-bold tracking-wider uppercase z-50 relative"
+       style="background: #000; border-color: rgba(255,255,255,0.12); color: var(--acid-volt);">
+    <div class="led-marquee">
+      <div class="led-marquee-inner">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+          RÉGIE LIVE ACTIVE • PAS D'APPLICATION À INSTALLER
+        </span>
+        <span>•</span>
+        <span>100M+ TITRES SPOTIFY OFFICIELS</span>
+        <span>•</span>
+        <span>SCAN QR & VOTE EN DIRECT</span>
+        <span>•</span>
+        <span>BOUCLIER ANTI-TROLL & COOLDOWN 45M</span>
+        <span>•</span>
+        <span>PROJECTION SCÈNE BPM-SYNC</span>
+        <span>•</span>
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+          RÉGIE LIVE ACTIVE • PAS D'APPLICATION À INSTALLER
+        </span>
+        <span>•</span>
+        <span>100M+ TITRES SPOTIFY OFFICIELS</span>
+        <span>•</span>
+        <span>SCAN QR & VOTE EN DIRECT</span>
+        <span>•</span>
+        <span>BOUCLIER ANTI-TROLL & COOLDOWN 45M</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. HEADER NAVIGATION (Style Studio Hardware) ─────────────── -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl border-b transition-colors"
+          style="background: rgba(10, 10, 15, 0.92); border-color: var(--console-border);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo -->
-      <a href="/" class="flex items-center gap-3 group">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center relative shadow-sm" style="background: linear-gradient(135deg, var(--accent) 0%, #5d3ce6 100%)">
-          <svg class="w-5 h-5 text-white transform group-hover:scale-105 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-            <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+      <!-- Brand Logo / Identity -->
+      <a href="/" class="flex items-center gap-3.5 group">
+        <!-- Stylized Vinyl Icon -->
+        <div class="w-10 h-10 rounded-full flex items-center justify-center relative border border-white/20 shadow-md group-hover:rotate-45 transition-transform duration-300"
+             style="background: #111; color: var(--acid-volt)">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="6"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor"/>
           </svg>
         </div>
         <div class="flex flex-col">
           <div class="flex items-center gap-2">
-            <span class="font-bold tracking-tight text-base" style="color:var(--text-primary)">Music<span style="color:var(--accent)">Live</span></span>
-            <span class="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded border uppercase flex items-center gap-1" style="background:var(--accent-dim);color:var(--accent);border-color:rgba(124,92,252,0.3)">
-              <span class="w-1.5 h-1.5 rounded-full bg-current relative live-indicator"></span>
-              Live
+            <span class="font-display font-black text-xl tracking-tight text-white">MUSIC<span style="color:var(--acid-volt)">LIVE</span></span>
+            <span class="font-mono-code text-[10px] px-1.5 py-0.2 rounded font-bold border uppercase tracking-wider text-black"
+                  style="background: var(--acid-volt); border-color: var(--acid-volt)">
+              PRO
             </span>
           </div>
-          <span class="text-[11px] hidden sm:block leading-none" style="color:var(--text-muted)">Régie & Jukebox Interactif</span>
+          <span class="font-mono-code text-[10px] text-neutral-400 tracking-wider">CROWD-CURATED DJ BOOTH</span>
         </div>
       </a>
 
-      <!-- Desktop Links -->
-      <nav class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--text-secondary)">
-        <a href="#interactive-demo" class="hover:text-white transition-colors">Démo live</a>
-        <a href="#features" class="hover:text-white transition-colors">Fonctionnalités</a>
-        <a href="#workflow" class="hover:text-white transition-colors">Déroulement</a>
-        <a href="#projection" class="hover:text-white transition-colors">Écran scène</a>
+      <!-- Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-8 font-grotesk text-sm font-semibold tracking-wide text-neutral-300">
+        <a href="#console-interactive" class="hover:text-white transition-colors flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--acid-volt)"></span>
+          Console Interactive
+        </a>
+        <a href="#manifesto" class="hover:text-white transition-colors">Manifeste Anti-Galère</a>
+        <a href="#specs" class="hover:text-white transition-colors">Fiche Technique</a>
+        <a href="#ticket-creator" class="hover:text-white transition-colors">Générateur de Pass</a>
+        <a href="#projection-mode" class="hover:text-white transition-colors">Écran Scène</a>
         <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
       </nav>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-2.5 sm:gap-3">
-        <!-- Theme Toggle Button -->
-        <button data-theme-toggle class="btn btn-ghost btn-icon w-9 h-9 flex items-center justify-center rounded-lg" title="Changer de thème">
-          <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <!-- Action Area -->
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle -->
+        <button data-theme-toggle class="p-2.5 rounded-lg border border-white/10 hover:border-white/30 text-neutral-300 hover:text-white transition-all"
+                title="Basculer Thème" style="background: #12121a;">
+          <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
 
-        <!-- Spotify Connect / Login CTA -->
-        <a href="/login" class="tactile-btn flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-sm hover:shadow transition-all"
-           style="background:#1DB954;">
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <!-- CTA Launch with Spotify -->
+        <a href="/login" class="pro-tactile flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg font-mono-code font-bold text-xs sm:text-sm tracking-wide text-black uppercase shadow-lg shadow-[#1db954]/20 hover:brightness-110"
+           style="background: var(--spotify-green);">
+          <svg class="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
             <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
           </svg>
-          <span>Lancer ma soirée</span>
+          <span>Lancer la régie</span>
         </a>
       </div>
+
     </div>
   </header>
 
-  <!-- ── 2. HERO SECTION ──────────────────────────────────────── -->
-  <section class="relative pt-12 sm:pt-20 pb-16 px-4 sm:px-6 overflow-hidden">
-    <div class="max-w-5xl mx-auto text-center relative z-10">
+  <!-- ── 3. HERO SECTION (Éditorial & Viscéral) ───────────────────── -->
+  <section class="relative pt-12 sm:pt-20 pb-20 px-4 sm:px-6 overflow-hidden border-b" style="border-color: var(--console-border)">
+    
+    <!-- Hero Background Photography with Raw Studio Overlay -->
+    <div class="absolute inset-0 pointer-events-none opacity-25 mix-blend-luminosity">
+      <img src="/images/dj-live-booth.jpg" alt="Ambiance DJ Live Club" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-transparent to-[#0a0a0f]"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto relative z-10">
       
-      <!-- Hardware vibe status badge -->
-      <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium mb-6 border shadow-sm"
-           style="background: var(--bg-surface); border-color: var(--border); color: var(--text-secondary);">
-        <span class="flex items-center gap-1.5 text-xs">
-          <span class="w-2 h-2 rounded-full" style="background:var(--green)"></span>
-          <span style="color:var(--text-primary)" class="font-semibold">V2.0 LIVE</span>
+      <!-- Studio Header Badge -->
+      <div class="flex flex-wrap items-center gap-3 mb-6">
+        <span class="gaffer-tape px-3 py-1 text-xs">
+          STATION RÉGIE #ML-2026
         </span>
-        <span style="color:var(--border)">|</span>
-        <span>Pas d'application à télécharger</span>
-        <span style="color:var(--border)">|</span>
-        <span class="hidden sm:inline">Spotify Web Playback SDK</span>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded font-mono-code text-xs font-semibold border"
+             style="background: rgba(18,18,24,0.85); border-color: rgba(255,255,255,0.15); color: #fff;">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-ping"></span>
+          <span>LATENCE : <strong>&lt; 12ms</strong></span>
+          <span class="text-neutral-500">|</span>
+          <span>FLUX : <strong>SPOTIFY 320 KBPS</strong></span>
+        </div>
       </div>
 
-      <!-- Main Headline -->
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
-        La régie DJ participative<br class="hidden sm:inline" />
-        <span class="bg-gradient-to-r from-[#7c5cfc] via-[#a855f7] to-[#1DB954] bg-clip-text text-transparent">qui fait vibrer la foule</span>
-      </h1>
+      <!-- Main Brutalist Headline -->
+      <div class="mb-8">
+        <h1 class="font-display font-black text-4xl sm:text-6xl lg:text-7xl tracking-tighter uppercase leading-[0.95] text-white">
+          La régie DJ où la foule vote.<br/>
+          <span style="color: var(--acid-volt)">Vous restez le patron.</span>
+        </h1>
+      </div>
 
-      <!-- Concrete Subtitle (No AI fluff) -->
-      <p class="text-base sm:text-lg max-w-2xl mx-auto mb-9 font-normal leading-relaxed" style="color: var(--text-secondary)">
-        Vos invités scannent un QR code, explorent le catalogue Spotify et votent pour leurs sons préférés. 
-        <strong style="color:var(--text-primary)" class="font-semibold">Vous gardez le contrôle total</strong> depuis votre console régie : validation en un clic, glisser-déposer et protection anti-troll.
+      <!-- Raw & Honest Subtitle -->
+      <p class="font-grotesk text-lg sm:text-2xl font-normal max-w-3xl text-neutral-300 leading-snug mb-10">
+        Fini les relous qui hurlent à 2 cm de vos oreilles en postillonnant, les écrans de smartphone brandis dans le noir et les verres posés près de vos platines. 
+        <span class="text-white font-semibold">Vos invités scannent un QR code, cherchent sur Spotify et votent.</span> 
+        Votre régie tranche en un clic ou laisse monter la hype démocratique.
       </p>
 
-      <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-10">
-        <a href="/login" class="tactile-btn w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl font-semibold text-white text-base shadow-lg shadow-[#1DB954]/20 hover:brightness-105 transition-all"
-           style="background: #1DB954;">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+      <!-- Action Buttons + Audio Test Pad -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-14">
+        
+        <a href="/login" class="pro-tactile inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-mono-code font-extrabold text-sm sm:text-base uppercase tracking-wider text-black shadow-xl hover:brightness-110"
+           style="background: var(--spotify-green);">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
             <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
           </svg>
           Connecter Spotify & Démarrer
         </a>
 
-        <a href="#interactive-demo" class="tactile-btn w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-medium text-sm border transition-all"
-           style="background: var(--bg-surface); border-color: var(--border); color: var(--text-primary)">
-          <svg class="w-4 h-4 text-[#7c5cfc]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Tester la démo interactive
+        <a href="#console-interactive" class="pro-tactile inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl font-mono-code font-bold text-sm tracking-wider uppercase border border-white/20 hover:border-white/50 text-white"
+           style="background: #151520;">
+          <svg class="w-4 h-4 text-[#d4ff00]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Tester la console en direct
         </a>
+
       </div>
 
-      <!-- Trust highlights (Direct & Concrete) -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto pt-6 text-xs text-left" style="border-top: 1px solid var(--border)">
-        <div class="flex items-center gap-2.5">
-          <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style="background:var(--green-dim);color:var(--green)">✓</div>
-          <span style="color:var(--text-secondary)">Scan immédiat sans compte</span>
+      <!-- Spec Sheet Quick Pillars (Bandeau 4 piliers matériel) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-8 border-t" style="border-color: var(--console-border)">
+        
+        <div class="p-3.5 rounded-lg border flex flex-col justify-between" style="background: rgba(18,18,24,0.6); border-color: var(--console-border)">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[11px] text-neutral-400">CH-01 // CLIENT</span>
+            <span class="text-xs font-bold" style="color:var(--acid-volt)">0 APPLI</span>
+          </div>
+          <p class="font-grotesk text-xs text-neutral-300">Scan immédiat avec l'appareil photo iPhone ou Android.</p>
         </div>
-        <div class="flex items-center gap-2.5">
-          <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style="background:var(--accent-dim);color:var(--accent)">✓</div>
-          <span style="color:var(--text-secondary)">WebSockets ultra réactifs</span>
+
+        <div class="p-3.5 rounded-lg border flex flex-col justify-between" style="background: rgba(18,18,24,0.6); border-color: var(--console-border)">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[11px] text-neutral-400">CH-02 // CATALOG</span>
+            <span class="text-xs font-bold text-emerald-400">100M+ TITRES</span>
+          </div>
+          <p class="font-grotesk text-xs text-neutral-300">Catalogue complet Spotify, jaquettes officielles & métadonnées.</p>
         </div>
-        <div class="flex items-center gap-2.5">
-          <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style="background:var(--cyan-dim);color:var(--cyan)">✓</div>
-          <span style="color:var(--text-secondary)">Cooldown anti-répétition</span>
+
+        <div class="p-3.5 rounded-lg border flex flex-col justify-between" style="background: rgba(18,18,24,0.6); border-color: var(--console-border)">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[11px] text-neutral-400">CH-03 // SÉCURITÉ</span>
+            <span class="text-xs font-bold" style="color:var(--hazard-orange)">ANTI-TROLL</span>
+          </div>
+          <p class="font-grotesk text-xs text-neutral-300">Cooldown 45m anti-répétition, quotas de vote et blacklist 1-clic.</p>
         </div>
-        <div class="flex items-center gap-2.5">
-          <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style="background:var(--amber-dim);color:var(--amber)">✓</div>
-          <span style="color:var(--text-secondary)">Mode projection BPM-sync</span>
+
+        <div class="p-3.5 rounded-lg border flex flex-col justify-between" style="background: rgba(18,18,24,0.6); border-color: var(--console-border)">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono-code text-[11px] text-neutral-400">CH-04 // SCÈNE</span>
+            <span class="text-xs font-bold text-cyan-400">PROJECTION 4K</span>
+          </div>
+          <p class="font-grotesk text-xs text-neutral-300">Affichage grand écran vidéoprojecteur avec QR géant & BPM live.</p>
         </div>
+
       </div>
 
     </div>
   </section>
 
-  <!-- ── 3. INTERACTIVE PRODUCT SHOWROOM (REAL PRODUCT SIMULATION) ── -->
-  <section id="interactive-demo" class="py-12 sm:py-20 px-4 sm:px-6 relative">
+  <!-- ── 4. CONSOLE DJ INTERACTIVE & LA FILE DU PUBLIC ───────────── -->
+  <section id="console-interactive" class="py-16 sm:py-24 px-4 sm:px-6 relative">
     <div class="max-w-6xl mx-auto">
       
-      <!-- Section header -->
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <span class="text-xs font-mono font-semibold uppercase tracking-wider px-3 py-1 rounded-full border"
-              style="color: var(--accent); background: var(--accent-dim); border-color: rgba(124,92,252,0.3);">
-          Simulation en direct
-        </span>
-        <h2 class="text-2xl sm:text-4xl font-extrabold mt-3 mb-2" style="color: var(--text-primary)">
-          Voyez comment la magie opère
-        </h2>
-        <p class="text-sm sm:text-base" style="color: var(--text-secondary)">
-          À gauche le smartphone d’un invité. À droite votre console DJ connectée. Cliquez sur les boutons de vote pour voir la file d’attente réagir instantanément !
+      <!-- Section Title Badge -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 pb-6 border-b" style="border-color: var(--console-border)">
+        <div>
+          <div class="flex items-center gap-2 mb-2 font-mono-code text-xs font-bold" style="color: var(--acid-volt)">
+            <span class="w-2.5 h-2.5 rounded-sm bg-current"></span>
+            SIMULATION RÉGIE TEMPS RÉEL
+          </div>
+          <h2 class="font-display font-extrabold text-3xl sm:text-4xl uppercase tracking-tight text-white">
+            Prenez les commandes de la console
+          </h2>
+        </div>
+        <p class="font-grotesk text-sm sm:text-base text-neutral-400 max-w-md">
+          Manipulez la platine vinyle, appuyez sur les pads de son MPC, et décidez quelles propositions des invités méritent d'entrer dans le mix !
         </p>
       </div>
 
-      <!-- Main Showcase Container: Guest Phone vs DJ Console -->
-      <div class="pro-panel rounded-2xl overflow-hidden p-3 sm:p-6 border">
+      <!-- The Physical DJ Console Hardware Chassis -->
+      <div class="chassis-box rounded-2xl p-4 sm:p-7 relative overflow-hidden">
         
-        <!-- Showcase Top Bar (DJ Desk Header) -->
-        <div class="flex items-center justify-between pb-4 mb-4 border-b text-xs" style="border-color: var(--border);">
+        <!-- Rack Mount Screws -->
+        <span class="screw top-3 left-3"></span>
+        <span class="screw top-3 right-3"></span>
+        <span class="screw bottom-3 left-3"></span>
+        <span class="screw bottom-3 right-3"></span>
+
+        <!-- Top Hardware Bar: Timecode, Session ID & Status -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b text-xs font-mono-code"
+             style="border-color: rgba(255,255,255,0.1)">
+          
           <div class="flex items-center gap-3">
-            <div class="flex gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block"></span>
-            </div>
-            <span class="font-mono font-medium hidden sm:inline" style="color: var(--text-muted)">SESSION ID: #GALA-2026-LIVE</span>
-          </div>
-
-          <!-- Central Audio Playing Pill -->
-          <div class="flex items-center gap-2 px-3 py-1 rounded-lg" style="background: var(--bg-elevated); border: 1px solid var(--border)">
-            <span class="flex items-center gap-1 h-3">
-              <span class="eq-bar"></span>
-              <span class="eq-bar"></span>
-              <span class="eq-bar"></span>
-              <span class="eq-bar"></span>
-              <span class="eq-bar"></span>
+            <span class="px-2.5 py-1 rounded bg-black/70 border border-white/10 text-neutral-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              REC ● <span id="sessionTimer">01:42:19</span>
             </span>
-            <span class="font-medium truncate max-w-[170px] sm:max-w-xs" style="color: var(--text-primary)">Justice — Neverender (feat. Tame Impala)</span>
-            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded" style="background: var(--green-dim); color: var(--green)">EN COURS</span>
+            <span class="text-neutral-400 hidden sm:inline">PROJET : <strong class="text-white">ROOFTOP_SESSION_LIVE</strong></span>
           </div>
 
-          <div class="flex items-center gap-2 font-mono text-[11px]" style="color: var(--text-secondary)">
-            <span class="w-2 h-2 rounded-full bg-green-400 live-indicator relative"></span>
-            <span id="demoGuestCounter">42 invités connectés</span>
+          <!-- Master VU Meter Display -->
+          <div class="flex items-center gap-4 bg-black/60 px-3 py-1.5 rounded-lg border border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-neutral-400">CH-L</span>
+              <div class="vu-meter-bar" id="vuMeterL"></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-neutral-400">CH-R</span>
+              <div class="vu-meter-bar" id="vuMeterR"></div>
+            </div>
+            <div class="flex flex-col text-[10px] leading-tight">
+              <span class="text-emerald-400 font-bold" id="vuBpmDisplay">124 BPM</span>
+              <span class="text-neutral-400">PEAK: -1.2 dB</span>
+            </div>
           </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Tap BPM Button -->
+            <button onclick="tapBpm()" class="pro-tactile px-2.5 py-1 rounded bg-[#20202e] hover:bg-[#2b2b3d] text-white font-mono-code text-[11px] font-bold border border-white/15" title="Tapez en rythme pour calculer le tempo">
+              👆 TAP BPM
+            </button>
+            <span class="px-2 py-1 rounded text-black font-bold text-[10px]" style="background:var(--acid-volt)">
+              AUTO-SYNC
+            </span>
+          </div>
+
         </div>
 
-        <!-- The Split Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Split Deck: Left Turntable & Sampler | Right Live Crowd Queue -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          <!-- LEFT: Guest Mobile Simulation (5 cols) -->
-          <div class="lg:col-span-5 flex flex-col items-center">
-            <div class="w-full max-w-sm rounded-[2.2rem] p-2.5 shadow-2xl relative border"
-                 style="background: #050508; border-color: rgba(255,255,255,0.14);">
+          <!-- LEFT: The DJ Rig (Platter + MPC Soundboard + Crossfader) (7 cols) -->
+          <div class="lg:col-span-7 flex flex-col gap-6">
+            
+            <div class="p-5 rounded-xl border flex flex-col sm:flex-row items-center gap-6"
+                 style="background: #0d0d14; border-color: rgba(255,255,255,0.1)">
               
-              <!-- Phone notch -->
-              <div class="w-24 h-4 bg-black rounded-full mx-auto mb-2 flex items-center justify-center">
-                <div class="w-3 h-3 rounded-full bg-neutral-900"></div>
-              </div>
-
-              <!-- Phone Content inside screen -->
-              <div class="rounded-[1.8rem] overflow-hidden p-4 flex flex-col gap-3 min-h-[460px]" style="background: var(--bg-base);">
+              <!-- Rotating Vinyl Platter -->
+              <div class="relative shrink-0 flex items-center justify-center">
+                <div id="vinylRecord" class="w-40 h-40 sm:w-48 sm:h-48 rounded-full shadow-2xl relative cursor-pointer border-4 border-[#1c1c24] vinyl-platter playing overflow-hidden"
+                     onclick="toggleVinylPlay()" title="Cliquez sur le vinyle pour Play/Pause">
+                  <img src="/images/vinyl-record.jpg" alt="Disque Vinyle Music Live" class="w-full h-full object-cover rounded-full" />
+                </div>
                 
-                <!-- Phone Header -->
-                <div class="flex items-center justify-between pb-2 border-b" style="border-color: var(--border);">
-                  <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--accent)">Music Live</p>
-                    <p class="text-xs font-bold truncate" style="color: var(--text-primary)">Soirée Privée • Le Rooftop</p>
-                  </div>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full" style="background: var(--bg-elevated); color: var(--text-secondary);">
-                    3 requêtes restantes
-                  </span>
-                </div>
-
-                <!-- Fake Search Input -->
-                <div class="relative">
-                  <input type="text" id="demoSearchInput" placeholder="Rechercher un son ou artiste..." 
-                         class="w-full text-xs rounded-xl px-3 py-2 pl-8 border transition-all"
-                         style="background: var(--bg-surface); border-color: var(--border); color: var(--text-primary);" />
-                  <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5" style="color: var(--text-muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </div>
-
-                <!-- Quick Track Add Pills -->
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[10px]" style="color: var(--text-secondary)">
-                  <span class="shrink-0 font-medium">Suggestions :</span>
-                  <button onclick="addDemoTrack('Daft Punk', 'One More Time', '123 bpm', 'https://i.scdn.co/image/ab67616d00004851c8a11e47cba5e4e7e6d0a7a0')" 
-                          class="shrink-0 px-2 py-0.5 rounded-full border hover:border-purple-400 transition"
-                          style="background: var(--bg-elevated); border-color: var(--border); color: var(--text-primary)">
-                    + One More Time
-                  </button>
-                  <button onclick="addDemoTrack('Fred Again..', 'adore u', '130 bpm')" 
-                          class="shrink-0 px-2 py-0.5 rounded-full border hover:border-purple-400 transition"
-                          style="background: var(--bg-elevated); border-color: var(--border); color: var(--text-primary)">
-                    + adore u
-                  </button>
-                </div>
-
-                <!-- Guest Queue List with Interactive Vote buttons -->
-                <div class="flex-1 flex flex-col gap-2 overflow-y-auto max-h-[290px] pr-1">
-                  <p class="text-[11px] font-semibold tracking-wide uppercase mt-1" style="color: var(--text-muted)">File des propositions</p>
-                  
-                  <div id="demoGuestList" class="space-y-2">
-                    <!-- Cards will be populated and reactive -->
-                  </div>
-                </div>
-
-                <!-- Phone Bottom Bar Hint -->
-                <div class="pt-2 text-center border-t text-[10px]" style="border-color: var(--border); color: var(--text-muted)">
-                  ⚡ Scan QR automatique • Aucune installation requise
-                </div>
+                <!-- Play / Pause Center Floating Overlay -->
+                <button onclick="toggleVinylPlay()" id="vinylPlayBtn"
+                        class="absolute w-12 h-12 rounded-full flex items-center justify-center shadow-2xl text-black font-bold transition-all"
+                        style="background: var(--acid-volt);" title="Play/Pause">
+                  <svg id="vinylPlayIcon" class="w-5 h-5 fill-current hidden" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <svg id="vinylPauseIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
               </div>
 
-              <!-- Phone home indicator -->
-              <div class="w-28 h-1 bg-neutral-600/70 rounded-full mx-auto mt-2"></div>
+              <!-- Deck Now Playing Metadata & Controls -->
+              <div class="flex-1 min-w-0 text-center sm:text-left">
+                <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                  <span class="px-2 py-0.5 rounded font-mono-code text-[10px] font-bold text-black uppercase"
+                        style="background: var(--acid-volt)">EN COURS DANS LA SALLE</span>
+                  <div class="live-eq">
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                </div>
+
+                <h3 class="font-display font-extrabold text-xl text-white truncate" id="currentTrackTitle">
+                  Justice — Neverender
+                </h3>
+                <p class="font-grotesk text-sm text-neutral-300 truncate mb-3" id="currentTrackArtist">
+                  Featuring Tame Impala • Album: Hyperdrama
+                </p>
+
+                <!-- Audio Scrubber bar -->
+                <div class="w-full bg-[#1e1e2c] h-1.5 rounded-full overflow-hidden mb-2">
+                  <div id="trackProgressBar" class="h-full rounded-full transition-all duration-300"
+                       style="background: var(--acid-volt); width: 45%;"></div>
+                </div>
+                <div class="flex justify-between font-mono-code text-[11px] text-neutral-400">
+                  <span id="trackTimeCurrent">01:52</span>
+                  <span id="trackKeyCamelot" class="font-bold text-purple-400">CAMELOT 8A • 126 BPM</span>
+                  <span>04:12</span>
+                </div>
+
+                <!-- 33/45 RPM Speed Toggle -->
+                <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-center sm:justify-start gap-3 text-xs font-mono-code">
+                  <span class="text-neutral-400">VITESSE :</span>
+                  <button onclick="setVinylRpm(33)" id="btnRpm33" class="px-2 py-1 rounded bg-[#20202e] text-white font-bold border border-white/20 active-rpm">33 RPM</button>
+                  <button onclick="setVinylRpm(45)" id="btnRpm45" class="px-2 py-1 rounded bg-[#161622] text-neutral-400 border border-white/10">45 RPM</button>
+                </div>
+
+              </div>
+
             </div>
-            <p class="text-xs mt-3 font-medium text-center" style="color: var(--text-secondary)">
-              📱 Interface Invité (accessible sur Safari, Chrome, Android, iOS)
-            </p>
+
+            <!-- MPC Soundboard / Live SFX Launchpad -->
+            <div class="p-4 rounded-xl border" style="background: #0d0d14; border-color: rgba(255,255,255,0.1)">
+              <div class="flex items-center justify-between mb-3 text-xs font-mono-code">
+                <span class="text-neutral-300 font-bold flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full" style="background:var(--hazard-orange)"></span>
+                  SOUNDBOARD LIVE SFX (CLIQUEZ POUR JOUER EN DIRECT)
+                </span>
+                <span class="text-neutral-400">SYNTH WEB AUDIO</span>
+              </div>
+
+              <!-- 4 Real Synthesized Sound Pads -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                
+                <button onclick="playSfx('airhorn', this)" class="launchpad-btn p-3 text-left">
+                  <div class="font-mono-code text-[10px] text-neutral-400">PAD 01</div>
+                  <div class="font-display font-extrabold text-sm text-white mt-1">🎺 AIRHORN</div>
+                  <div class="font-mono-code text-[10px] text-neutral-400">Rave Drop</div>
+                </button>
+
+                <button onclick="playSfx('laser', this)" class="launchpad-btn p-3 text-left">
+                  <div class="font-mono-code text-[10px] text-neutral-400">PAD 02</div>
+                  <div class="font-display font-extrabold text-sm text-white mt-1">⚡ LASER ZAP</div>
+                  <div class="font-mono-code text-[10px] text-neutral-400">Dub Echo</div>
+                </button>
+
+                <button onclick="playSfx('rewind', this)" class="launchpad-btn p-3 text-left">
+                  <div class="font-mono-code text-[10px] text-neutral-400">PAD 03</div>
+                  <div class="font-display font-extrabold text-sm text-white mt-1">⏪ REWIND</div>
+                  <div class="font-mono-code text-[10px] text-neutral-400">Spinback</div>
+                </button>
+
+                <button onclick="playSfx('subdrop', this)" class="launchpad-btn p-3 text-left">
+                  <div class="font-mono-code text-[10px] text-neutral-400">PAD 04</div>
+                  <div class="font-display font-extrabold text-sm text-white mt-1">💣 808 DROP</div>
+                  <div class="font-mono-code text-[10px] text-neutral-400">Sub Bass</div>
+                </button>
+
+              </div>
+            </div>
+
+            <!-- Tactile Crossfader Slider -->
+            <div class="p-4 rounded-xl border" style="background: #0d0d14; border-color: rgba(255,255,255,0.1)">
+              <div class="flex justify-between text-xs font-mono-code mb-2">
+                <span class="text-neutral-300 font-bold">DECK A (SÉLECTION DJ)</span>
+                <span class="text-neutral-400" id="crossfaderValue">CENTRE (50/50)</span>
+                <span class="font-bold" style="color:var(--acid-volt)">DECK B (VOTES DU PUBLIC)</span>
+              </div>
+              <input type="range" id="crossfaderSlider" min="0" max="100" value="50" oninput="updateCrossfader(this.value)"
+                     class="w-full accent-[#d4ff00] cursor-ew-resize h-3 bg-black rounded-lg appearance-none" />
+            </div>
+
           </div>
 
-          <!-- RIGHT: DJ Live Console Deck Simulation (7 cols) -->
-          <div class="lg:col-span-7 flex flex-col gap-3">
+          <!-- RIGHT: The Live Crowd Request Crate (Setlist / Queue) (5 cols) -->
+          <div class="lg:col-span-5 flex flex-col gap-4">
             
-            <div class="rounded-xl border p-4 sm:p-5 flex flex-col gap-4" style="background: var(--bg-base); border-color: var(--border);">
+            <div class="p-5 rounded-xl border flex flex-col gap-4"
+                 style="background: #0d0d14; border-color: rgba(255,255,255,0.1)">
               
-              <!-- Console Top Stats & Controls -->
-              <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b" style="border-color: var(--border);">
+              <!-- Setlist Header -->
+              <div class="flex items-center justify-between pb-3 border-b border-white/10">
                 <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background: var(--accent-dim); color: var(--accent)">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                  </div>
-                  <div>
-                    <h3 class="text-sm font-bold" style="color: var(--text-primary)">Console Régie DJ</h3>
-                    <p class="text-[11px]" style="color: var(--text-muted)">Spotify Web Player actif • 320 kbps</p>
-                  </div>
+                  <span class="gaffer-tape px-2 py-0.5 text-[10px]">CRATE // LIVE</span>
+                  <span class="font-mono-code text-xs text-neutral-300" id="queueCountDisplay">4 demandes actives</span>
                 </div>
-
-                <div class="flex items-center gap-2">
-                  <button id="btnAutoAcceptDemo" onclick="toggleAutoAcceptDemo()" class="tactile-btn text-xs px-2.5 py-1.5 rounded-lg border font-medium flex items-center gap-1.5"
-                          style="background: var(--bg-elevated); border-color: var(--border); color: var(--text-secondary)">
-                    <span class="w-2 h-2 rounded-full bg-neutral-500" id="autoAcceptIndicator"></span>
-                    <span>Auto-Accept : <strong id="autoAcceptText" class="text-neutral-400">OFF</strong></span>
-                  </button>
-                  <span class="text-xs px-2.5 py-1.5 rounded-lg font-mono font-semibold" style="background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.2)">
-                    ANTI-SPAM ACTIF
-                  </span>
-                </div>
+                
+                <!-- Anti-Spam Badge -->
+                <span class="font-mono-code text-[10px] px-2 py-0.5 rounded border border-emerald-500/30 text-emerald-400 font-bold bg-emerald-500/10">
+                  ANTI-TROLL ACTIF
+                </span>
               </div>
 
-              <!-- Live Queue List in DJ Console -->
+              <!-- Quick Add a Track Simulation Input -->
               <div>
-                <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted)">
-                  <span>Demandes en temps réel</span>
-                  <span id="demoDjCount" class="font-mono text-neutral-400">4 titres en attente</span>
-                </div>
-
-                <div id="demoDjList" class="space-y-2">
-                  <!-- DJ Cards populated by script with live accept / reject buttons -->
+                <label class="block font-mono-code text-[11px] text-neutral-400 mb-1.5 uppercase">
+                  Simuler la recherche Spotify d'un invité :
+                </label>
+                <div class="flex gap-2">
+                  <input type="text" id="simTrackInput" placeholder="ex: Daft Punk, Fred again, Dua Lipa..." 
+                         class="flex-1 text-xs rounded-lg px-3 py-2 bg-black border border-white/15 text-white font-grotesk focus:outline-none focus:border-[#d4ff00]" />
+                  <button onclick="addSimulatedTrack()" class="pro-tactile px-3.5 py-2 rounded-lg text-xs font-mono-code font-bold text-black uppercase"
+                          style="background: var(--acid-volt)">
+                    + Proposer
+                  </button>
                 </div>
               </div>
 
-              <!-- Console Bottom Feature Bar -->
-              <div class="mt-2 pt-3 border-t grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs" style="border-color: var(--border)">
-                <div class="p-2.5 rounded-lg flex items-center gap-2" style="background: var(--bg-surface)">
-                  <svg class="w-4 h-4 text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  <span style="color: var(--text-secondary)">Cooldown 45m anti-doublon</span>
-                </div>
-                <div class="p-2.5 rounded-lg flex items-center gap-2" style="background: var(--bg-surface)">
-                  <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
-                  <span style="color: var(--text-secondary)">QR Code export SVG HD</span>
-                </div>
-                <div class="p-2.5 rounded-lg flex items-center gap-2" style="background: var(--bg-surface)">
-                  <svg class="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-                  <span style="color: var(--text-secondary)">Glisser-déposer de la queue</span>
-                </div>
+              <!-- Live Request List with Dynamic Vote Buttons -->
+              <div class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1" id="interactiveQueueList">
+                <!-- Dynamically rendered via renderQueue() -->
+              </div>
+
+              <!-- Bottom Queue Summary -->
+              <div class="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono-code text-neutral-400">
+                <span>⚡ Mises à jour en direct (WebSockets)</span>
+                <span>TRI : PAR POPULARITÉ</span>
               </div>
 
             </div>
 
-            <p class="text-xs font-medium text-center" style="color: var(--text-secondary)">
-              🎛️ Écran Régie DJ : modération en direct, détection de BPM et réorganisation à la volée
-            </p>
           </div>
 
         </div>
@@ -404,129 +675,220 @@
     </div>
   </section>
 
-  <!-- ── 4. LES 4 PILIERS DU PRODUIT (FONCTIONNALITÉS RÉELLES) ──── -->
-  <section id="features" class="py-16 sm:py-24 px-4 sm:px-6 relative" style="border-top: 1px solid var(--border); background: var(--bg-surface)">
+  <!-- ── 5. MANIFESTE ANTI-GALÈRE (Avant vs Avec Music Live) ──────── -->
+  <section id="manifesto" class="py-16 sm:py-24 px-4 sm:px-6 border-t" style="border-color: var(--console-border); background: #08080d;">
+    <div class="max-w-6xl mx-auto">
+      
+      <div class="max-w-3xl mb-14">
+        <span class="font-mono-code text-xs font-bold uppercase tracking-widest text-[#ff4d00]">
+          RÉALITÉ DU TERRAIN
+        </span>
+        <h2 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white mt-2 mb-4 leading-none">
+          Pourquoi les DJs ont besoin de Music Live
+        </h2>
+        <p class="font-grotesk text-base sm:text-lg text-neutral-300">
+          Toute personne qui a déjà mixé dans un bar, un mariage ou un festival connaît ce cauchemar. Voici comment nous réglons le problème pour toujours.
+        </p>
+      </div>
+
+      <!-- Before vs After Split Comparison -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- The Chaotic Old Way (AVANT) -->
+        <div class="p-6 sm:p-8 rounded-2xl border flex flex-col justify-between"
+             style="background: rgba(26, 12, 12, 0.4); border-color: rgba(239, 68, 68, 0.25);">
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <span class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 font-mono-code font-black flex items-center justify-center text-sm border border-red-500/30">✕</span>
+              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-red-300">
+                L'ancienne méthode chaotique
+              </h3>
+            </div>
+
+            <ul class="space-y-4 font-grotesk text-sm sm:text-base text-neutral-300">
+              <li class="flex items-start gap-3">
+                <span class="text-red-400 font-bold shrink-0">01.</span>
+                <span><strong>L'invité lourd qui hurle :</strong> Il te postillonne à 2 cm de l'oreille en criant <em>« Steuplé mets du Jul sinon je pars ! »</em> alors que tu joues un set melodic techno.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-red-400 font-bold shrink-0">02.</span>
+                <span><strong>L'écran de téléphone aveuglant :</strong> Quelqu'un te colle un écran à 100% de luminosité dans les yeux en pleine obscurité de régie avec un titre YouTube pourri.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-red-400 font-bold shrink-0">03.</span>
+                <span><strong>Le verre de trop :</strong> Un invité s'accoude à votre table de mixage à 3 000 € avec sa pinte de bière qui menace d'engloutir les faders.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="text-red-400 font-bold shrink-0">04.</span>
+                <span><strong>Les doublons en boucle :</strong> Quatre personnes différentes viennent demander le même morceau toutes les 15 minutes.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-red-500/20 font-mono-code text-xs text-red-400">
+            RÉSULTAT : DJ distrait, transitions ratées et tension dans la régie.
+          </div>
+        </div>
+
+        <!-- The Music Live Way (AVEC MUSIC LIVE) -->
+        <div class="p-6 sm:p-8 rounded-2xl border flex flex-col justify-between"
+             style="background: rgba(14, 26, 12, 0.4); border-color: rgba(212, 255, 0, 0.3);">
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <span class="w-8 h-8 rounded-full text-black font-mono-code font-black flex items-center justify-center text-sm" style="background:var(--acid-volt)">✓</span>
+              <h3 class="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-white">
+                Avec Music Live
+              </h3>
+            </div>
+
+            <ul class="space-y-4 font-grotesk text-sm sm:text-base text-neutral-300">
+              <li class="flex items-start gap-3">
+                <span class="font-bold shrink-0" style="color:var(--acid-volt)">01.</span>
+                <span><strong>Le public scanne sans vous déranger :</strong> Un QR code sur le comptoir ou projeté sur scène. Zéro appli à installer, accès en 3 secondes.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="font-bold shrink-0" style="color:var(--acid-volt)">02.</span>
+                <span><strong>Intelligence collective & votes :</strong> La salle upvote les meilleurs titres. Vous voyez immédiatement quels morceaux feront exploser le dancefloor.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="font-bold shrink-0" style="color:var(--acid-volt)">03.</span>
+                <span><strong>Bouclier anti-troll & Cooldown :</strong> Délai de 45 min pour éviter qu'un morceau ne soit rejoué. Limite de requêtes par personne pour bloquer les spammeurs.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="font-bold shrink-0" style="color:var(--acid-volt)">04.</span>
+                <span><strong>Vous restez le maître à bord :</strong> Rien ne passe sans votre validation (ou activez l'auto-acceptation avec vos filtres préférés).</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-4 border-t font-mono-code text-xs text-black font-bold px-3 py-1.5 rounded inline-block" style="background: var(--acid-volt)">
+            RÉSULTAT : Ambiance électrique, foule comblée, régie sereine.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 6. FICHE TECHNIQUE TOUR BUS (Hardware & Architecture Rig) ─ -->
+  <section id="specs" class="py-16 sm:py-24 px-4 sm:px-6 border-t" style="border-color: var(--console-border);">
     <div class="max-w-6xl mx-auto">
       
       <div class="max-w-2xl mb-14">
-        <span class="text-xs font-mono uppercase tracking-widest font-semibold" style="color: var(--accent)">
-          Conçu pour le terrain
+        <span class="font-mono-code text-xs font-bold uppercase tracking-widest text-[#d4ff00]">
+          RACK TECHNIQUE & PERFORMANCE
         </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-2 mb-4" style="color: var(--text-primary)">
-          Chaque détail a été pensé pour que votre soirée soit fluide
+        <h2 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white mt-2 mb-4 leading-none">
+          Conçu pour le live, pas pour faire joli
         </h2>
-        <p class="text-base" style="color: var(--text-secondary)">
-          Pas de gadgets inutiles : uniquement les fonctionnalités indispensables pour piloter une ambiance sans jamais perdre le contrôle de vos platines.
+        <p class="font-grotesk text-base sm:text-lg text-neutral-300">
+          Chaque milliseconde compte quand 500 personnes dansent devant vous. Notre stack technique est taillée pour la robustesse en conditions réelles.
         </p>
       </div>
 
+      <!-- 6 Technical Modules Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-        <!-- Feature 1 -->
-        <div class="card p-6 flex flex-col justify-between hover:border-[rgba(124,92,252,0.4)] transition-all">
+        
+        <!-- Module 1 -->
+        <div class="chassis-box p-6 rounded-xl flex flex-col justify-between">
           <div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background: var(--accent-dim); color: var(--accent)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
-              </svg>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono-code text-xs text-neutral-400">MOD-01 // AUDIO</span>
+              <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">320 KBPS</span>
             </div>
-            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary)">Zéro appli à installer</h3>
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-              Les invités scannent le QR code avec l'appareil photo de leur téléphone et accèdent instantanément à la web-app. Aucun compte à créer, aucune saisie d'identifiant.
+            <h3 class="font-display font-extrabold text-lg text-white mb-2">Spotify Web Playback SDK</h3>
+            <p class="font-grotesk text-sm text-neutral-400 leading-relaxed">
+              Diffusion directe dans le navigateur sur votre sono sans passer par un câble auxiliaire supplémentaire. Contrôle complet de la lecture, du volume et du crossfade.
             </p>
           </div>
-          <div class="mt-6 pt-4 border-t text-xs font-mono" style="border-color: var(--border); color: var(--accent)">
-            Temps d'accès moyen : &lt; 3 secondes
+          <div class="mt-6 pt-3 border-t border-white/10 font-mono-code text-[11px] text-neutral-500">
+            AUDIO HIFI OFFICIEL SPOTIFY
           </div>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="card p-6 flex flex-col justify-between hover:border-[rgba(34,197,94,0.4)] transition-all">
+        <!-- Module 2 -->
+        <div class="chassis-box p-6 rounded-xl flex flex-col justify-between">
           <div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background: var(--green-dim); color: var(--green)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-              </svg>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono-code text-xs text-neutral-400">MOD-02 // RÉSEAU</span>
+              <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">&lt; 15MS</span>
             </div>
-            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary)">Intégration Spotify native</h3>
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-              Recherche dans des dizaines de millions de titres Spotify, jaquettes officielles, aperçus audio 30s et lecture automatique via le SDK Web Playback sur votre machine.
+            <h3 class="font-display font-extrabold text-lg text-white mb-2">Moteur WebSockets Temps Réel</h3>
+            <p class="font-grotesk text-sm text-neutral-400 leading-relaxed">
+              Dès qu'un invité vote ou soumet un son, la mise à jour s'affiche instantanément sur votre console et sur l'écran scène sans aucun rechargement de page.
             </p>
           </div>
-          <div class="mt-6 pt-4 border-t text-xs font-mono" style="border-color: var(--border); color: var(--green)">
-            Qualité audio 320 kbps & métadonnées complètes
+          <div class="mt-6 pt-3 border-t border-white/10 font-mono-code text-[11px] text-neutral-500">
+            LATENCE MINIMALE SANS POLLING
           </div>
         </div>
 
-        <!-- Feature 3 -->
-        <div class="card p-6 flex flex-col justify-between hover:border-[rgba(239,68,68,0.4)] transition-all">
+        <!-- Module 3 -->
+        <div class="chassis-box p-6 rounded-xl flex flex-col justify-between">
           <div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background: var(--red-dim); color: var(--red)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono-code text-xs text-neutral-400">MOD-03 // HARMONIE</span>
+              <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">CAMELOT 8A</span>
             </div>
-            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary)">Bouclier anti-troll & cooldown</h3>
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-              Fini la même chanson passée 5 fois de suite. Définissez un délai de répétition (ex: 45 min), un quota de demandes par participant et bannissez les spammeurs d'un clic.
+            <h3 class="font-display font-extrabold text-lg text-white mb-2">Détection Tonalité & BPM</h3>
+            <p class="font-grotesk text-sm text-neutral-400 leading-relaxed">
+              Chaque morceau suggéré analyse sa clé harmonique (roue de Camelot) et son tempo pour vous aider à caler des enchaînements musicaux fluides.
             </p>
           </div>
-          <div class="mt-6 pt-4 border-t text-xs font-mono" style="border-color: var(--border); color: var(--red)">
-            Algorithme de détection des doublons inclus
+          <div class="mt-6 pt-3 border-t border-white/10 font-mono-code text-[11px] text-neutral-500">
+            MIXAGE HARMONIQUE FACILITÉ
           </div>
         </div>
 
-        <!-- Feature 4 -->
-        <div class="card p-6 flex flex-col justify-between hover:border-[rgba(6,182,212,0.4)] transition-all">
+        <!-- Module 4 -->
+        <div class="chassis-box p-6 rounded-xl flex flex-col justify-between">
           <div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background: var(--cyan-dim); color: var(--cyan)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-              </svg>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono-code text-xs text-neutral-400">MOD-04 // MODÉRATION</span>
+              <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">ANTI-SPAM</span>
             </div>
-            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary)">Votes et classements live</h3>
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-              Les participants votent pour propulser les meilleurs morceaux. La file s'ordonne automatiquement ou manuellement au gré des votes grâce aux WebSockets en temps réel.
+            <h3 class="font-display font-extrabold text-lg text-white mb-2">Protection & Cooldown 45m</h3>
+            <p class="font-grotesk text-sm text-neutral-400 leading-relaxed">
+              Algorithme intelligent qui détecte les titres similaires et empêche la répétition. Possibilité de bannir un invité spammeur en un seul geste.
             </p>
           </div>
-          <div class="mt-6 pt-4 border-t text-xs font-mono" style="border-color: var(--border); color: var(--cyan)">
-            Mise à jour instantanée sans recharger la page
+          <div class="mt-6 pt-3 border-t border-white/10 font-mono-code text-[11px] text-neutral-500">
+            GOUVERNANCE TOTALE DU DJ
           </div>
         </div>
 
-        <!-- Feature 5 -->
-        <div class="card p-6 flex flex-col justify-between hover:border-[rgba(245,158,11,0.4)] transition-all">
+        <!-- Module 5 -->
+        <div class="chassis-box p-6 rounded-xl flex flex-col justify-between">
           <div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background: var(--amber-dim); color: var(--amber)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-              </svg>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono-code text-xs text-neutral-400">MOD-05 // VISUEL</span>
+              <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded text-black font-bold" style="background:var(--acid-volt)">4K READY</span>
             </div>
-            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary)">Mode projection grand écran</h3>
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-              Ouvrez la vue projection sur votre vidéoprojecteur : grand QR code toujours scannable, jaquette animée, barre de progression et visuels de scène (Aurora, Spectrum, Laser).
+            <h3 class="font-display font-extrabold text-lg text-white mb-2">Écran Scène & Karaoké Live</h3>
+            <p class="font-grotesk text-sm text-neutral-400 leading-relaxed">
+              Sortie plein écran dédiée pour vidéoprojecteurs et murs LED. Grand QR persistant, jaquette haute définition, spectres réactifs et paroles synchronisées.
             </p>
           </div>
-          <div class="mt-6 pt-4 border-t text-xs font-mono" style="border-color: var(--border); color: var(--amber)">
-            Optimisé pour téléviseurs et vidéoprojecteurs
+          <div class="mt-6 pt-3 border-t border-white/10 font-mono-code text-[11px] text-neutral-500">
+            IMMERSION TOTALE DU PUBLIC
           </div>
         </div>
 
-        <!-- Feature 6 -->
-        <div class="card p-6 flex flex-col justify-between hover:border-[rgba(124,92,252,0.4)] transition-all">
+        <!-- Module 6 -->
+        <div class="chassis-box p-6 rounded-xl flex flex-col justify-between">
           <div>
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background: var(--accent-dim); color: var(--accent)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-              </svg>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono-code text-xs text-neutral-400">MOD-06 // ACCESSIBILITÉ</span>
+              <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">0 SEC SETUP</span>
             </div>
-            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary)">Statistiques & Historique DJ</h3>
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-              Retrouvez l'historique complet de chaque soirée : morceaux les plus demandés, taux d'acceptation, pics d'affluence et export des playlists de la nuit.
+            <h3 class="font-display font-extrabold text-lg text-white mb-2">Web App Progressive PWA</h3>
+            <p class="font-grotesk text-sm text-neutral-400 leading-relaxed">
+              Aucun téléchargement sur l'App Store, aucun compte requis pour le public. Fonctionne sur Safari iOS, Chrome Android et tous les navigateurs modernes.
             </p>
           </div>
-          <div class="mt-6 pt-4 border-t text-xs font-mono" style="border-color: var(--border); color: var(--accent)">
-            Dashboard complet par événement
+          <div class="mt-6 pt-3 border-t border-white/10 font-mono-code text-[11px] text-neutral-500">
+            ZÉRO BARRIÈRE À L'ENTRÉE
           </div>
         </div>
 
@@ -535,58 +897,128 @@
     </div>
   </section>
 
-  <!-- ── 5. WORKFLOW CONCRET D'UNE SOIRÉE ──────────────────────── -->
-  <section id="workflow" class="py-16 sm:py-24 px-4 sm:px-6 relative">
+  <!-- ── 7. GÉNÉRATEUR TACTILE DE PASS & QR DE SOIRÉE ───────────── -->
+  <section id="ticket-creator" class="py-16 sm:py-24 px-4 sm:px-6 border-t" style="border-color: var(--console-border); background: #07070b;">
     <div class="max-w-5xl mx-auto">
       
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <span class="text-xs font-mono uppercase tracking-widest font-semibold" style="color: var(--accent)">
-          Prise en main en 30 secondes
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="font-mono-code text-xs font-bold uppercase tracking-widest text-[#d4ff00]">
+          PERSONNALISATION LIVE
         </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-2 mb-3" style="color: var(--text-primary)">
-          Comment se déroule votre soirée
+        <h2 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white mt-2 mb-3">
+          Générez le pass de votre soirée
         </h2>
-        <p class="text-sm sm:text-base" style="color: var(--text-secondary)">
-          De l'arrivée sur les lieux jusqu'au dernier morceau, tout est fait pour que vous vous concentriez sur le mix.
+        <p class="font-grotesk text-sm sm:text-base text-neutral-400">
+          Entrez le nom de votre événement et visualisez instantanément le ticket backstage avec son QR code prêt à être imprimé ou projeté.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+      <!-- Live Ticket Generator Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         
-        <!-- Step 1 -->
-        <div class="card p-6 relative flex flex-col">
-          <div class="flex items-center justify-between mb-4">
-            <span class="font-mono text-2xl font-black" style="color: var(--accent)">01</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded border" style="border-color: var(--border); color: var(--text-muted)">INSTALLATION</span>
+        <!-- Left: Ticket Configurator Form (5 cols) -->
+        <div class="lg:col-span-5 chassis-box p-6 rounded-2xl flex flex-col gap-4">
+          
+          <div>
+            <label class="block font-mono-code text-xs font-bold uppercase text-neutral-300 mb-2">
+              Nom de votre soirée :
+            </label>
+            <input type="text" id="ticketEventNameInput" value="GALA LE ROOFTOP 2026" oninput="updateTicketLive()"
+                   class="w-full bg-black border border-white/20 text-white rounded-lg px-3.5 py-2.5 font-grotesk font-bold text-sm focus:outline-none focus:border-[#d4ff00]" />
           </div>
-          <h3 class="text-base font-bold mb-2" style="color: var(--text-primary)">Le DJ lance la session</h3>
-          <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-            Connectez-vous via Spotify, donnez un nom à votre soirée. Le QR code unique et l'URL dédiée sont générés immédiatement, prêts à être projetés ou imprimés.
-          </p>
+
+          <div>
+            <label class="block font-mono-code text-xs font-bold uppercase text-neutral-300 mb-2">
+              Lieu ou Vibe :
+            </label>
+            <input type="text" id="ticketVenueInput" value="Le Rooftop Club • Paris" oninput="updateTicketLive()"
+                   class="w-full bg-black border border-white/20 text-white rounded-lg px-3.5 py-2.5 font-grotesk text-sm focus:outline-none focus:border-[#d4ff00]" />
+          </div>
+
+          <div>
+            <label class="block font-mono-code text-xs font-bold uppercase text-neutral-300 mb-2">
+              Type d'ambiance :
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setTicketTheme('ELECTRO')" class="pro-tactile py-2 rounded-lg font-mono-code text-xs font-bold bg-[#1d1d2b] border border-white/20 text-white active-tag">ELECTRO</button>
+              <button onclick="setTicketTheme('HIP-HOP')" class="pro-tactile py-2 rounded-lg font-mono-code text-xs font-bold bg-[#14141e] border border-white/10 text-neutral-400">HIP-HOP</button>
+              <button onclick="setTicketTheme('MARIAGE')" class="pro-tactile py-2 rounded-lg font-mono-code text-xs font-bold bg-[#14141e] border border-white/10 text-neutral-400">MARIAGE</button>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-white/10">
+            <a href="/login" class="pro-tactile w-full py-3.5 rounded-xl font-mono-code font-black text-xs uppercase tracking-wider text-black flex items-center justify-center gap-2"
+               style="background: var(--acid-volt);">
+              <span>Créer cette session avec Spotify</span>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+
         </div>
 
-        <!-- Step 2 -->
-        <div class="card p-6 relative flex flex-col">
-          <div class="flex items-center justify-between mb-4">
-            <span class="font-mono text-2xl font-black" style="color: #ec4899">02</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded border" style="border-color: var(--border); color: var(--text-muted)">INTERACTION</span>
-          </div>
-          <h3 class="text-base font-bold mb-2" style="color: var(--text-primary)">La salle propose et vote</h3>
-          <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-            Chaque invité scanne le code et accède au moteur de recherche Spotify. Ils voient le titre en cours, votent pour leurs favoris et suivent l'état de leur demande.
-          </p>
-        </div>
+        <!-- Right: The Rendered Backstage Pass / Ticket Stub (7 cols) -->
+        <div class="lg:col-span-7 flex justify-center">
+          
+          <div class="ticket-stub w-full max-w-md p-6 sm:p-7 rounded-2xl shadow-2xl border border-white/20">
+            
+            <!-- Ticket Top Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-dashed border-white/20 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-mono-code text-xs font-extrabold tracking-widest text-white uppercase">PASS OFFICIEL RÉGIE</span>
+              </div>
+              <span class="font-mono-code text-xs font-bold text-neutral-400" id="ticketIdDisplay">#ML-8924</span>
+            </div>
 
-        <!-- Step 3 -->
-        <div class="card p-6 relative flex flex-col">
-          <div class="flex items-center justify-between mb-4">
-            <span class="font-mono text-2xl font-black" style="color: var(--green)">03</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded border" style="border-color: var(--border); color: var(--text-muted)">MIX ENCHAÎNÉ</span>
+            <!-- Event Details on Ticket -->
+            <div class="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <span class="font-mono-code text-[10px] text-neutral-400 uppercase tracking-widest" id="ticketThemeDisplay">SESSION ELECTRO</span>
+                <h3 class="font-display font-black text-2xl sm:text-3xl uppercase tracking-tight text-white leading-tight mt-1" id="ticketEventNameDisplay">
+                  GALA LE ROOFTOP 2026
+                </h3>
+                <p class="font-grotesk text-xs sm:text-sm text-neutral-300 mt-1" id="ticketVenueDisplay">
+                  Le Rooftop Club • Paris
+                </p>
+                <div class="mt-3 flex items-center gap-2 font-mono-code text-[11px] text-neutral-400">
+                  <span class="px-2 py-0.5 rounded bg-white/10 text-white font-bold">ENTRÉE LIBRE</span>
+                  <span>SCAN CAMERA SANS APPLI</span>
+                </div>
+              </div>
+
+              <!-- High Contrast Stylized QR Code Graphic -->
+              <div class="shrink-0 p-2.5 bg-white rounded-xl shadow-lg border-2 border-black flex flex-col items-center">
+                <svg viewBox="0 0 100 100" class="w-20 h-20 text-black fill-current">
+                  <rect x="5" y="5" width="28" height="28" rx="3" fill="#000" />
+                  <rect x="11" y="11" width="16" height="16" fill="#fff" />
+                  <rect x="15" y="15" width="8" height="8" fill="#000" />
+                  <rect x="67" y="5" width="28" height="28" rx="3" fill="#000" />
+                  <rect x="73" y="11" width="16" height="16" fill="#fff" />
+                  <rect x="77" y="15" width="8" height="8" fill="#000" />
+                  <rect x="5" y="67" width="28" height="28" rx="3" fill="#000" />
+                  <rect x="11" y="73" width="16" height="16" fill="#fff" />
+                  <rect x="15" y="77" width="8" height="8" fill="#000" />
+                  <rect x="42" y="10" width="8" height="18" fill="#000" />
+                  <rect x="42" y="42" width="16" height="16" rx="2" fill="#000" />
+                  <rect x="10" y="42" width="20" height="8" fill="#000" />
+                  <rect x="72" y="42" width="18" height="12" fill="#000" />
+                  <rect x="42" y="70" width="24" height="8" fill="#000" />
+                  <rect x="72" y="70" width="18" height="20" fill="#000" />
+                </svg>
+                <span class="font-mono-code text-[8px] font-black tracking-widest text-black mt-1">SCAN ME</span>
+              </div>
+            </div>
+
+            <!-- Barcode Graphic footer on ticket -->
+            <div class="pt-4 border-t border-dashed border-white/20 flex items-center justify-between">
+              <div class="flex items-center gap-1 font-mono-code text-[9px] text-neutral-500">
+                <span>||||| | |||| || |||||| | ||||| |||| | |||||||</span>
+              </div>
+              <span class="font-mono-code text-[10px] text-neutral-400">MUSIC-LIVE.APP</span>
+            </div>
+
           </div>
-          <h3 class="text-base font-bold mb-2" style="color: var(--text-primary)">La régie pilote sans accroc</h3>
-          <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-            Le DJ accepte ou réorganise les morceaux par glisser-déposer. La lecture s'enchaîne automatiquement sur Spotify avec la qualité maximale.
-          </p>
+
         </div>
 
       </div>
@@ -594,103 +1026,118 @@
     </div>
   </section>
 
-  <!-- ── 6. ZOOM MODE PROJECTION (DISPLAY VIEW) ────────────────── -->
-  <section id="projection" class="py-16 sm:py-24 px-4 sm:px-6" style="background: var(--bg-surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <!-- ── 8. MODE PROJECTION SCÈNE & VIDÉOPROJECTEUR ─────────────── -->
+  <section id="projection-mode" class="py-16 sm:py-24 px-4 sm:px-6 border-t" style="border-color: var(--console-border); background: #08080d;">
     <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
       
-      <!-- Text left -->
+      <!-- Description Left (5 cols) -->
       <div class="lg:col-span-5">
-        <span class="text-xs font-mono uppercase tracking-widest font-semibold px-2.5 py-1 rounded" style="background: var(--accent-dim); color: var(--accent)">
-          Vue Projection Scène
+        <span class="gaffer-tape px-3 py-1 text-xs">
+          VUE PLEIN ÉCRAN SCÈNE
         </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 mb-4" style="color: var(--text-primary)">
-          Un affichage spectaculaire sur grand écran
+        <h2 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white mt-4 mb-4 leading-none">
+          Un show visuel calibré pour les grands écrans
         </h2>
-        <p class="text-sm sm:text-base leading-relaxed mb-6" style="color: var(--text-secondary)">
-          Branchez un câble HDMI vers votre vidéoprojecteur ou téléviseur. Music Live dispose d'un mode plein écran conçu spécialement pour les scènes et les clubs :
+        <p class="font-grotesk text-base sm:text-lg text-neutral-300 leading-relaxed mb-6">
+          Reliez un câble HDMI vers votre vidéoprojecteur, mur LED ou écran de bar. Music Live possède une interface dédiée ultra-lisible, même au fond d’une salle sombre :
         </p>
 
-        <ul class="space-y-3.5 text-sm" style="color: var(--text-secondary)">
-          <li class="flex items-start gap-3">
-            <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5" style="background: var(--green-dim); color: var(--green)">✓</div>
-            <span><strong style="color: var(--text-primary)">QR Code XXL permanent :</strong> les personnes au fond de la salle peuvent scanner à tout moment.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5" style="background: var(--accent-dim); color: var(--accent)">✓</div>
-            <span><strong style="color: var(--text-primary)">Pochette & Titre en cours :</strong> affichage dynamique haute définition du morceau actuellement joué.</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5" style="background: var(--cyan-dim); color: var(--cyan)">✓</div>
-            <span><strong style="color: var(--text-primary)">Ambiances réactives intégrées :</strong> modes visuels Aurora, Spectrum et Laser réagissant au tempo du mix.</span>
-          </li>
-        </ul>
+        <div class="space-y-4 font-grotesk text-sm text-neutral-300">
+          <div class="p-3.5 rounded-lg border border-white/10 bg-black/40 flex items-start gap-3">
+            <span class="font-mono-code font-bold text-base" style="color:var(--acid-volt)">01</span>
+            <div>
+              <strong class="text-white block font-semibold">QR Code permanent haute lisibilité</strong>
+              <span>Scannable à 15 mètres de distance, même dans la fumée et les stroboscopes.</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-lg border border-white/10 bg-black/40 flex items-start gap-3">
+            <span class="font-mono-code font-bold text-base text-cyan-400">02</span>
+            <div>
+              <strong class="text-white block font-semibold">Spectres audio réactifs (Aurora, Spectrum, Laser)</strong>
+              <span>Visuels génératifs synchronisés sur le tempo de la musique jouée.</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-lg border border-white/10 bg-black/40 flex items-start gap-3">
+            <span class="font-mono-code font-bold text-base text-pink-400">03</span>
+            <div>
+              <strong class="text-white block font-semibold">Karaoké Live & Paroles synchronisées</strong>
+              <span>Activez l'option en un clic quand la foule veut chanter en chœur sur les refrains.</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Projection Screen Mockup right -->
+      <!-- Projection Screen Preview (7 cols) -->
       <div class="lg:col-span-7">
-        <div class="rounded-2xl p-3 sm:p-5 border shadow-2xl relative overflow-hidden" style="background: #080812; border-color: rgba(255,255,255,0.12)">
+        <div class="chassis-box rounded-2xl p-4 sm:p-6 border shadow-2xl relative overflow-hidden bg-black">
           
-          <!-- Subtle glow in projection preview -->
-          <div class="absolute -right-10 -bottom-10 w-64 h-64 rounded-full blur-3xl opacity-30 pointer-events-none" style="background: #7c5cfc"></div>
-          <div class="absolute -left-10 -top-10 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none" style="background: #1DB954"></div>
+          <!-- Screen Frame Header -->
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10 font-mono-code text-xs text-neutral-400">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+              <span class="ml-2 text-white font-bold">AFFICHAGE SCÈNE // 1920x1080 60FPS</span>
+            </div>
+            <span class="text-emerald-400">● LIVE BROADCAST</span>
+          </div>
 
-          <!-- Display Screen Layout -->
-          <div class="rounded-xl border p-5 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10" style="background: rgba(18,18,26,0.85); border-color: rgba(255,255,255,0.08)">
+          <!-- Inside Screen Content Mockup -->
+          <div class="p-6 sm:p-8 rounded-xl border border-white/10 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
+               style="background: radial-gradient(circle at 70% 30%, rgba(212, 255, 0, 0.08) 0%, #080810 70%);">
             
-            <!-- Left Info (Now Playing) -->
+            <!-- Left Info: Now Playing Track -->
             <div class="flex-1 text-center md:text-left">
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider mb-4" style="background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3)">
-                <span class="w-2 h-2 rounded-full bg-green-400 live-indicator relative"></span>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded font-mono-code text-[11px] font-bold uppercase mb-4"
+                   style="background: var(--acid-volt-dim); color: var(--acid-volt); border: 1px solid rgba(212,255,0,0.3)">
+                <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
                 EN DIRECT DANS LA SALLE
               </div>
 
-              <div class="flex items-center gap-4 justify-center md:justify-start mb-3">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shadow-lg border border-white/10 shrink-0 relative">
-                  <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=160&auto=format&fit=crop&q=80" 
-                       alt="Artwork" class="w-full h-full object-cover" />
-                  <div class="absolute inset-0 bg-black/20"></div>
-                </div>
+              <div class="flex items-center gap-4 justify-center md:justify-start mb-4">
+                <img src="/images/vinyl-record.jpg" alt="Artwork" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-white/20 shadow-xl shrink-0" />
                 <div>
-                  <h4 class="text-lg sm:text-xl font-extrabold text-white leading-tight">One More Time</h4>
-                  <p class="text-sm font-medium text-purple-300">Daft Punk — Discovery</p>
-                  <p class="text-xs text-neutral-400 mt-1 font-mono">123 BPM • Demandé par Thomas</p>
+                  <h4 class="font-display font-black text-xl sm:text-2xl text-white uppercase leading-tight">One More Time</h4>
+                  <p class="font-grotesk text-sm text-neutral-300">Daft Punk — Discovery</p>
+                  <p class="font-mono-code text-xs text-neutral-400 mt-1">123 BPM • Demandé par 24 invités</p>
                 </div>
               </div>
 
-              <!-- Progress bar -->
-              <div class="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden mt-4">
-                <div class="bg-gradient-to-r from-purple-500 to-green-400 h-full rounded-full w-2/3"></div>
+              <!-- Audio progress bar -->
+              <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-3">
+                <div class="h-full rounded-full w-3/4" style="background: var(--acid-volt)"></div>
               </div>
-              <div class="flex justify-between text-[11px] font-mono text-neutral-400 mt-1">
-                <span>02:34</span>
+              <div class="flex justify-between font-mono-code text-[11px] text-neutral-400 mt-1.5">
+                <span>03:15</span>
                 <span>05:20</span>
               </div>
             </div>
 
             <!-- Right QR code display -->
-            <div class="shrink-0 p-4 rounded-xl text-center border flex flex-col items-center gap-2" style="background: #0d0d14; border-color: var(--border)">
+            <div class="shrink-0 p-4 rounded-xl border border-white/20 bg-black text-center flex flex-col items-center gap-2 shadow-2xl">
               <div class="w-28 h-28 sm:w-32 sm:h-32 bg-white rounded-lg p-2 flex items-center justify-center">
-                <!-- SVG Stylized QR -->
-                <svg viewBox="0 0 100 100" class="w-full h-full text-black" fill="currentColor">
-                  <rect x="5" y="5" width="28" height="28" rx="4" fill="#000" />
+                <svg viewBox="0 0 100 100" class="w-full h-full text-black fill-current">
+                  <rect x="5" y="5" width="28" height="28" rx="3" fill="#000" />
                   <rect x="11" y="11" width="16" height="16" fill="#fff" />
                   <rect x="15" y="15" width="8" height="8" fill="#000" />
-                  <rect x="67" y="5" width="28" height="28" rx="4" fill="#000" />
+                  <rect x="67" y="5" width="28" height="28" rx="3" fill="#000" />
                   <rect x="73" y="11" width="16" height="16" fill="#fff" />
                   <rect x="77" y="15" width="8" height="8" fill="#000" />
-                  <rect x="5" y="67" width="28" height="28" rx="4" fill="#000" />
+                  <rect x="5" y="67" width="28" height="28" rx="3" fill="#000" />
                   <rect x="11" y="73" width="16" height="16" fill="#fff" />
                   <rect x="15" y="77" width="8" height="8" fill="#000" />
                   <rect x="42" y="10" width="8" height="18" fill="#000" />
-                  <rect x="42" y="42" width="16" height="16" rx="2" fill="#7c5cfc" />
+                  <rect x="42" y="42" width="16" height="16" rx="2" fill="#000" />
                   <rect x="10" y="42" width="20" height="8" fill="#000" />
                   <rect x="72" y="42" width="18" height="12" fill="#000" />
                   <rect x="42" y="70" width="24" height="8" fill="#000" />
                   <rect x="72" y="70" width="18" height="20" fill="#000" />
                 </svg>
               </div>
-              <span class="text-[11px] font-bold text-white tracking-wide">SCAN POUR CHOISIR</span>
-              <span class="text-[10px] text-neutral-400 font-mono">music-live.app</span>
+              <span class="font-mono-code text-[11px] font-bold text-white tracking-wider">SCAN POUR PROPOSER</span>
+              <span class="font-mono-code text-[9px] text-neutral-400">MUSIC-LIVE.APP</span>
             </div>
 
           </div>
@@ -701,116 +1148,71 @@
     </div>
   </section>
 
-  <!-- ── 7. CAS D'USAGE RÉELS (POUR QUI ?) ──────────────────────── -->
-  <section class="py-16 sm:py-24 px-4 sm:px-6">
-    <div class="max-w-6xl mx-auto">
-      
-      <div class="text-center max-w-2xl mx-auto mb-14">
-        <span class="text-xs font-mono uppercase tracking-widest font-semibold" style="color: var(--accent)">
-          Adapté à chaque contexte
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-2 mb-3" style="color: var(--text-primary)">
-          Fini les invités qui tapent sur l'épaule du DJ
-        </h2>
-        <p class="text-sm sm:text-base" style="color: var(--text-secondary)">
-          Music Live résout les frictions habituelles de la musique en public de façon élégante et professionnelle.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="card p-6">
-          <div class="text-2xl mb-3">🎧</div>
-          <h3 class="text-base font-bold mb-2" style="color: var(--text-primary)">DJs & Clubs résidents</h3>
-          <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-            Vous restez concentré sur votre mix sans être interrompu par des demandes orales inaudibles ou des verres renversés près de votre régie.
-          </p>
-        </div>
-
-        <div class="card p-6">
-          <div class="text-2xl mb-3">💍</div>
-          <h3 class="text-base font-bold mb-2" style="color: var(--text-primary)">Mariages & Fêtes privées</h3>
-          <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-            Faites participer toutes les générations. Les invités votent et la playlist reflète naturellement les envies de la famille sans monopole.
-          </p>
-        </div>
-
-        <div class="card p-6">
-          <div class="text-2xl mb-3">🎓</div>
-          <h3 class="text-base font-bold mb-2" style="color: var(--text-primary)">Galas & Soirées étudiantes</h3>
-          <p class="text-sm leading-relaxed" style="color: var(--text-secondary)">
-            Générez une émulation collective avec le système de vote en temps réel et la projection sur grand écran dans la salle principale.
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ── 8. FAQ TECHNIQUE & PRATIQUE ──────────────────────────── -->
-  <section id="faq" class="py-16 sm:py-24 px-4 sm:px-6" style="background: var(--bg-surface); border-top: 1px solid var(--border);">
+  <!-- ── 9. FAQ TECHNIQUE & CONCRÈTE (Zéro bla-bla) ──────────────── -->
+  <section id="faq" class="py-16 sm:py-24 px-4 sm:px-6 border-t" style="border-color: var(--console-border);">
     <div class="max-w-3xl mx-auto">
       
-      <div class="text-center mb-12">
-        <span class="text-xs font-mono uppercase tracking-widest font-semibold" style="color: var(--accent)">
-          Questions fréquentes
+      <div class="text-center mb-14">
+        <span class="font-mono-code text-xs font-bold uppercase tracking-widest text-[#d4ff00]">
+          QUESTIONS RÉGIE & LOGISTIQUE
         </span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-2 mb-2" style="color: var(--text-primary)">
-          Tout ce que vous devez savoir
+        <h2 class="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white mt-2 mb-3">
+          Ce que les DJs et orgas nous demandent
         </h2>
-        <p class="text-sm" style="color: var(--text-secondary)">Des réponses claires et concrètes.</p>
+        <p class="font-grotesk text-neutral-400 text-sm sm:text-base">
+          Des réponses sans filtre pour préparer votre soirée en toute sérénité.
+        </p>
       </div>
 
       <div class="space-y-4">
         
-        <details class="card p-5 cursor-pointer group" open>
-          <summary class="font-semibold text-sm sm:text-base flex items-center justify-between list-none" style="color: var(--text-primary)">
-            <span>Les invités ont-ils besoin d’un compte ou de Spotify ?</span>
-            <svg class="w-4 h-4 text-neutral-400 group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <details class="chassis-box p-5 rounded-xl cursor-pointer group" open>
+          <summary class="font-grotesk font-bold text-base sm:text-lg flex items-center justify-between list-none text-white">
+            <span>Les invités ont-ils besoin d'un compte Spotify ou d'une appli ?</span>
+            <span class="faq-icon text-xl font-mono-code text-neutral-400 transition-transform">+</span>
           </summary>
-          <p class="text-sm mt-3 leading-relaxed" style="color: var(--text-secondary)">
-            Non, absolument pas ! Les invités n'ont besoin ni de compte Spotify, ni de télécharger une application. Ils ouvrent simplement la caméra de leur téléphone, scannent le QR code et peuvent immédiatement chercher des titres et voter.
+          <p class="font-grotesk text-sm sm:text-base text-neutral-300 mt-3 leading-relaxed">
+            Non, zéro téléchargement ! Les invités ouvrent simplement l'appareil photo de leur téléphone, scannent le QR code et accèdent immédiatement à la web app. Ils peuvent chercher des titres sur Spotify et voter sans jamais se connecter ni renseigner leur carte bleue.
           </p>
         </details>
 
-        <details class="card p-5 cursor-pointer group">
-          <summary class="font-semibold text-sm sm:text-base flex items-center justify-between list-none" style="color: var(--text-primary)">
+        <details class="chassis-box p-5 rounded-xl cursor-pointer group">
+          <summary class="font-grotesk font-bold text-base sm:text-lg flex items-center justify-between list-none text-white">
             <span>Faut-il un compte Spotify Premium pour le DJ / organisateur ?</span>
-            <svg class="w-4 h-4 text-neutral-400 group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            <span class="faq-icon text-xl font-mono-code text-neutral-400 transition-transform">+</span>
           </summary>
-          <p class="text-sm mt-3 leading-relaxed" style="color: var(--text-secondary)">
-            Oui. L'intégration officielle du Web Playback SDK de Spotify requiert un compte Spotify Premium pour le créateur de la soirée afin de diffuser les morceaux complets en haute fidélité directement dans le navigateur.
+          <p class="font-grotesk text-sm sm:text-base text-neutral-300 mt-3 leading-relaxed">
+            Oui. L'intégration officielle du Spotify Web Playback SDK exige un compte Spotify Premium pour l'hôte afin de diffuser les morceaux complets en haute fidélité (320 kbps) directement dans le navigateur sans pub.
           </p>
         </details>
 
-        <details class="card p-5 cursor-pointer group">
-          <summary class="font-semibold text-sm sm:text-base flex items-center justify-between list-none" style="color: var(--text-primary)">
-            <span>Comment empêcher le spam et les morceaux inappropriés ?</span>
-            <svg class="w-4 h-4 text-neutral-400 group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <details class="chassis-box p-5 rounded-xl cursor-pointer group">
+          <summary class="font-grotesk font-bold text-base sm:text-lg flex items-center justify-between list-none text-white">
+            <span>Un invité peut-il couper mon morceau ou troller la musique ?</span>
+            <span class="faq-icon text-xl font-mono-code text-neutral-400 transition-transform">+</span>
           </summary>
-          <p class="text-sm mt-3 leading-relaxed" style="color: var(--text-secondary)">
-            Music Live dispose d'une triple protection : le DJ a toujours le choix de valider manuellement chaque morceau avant sa diffusion ; un cooldown évite qu'un même son ne soit rejoué trop tôt ; et chaque invité a un quota de demandes avec limitation de débit (rate limit) pour empêcher les abus.
+          <p class="font-grotesk text-sm sm:text-base text-neutral-300 mt-3 leading-relaxed">
+            Absolument jamais. Vous gardez la mainmise absolue : soit vous validez manuellement chaque son par un clic, soit vous activez l'auto-acceptation avec des filtres stricts (ex: seuil de votes minimum, cooldown de 45 minutes et limite de demandes par personne). En cas d'abus, vous pouvez éjecter un participant d'un clic.
           </p>
         </details>
 
-        <details class="card p-5 cursor-pointer group">
-          <summary class="font-semibold text-sm sm:text-base flex items-center justify-between list-none" style="color: var(--text-primary)">
-            <span>Peut-on réordonner la file d'attente à la main ?</span>
-            <svg class="w-4 h-4 text-neutral-400 group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <details class="chassis-box p-5 rounded-xl cursor-pointer group">
+          <summary class="font-grotesk font-bold text-base sm:text-lg flex items-center justify-between list-none text-white">
+            <span>Que se passe-t-il si la connexion Wi-Fi ou 4G est faible ?</span>
+            <span class="faq-icon text-xl font-mono-code text-neutral-400 transition-transform">+</span>
           </summary>
-          <p class="text-sm mt-3 leading-relaxed" style="color: var(--text-secondary)">
-            Oui ! Dans la console DJ, vous pouvez réorganiser les titres par glisser-déposer (drag & drop), ou même supprimer ou réinsérer des morceaux en cas de changement d'ambiance.
+          <p class="font-grotesk text-sm sm:text-base text-neutral-300 mt-3 leading-relaxed">
+            Music Live est optimisé pour les réseaux de boîte de nuit : les échanges WebSocket sont ultra-légers (quelques octets par vote). Si la connexion coupe brièvement, le système se reconnecte en tâche de fond de façon transparente sans perdre la file de lecture.
           </p>
         </details>
 
-        <details class="card p-5 cursor-pointer group">
-          <summary class="font-semibold text-sm sm:text-base flex items-center justify-between list-none" style="color: var(--text-primary)">
-            <span>Comment diffuser l'écran de projection en salle ?</span>
-            <svg class="w-4 h-4 text-neutral-400 group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <details class="chassis-box p-5 rounded-xl cursor-pointer group">
+          <summary class="font-grotesk font-bold text-base sm:text-lg flex items-center justify-between list-none text-white">
+            <span>Puis-je réorganiser l'ordre des morceaux à la main ?</span>
+            <span class="faq-icon text-xl font-mono-code text-neutral-400 transition-transform">+</span>
           </summary>
-          <p class="text-sm mt-3 leading-relaxed" style="color: var(--text-secondary)">
-            Chaque soirée possède une URL d'écran dédiée. Il suffit d'ouvrir cette URL sur un second écran ou un vidéoprojecteur et de passer en plein écran (touche F11). Le QR code, le morceau en cours et les visuels animés s'ajustent automatiquement.
+          <p class="font-grotesk text-sm sm:text-base text-neutral-300 mt-3 leading-relaxed">
+            Oui ! La console DJ permet de glisser-déposer les titres pour changer l'ordre du set en temps réel, ou de glisser un son directement dans le player immédiat.
           </p>
         </details>
 
@@ -819,200 +1221,316 @@
     </div>
   </section>
 
-  <!-- ── 9. FINAL CALL TO ACTION ──────────────────────────────── -->
-  <section class="py-20 sm:py-28 px-4 sm:px-6 text-center relative overflow-hidden" style="background: var(--bg-base)">
-    <div class="max-w-2xl mx-auto relative z-10">
+  <!-- ── 10. GRAND APPEL À L'ACTION / TERMINAL DE DÉPART ───────── -->
+  <section class="py-20 sm:py-28 px-4 sm:px-6 text-center relative overflow-hidden border-t" style="border-color: var(--console-border); background: #000;">
+    
+    <div class="max-w-3xl mx-auto relative z-10">
       
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-6 shadow-xl" style="background: linear-gradient(135deg, var(--accent) 0%, #1DB954 100%)">
-        <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 border-2 border-[#1db954] shadow-2xl" style="background:#111">
+        <svg class="w-8 h-8 text-[#1db954] fill-current" viewBox="0 0 24 24">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
       </div>
 
-      <h2 class="text-3xl sm:text-4xl font-extrabold mb-4" style="color: var(--text-primary)">
-        Prêt pour votre prochaine soirée ?
+      <h2 class="font-display font-black text-4xl sm:text-6xl uppercase tracking-tighter text-white mb-4 leading-none">
+        Prêt à faire trembler le dancefloor ?
       </h2>
-      <p class="text-base mb-8" style="color: var(--text-secondary)">
-        Créez votre première session en 30 secondes. Connectez simplement votre compte Spotify.
+      <p class="font-grotesk text-base sm:text-xl text-neutral-300 mb-8 max-w-xl mx-auto">
+        Lancez votre session en 30 secondes chrono. Connectez votre Spotify et laissez la magie opérer.
       </p>
 
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <a href="/login" class="tactile-btn w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl font-semibold text-white text-base shadow-lg shadow-[#1DB954]/25 hover:brightness-105 transition-all"
-           style="background: #1DB954;">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/login" class="pro-tactile w-full sm:w-auto inline-flex items-center justify-center gap-3 px-9 py-4 rounded-xl font-mono-code font-black text-base uppercase tracking-wider text-black shadow-2xl hover:brightness-110"
+           style="background: var(--spotify-green);">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
             <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
           </svg>
-          Commencer avec Spotify
+          Démarrer ma session Spotify
         </a>
       </div>
 
-      <p class="text-xs mt-4" style="color: var(--text-muted)">
-        Aucune carte bancaire requise • Compatible avec vos playlists Spotify existantes
-      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-6 font-mono-code text-xs text-neutral-400">
+        <span>✓ AUCUNE CARTE BANCAIRE REQUISE</span>
+        <span>✓ 100% COMPATIBLE PLAYLISTS EXISTANTES</span>
+        <span>✓ SETUP EN &lt; 30 SECONDES</span>
+      </div>
 
     </div>
   </section>
 
-  <!-- ── 10. FOOTER ───────────────────────────────────────────── -->
-  <footer class="py-10 px-4 sm:px-6" style="border-top: 1px solid var(--border); background: var(--bg-surface)">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm" style="color: var(--text-muted)">
+  <!-- ── 11. FOOTER (Style Fiche Studio) ────────────────────────── -->
+  <footer class="py-12 px-4 sm:px-6 border-t font-mono-code" style="border-color: var(--console-border); background: #050508;">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-neutral-400">
       
-      <!-- Brand & copyright -->
+      <!-- Brand & Copy -->
       <div class="flex items-center gap-3">
-        <div class="w-6 h-6 rounded-lg flex items-center justify-center text-white" style="background: var(--accent)">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-black font-black text-xs" style="background:var(--acid-volt)">
+          ML
         </div>
-        <span class="font-semibold text-sm" style="color: var(--text-primary)">Music Live</span>
-        <span class="text-xs">&copy; 2026 Tous droits réservés.</span>
+        <div>
+          <span class="font-display font-extrabold text-sm text-white">MUSIC LIVE</span>
+          <span class="block text-[10px] text-neutral-400">&copy; 2026 Régie Participative. Tous droits réservés.</span>
+        </div>
       </div>
 
       <!-- Links -->
-      <div class="flex flex-wrap items-center justify-center gap-6 text-xs">
-        <a href="#interactive-demo" class="hover:text-white transition-colors">Démo live</a>
-        <a href="#features" class="hover:text-white transition-colors">Fonctionnalités</a>
-        <a href="#projection" class="hover:text-white transition-colors">Écran projection</a>
+      <div class="flex flex-wrap items-center justify-center gap-6">
+        <a href="#console-interactive" class="hover:text-white transition-colors">Console Démo</a>
+        <a href="#manifesto" class="hover:text-white transition-colors">Manifeste</a>
+        <a href="#specs" class="hover:text-white transition-colors">Specs Matériel</a>
+        <a href="#ticket-creator" class="hover:text-white transition-colors">Pass QR</a>
         <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
-        <a href="/login" class="hover:text-white transition-colors">Espace DJ</a>
+        <a href="/login" class="text-white hover:underline">Connexion DJ</a>
       </div>
 
-      <!-- Status tag -->
-      <div class="flex items-center gap-2 text-xs font-mono">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span>Système opérationnel</span>
+      <!-- Operational Tag -->
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>SYSTÈME OPÉRATIONNEL // 99.98%</span>
       </div>
 
     </div>
   </footer>
 
-  <!-- Toast notification (OAuth feedback) -->
-  <div id="errorToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl text-sm font-medium text-white shadow-2xl transition-all"
+  <!-- Toast Erreur Spotify si redirection OAuth -->
+  <div id="errorToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3.5 rounded-xl font-mono-code text-xs font-bold text-white shadow-2xl transition-all"
        style="background: #ef4444; max-width: 90vw; text-align: center"></div>
 
-  <!-- ── 11. INTERACTIVE DEMO ENGINE (JAVASCRIPT VANILLE LÉGER) ──── -->
+  <!-- ── 12. MOTEUR INTERACTIF JAVASCRIPT (AUDIO WEB API + SIMULATEUR) ─ -->
   <script>
-    // Liste initiale de morceaux pour le démonstrateur
-    let demoTracks = [
+    // ── 1. GESTION DES SONS AVEC WEB AUDIO API (AUCUN FICHIER EXTERNE REQUIS) ──
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Synthétiseurs d'effets DJ authentiques
+    function playSfx(type, btnElement) {
+      const ctx = getAudioContext();
+      if (btnElement) {
+        btnElement.classList.add('active-flash');
+        setTimeout(() => btnElement.classList.remove('active-flash'), 180);
+      }
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      if (type === 'airhorn') {
+        // Airhorn rave à 3 fréquences harmoniques (310Hz, 370Hz, 466Hz)
+        const freqs = [311.13, 369.99, 466.16];
+        freqs.forEach(freq => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.05, now + 0.15);
+          osc.frequency.exponentialRampToValueAtTime(freq * 0.98, now + 0.35);
+
+          // Tremolo rapide
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.setValueAtTime(0.22, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now + 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.46);
+        });
+      } else if (type === 'laser') {
+        // Laser Zap Dub : balayage exponentiel de 1800Hz à 80Hz
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(1800, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.28);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.31);
+      } else if (type === 'rewind') {
+        // Spinback / Scratch bruit blanc filtré balayé
+        const bufferSize = ctx.sampleRate * 0.35;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(3200, now);
+        filter.frequency.exponentialRampToValueAtTime(200, now + 0.32);
+        filter.Q.value = 4;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(now);
+        noise.stop(now + 0.36);
+      } else if (type === 'subdrop') {
+        // 808 Sub Drop : onde sinusoïdale pure de 130Hz à 32Hz
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.5);
+
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.56);
+      }
+    }
+
+    function playClick() {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, now);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    }
+
+    // ── 2. DONNÉES DU CRATE DE PROPOSITIONS (LIVE REQUESTS) ───────
+    let queueTracks = [
       {
         id: 1,
         title: "One More Time",
         artist: "Daft Punk",
         bpm: "123 BPM",
-        votes: 18,
+        key: "8A (C min)",
+        votes: 38,
         userVoted: false,
         status: "pending",
-        cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=80&auto=format&fit=crop&q=80"
+        user: "Lucas M."
       },
       {
         id: 2,
-        title: "Blinding Lights",
-        artist: "The Weeknd",
-        bpm: "171 BPM",
-        votes: 14,
+        title: "adore u",
+        artist: "Fred again.. & Obongjayar",
+        bpm: "130 BPM",
+        key: "11B (A Maj)",
+        votes: 29,
         userVoted: false,
         status: "pending",
-        cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=80&auto=format&fit=crop&q=80"
+        user: "Sarah D."
       },
       {
         id: 3,
-        title: "Levitating",
-        artist: "Dua Lipa",
-        bpm: "103 BPM",
-        votes: 11,
+        title: "(It Goes Like) Nanana",
+        artist: "Peggy Gou",
+        bpm: "130 BPM",
+        key: "5B (C# Maj)",
+        votes: 21,
         userVoted: false,
         status: "pending",
-        cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=80&auto=format&fit=crop&q=80"
+        user: "Maxime T."
       },
       {
         id: 4,
-        title: "Around the World",
-        artist: "Daft Punk",
-        bpm: "121 BPM",
-        votes: 7,
+        title: "Baddadan",
+        artist: "Chase & Status, Bou",
+        bpm: "174 BPM",
+        key: "4A (F min)",
+        votes: 14,
         userVoted: false,
         status: "pending",
-        cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=80&auto=format&fit=crop&q=80"
+        user: "Elena B."
       }
     ];
 
-    let autoAccept = false;
+    function renderQueue() {
+      // Tri automatique par popularité (votes décroissants)
+      queueTracks.sort((a, b) => b.votes - a.votes);
 
-    function renderDemo() {
-      // Tri par votes décroissants
-      demoTracks.sort((a, b) => b.votes - a.votes);
+      const listEl = document.getElementById("interactiveQueueList");
+      const countEl = document.getElementById("queueCountDisplay");
+      
+      const activeCount = queueTracks.filter(t => t.status !== 'rejected').length;
+      countEl.textContent = `${activeCount} demande${activeCount > 1 ? 's' : ''} active${activeCount > 1 ? 's' : ''}`;
 
-      const guestListEl = document.getElementById("demoGuestList");
-      const djListEl = document.getElementById("demoDjList");
-      const djCountEl = document.getElementById("demoDjCount");
-
-      const pendingCount = demoTracks.filter(t => t.status === "pending").length;
-      djCountEl.textContent = `${pendingCount} titre${pendingCount > 1 ? 's' : ''} en attente`;
-
-      // 1. Rendu vue invité
-      guestListEl.innerHTML = demoTracks.map((track) => `
-        <div class="flex items-center justify-between p-2 rounded-xl transition-all border"
-             style="background: var(--bg-surface); border-color: ${track.userVoted ? 'var(--accent)' : 'var(--border)'}">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <img src="${track.cover}" class="w-9 h-9 rounded-lg object-cover shrink-0" alt="Cover" />
-            <div class="min-w-0">
-              <p class="text-xs font-bold truncate leading-snug" style="color: var(--text-primary)">${escapeHtml(track.title)}</p>
-              <p class="text-[10px] truncate" style="color: var(--text-secondary)">${escapeHtml(track.artist)} • <span class="font-mono">${track.bpm}</span></p>
-            </div>
-          </div>
-          
-          <button onclick="toggleDemoVote(${track.id})" 
-                  class="tactile-btn shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all"
-                  style="${track.userVoted 
-                    ? 'background: var(--accent); color: #fff;' 
-                    : 'background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border);'}">
-            <svg class="w-3 h-3 ${track.userVoted ? 'fill-current' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M12 19V5M5 12l7-7 7 7"/>
-            </svg>
-            <span>${track.votes}</span>
-          </button>
-        </div>
-      `).join("");
-
-      // 2. Rendu vue DJ
-      djListEl.innerHTML = demoTracks.map((track) => {
+      listEl.innerHTML = queueTracks.map((track) => {
         if (track.status === 'rejected') return '';
         const isAccepted = track.status === 'accepted';
+
         return `
-          <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all ${isAccepted ? 'opacity-70 bg-emerald-950/20' : ''}"
-               style="background: var(--bg-surface); border-color: ${isAccepted ? 'rgba(34,197,94,0.3)' : 'var(--border)'}">
+          <div class="chassis-box p-3 rounded-lg border flex items-center justify-between gap-3 transition-all ${isAccepted ? 'border-emerald-500/50 bg-emerald-950/20' : ''}"
+               style="border-color: ${track.userVoted ? 'var(--acid-volt)' : 'rgba(255,255,255,0.1)'}">
             
-            <div class="flex items-center gap-3 min-w-0">
-              <!-- Drag handle icon -->
-              <span class="text-neutral-500 cursor-grab shrink-0">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
-              </span>
-
-              <img src="${track.cover}" class="w-10 h-10 rounded-lg object-cover shrink-0" alt="Cover" />
-
-              <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                  <p class="text-xs font-bold truncate" style="color: var(--text-primary)">${escapeHtml(track.title)}</p>
-                  <span class="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded" style="background: var(--accent-dim); color: var(--accent)">
-                    ▲ ${track.votes} votes
-                  </span>
-                  ${isAccepted ? '<span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400">ACCEPTÉ</span>' : ''}
-                </div>
-                <p class="text-[11px] truncate mt-0.5" style="color: var(--text-secondary)">${escapeHtml(track.artist)} • ${track.bpm}</p>
+            <!-- Left Info -->
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <p class="font-grotesk font-bold text-xs sm:text-sm text-white truncate">${escapeHtml(track.title)}</p>
+                <span class="font-mono-code text-[10px] px-1.5 py-0.2 rounded text-neutral-300 font-bold" style="background:#1b1b26;">
+                  ${track.bpm}
+                </span>
+                ${isAccepted ? '<span class="font-mono-code text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-bold">ACCEPTÉ</span>' : ''}
               </div>
+              <p class="font-grotesk text-xs text-neutral-400 truncate mt-0.5">
+                ${escapeHtml(track.artist)} • <span class="font-mono-code text-[10px] text-purple-400">${track.key}</span> • Demandé par ${escapeHtml(track.user)}
+              </p>
             </div>
 
-            <div class="flex items-center gap-1.5 shrink-0">
+            <!-- Right Buttons: Upvote + DJ Action -->
+            <div class="flex items-center gap-2 shrink-0">
+              
+              <!-- Upvote Button -->
+              <button onclick="voteTrack(${track.id})" 
+                      class="pro-tactile flex items-center gap-1 px-2.5 py-1 rounded-md font-mono-code text-xs font-bold border transition-all"
+                      style="${track.userVoted 
+                        ? 'background: var(--acid-volt); color: #000; border-color: var(--acid-volt);' 
+                        : 'background: #171722; color: #fff; border-color: rgba(255,255,255,0.15);'}">
+                <svg class="w-3 h-3 ${track.userVoted ? 'fill-current' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+                <span>${track.votes}</span>
+              </button>
+
+              <!-- DJ Quick Decision -->
               ${!isAccepted ? `
-                <button onclick="acceptDemoTrack(${track.id})" class="tactile-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-white flex items-center gap-1"
-                        style="background: #1DB954;" title="Accepter et envoyer sur Spotify">
-                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span class="hidden sm:inline">Accepter</span>
+                <button onclick="acceptTrack(${track.id})" class="pro-tactile p-1.5 rounded-md text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20" title="Accepter dans le set">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
-                <button onclick="rejectDemoTrack(${track.id})" class="tactile-btn p-1 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition" title="Refuser">
+                <button onclick="rejectTrack(${track.id})" class="pro-tactile p-1.5 rounded-md text-neutral-400 hover:text-red-400 hover:bg-red-500/10" title="Refuser">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               ` : `
-                <span class="text-xs font-mono text-emerald-400 flex items-center gap-1">
-                  ✓ Dans la file
-                </span>
+                <button onclick="playTrackNow(${track.id})" class="pro-tactile px-2 py-1 rounded bg-[#222233] text-[10px] font-mono-code font-bold text-white hover:bg-white hover:text-black">
+                  ▶ JOUER
+                </button>
               `}
+
             </div>
 
           </div>
@@ -1020,106 +1538,234 @@
       }).join("");
     }
 
-    function toggleDemoVote(trackId) {
-      const track = demoTracks.find(t => t.id === trackId);
-      if (!track) return;
-
-      if (track.userVoted) {
-        track.votes -= 1;
-        track.userVoted = false;
+    function voteTrack(id) {
+      playClick();
+      const t = queueTracks.find(item => item.id === id);
+      if (!t) return;
+      if (t.userVoted) {
+        t.votes -= 1;
+        t.userVoted = false;
       } else {
-        track.votes += 1;
-        track.userVoted = true;
-      }
-
-      if (autoAccept && track.votes >= 15 && track.status === 'pending') {
-        track.status = 'accepted';
-      }
-
-      renderDemo();
-    }
-
-    function acceptDemoTrack(trackId) {
-      const track = demoTracks.find(t => t.id === trackId);
-      if (!track) return;
-      track.status = 'accepted';
-      renderDemo();
-    }
-
-    function rejectDemoTrack(trackId) {
-      demoTracks = demoTracks.filter(t => t.id !== trackId);
-      renderDemo();
-    }
-
-    function addDemoTrack(artist, title, bpm, customCover) {
-      const exists = demoTracks.some(t => t.title.toLowerCase() === title.toLowerCase());
-      if (exists) {
-        // Déjà présent, on vote juste
-        const t = demoTracks.find(t => t.title.toLowerCase() === title.toLowerCase());
         t.votes += 1;
         t.userVoted = true;
-        renderDemo();
-        return;
       }
+      renderQueue();
+    }
 
-      demoTracks.push({
+    function acceptTrack(id) {
+      playClick();
+      const t = queueTracks.find(item => item.id === id);
+      if (!t) return;
+      t.status = 'accepted';
+      renderQueue();
+    }
+
+    function rejectTrack(id) {
+      playClick();
+      queueTracks = queueTracks.filter(item => item.id !== id);
+      renderQueue();
+    }
+
+    function playTrackNow(id) {
+      playClick();
+      const t = queueTracks.find(item => item.id === id);
+      if (!t) return;
+      document.getElementById("currentTrackTitle").textContent = t.title;
+      document.getElementById("currentTrackArtist").textContent = t.artist;
+      document.getElementById("trackKeyCamelot").textContent = `CAMELOT ${t.key} • ${t.bpm}`;
+      setVinylPlaying(true);
+    }
+
+    function addSimulatedTrack() {
+      const input = document.getElementById("simTrackInput");
+      const val = input.value.trim();
+      if (!val) return;
+
+      playClick();
+      queueTracks.push({
         id: Date.now(),
-        title: title,
-        artist: artist,
-        bpm: bpm || "125 BPM",
+        title: val,
+        artist: "Artiste Spotify",
+        bpm: `${Math.floor(Math.random() * (132 - 120 + 1) + 120)} BPM`,
+        key: "8B (C Maj)",
         votes: 1,
         userVoted: true,
-        status: autoAccept ? 'accepted' : 'pending',
-        cover: customCover || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=80&auto=format&fit=crop&q=80"
+        status: "pending",
+        user: "Vous"
       });
 
-      renderDemo();
+      input.value = "";
+      renderQueue();
     }
 
-    function toggleAutoAcceptDemo() {
-      autoAccept = !autoAccept;
-      const ind = document.getElementById("autoAcceptIndicator");
-      const txt = document.getElementById("autoAcceptText");
+    // ── 3. CONTRÔLE DE LA PLATINE VINYLE & DU CROSSFADER ──────────
+    let isVinylPlaying = true;
 
-      if (autoAccept) {
-        ind.className = "w-2 h-2 rounded-full bg-emerald-400";
-        txt.className = "text-emerald-400";
-        txt.textContent = "ON";
-        // Accepte tous les titres qui ont plus de 10 votes
-        demoTracks.forEach(t => {
-          if (t.votes >= 10) t.status = 'accepted';
-        });
+    function setVinylPlaying(state) {
+      isVinylPlaying = state;
+      const vinylEl = document.getElementById("vinylRecord");
+      const playIcon = document.getElementById("vinylPlayIcon");
+      const pauseIcon = document.getElementById("vinylPauseIcon");
+
+      if (isVinylPlaying) {
+        vinylEl.classList.add("playing");
+        playIcon.classList.add("hidden");
+        pauseIcon.classList.remove("hidden");
       } else {
-        ind.className = "w-2 h-2 rounded-full bg-neutral-500";
-        txt.className = "text-neutral-400";
-        txt.textContent = "OFF";
+        vinylEl.classList.remove("playing");
+        playIcon.classList.remove("hidden");
+        pauseIcon.classList.add("hidden");
       }
-      renderDemo();
     }
 
+    function toggleVinylPlay() {
+      playClick();
+      setVinylPlaying(!isVinylPlaying);
+    }
+
+    function setVinylRpm(rpm) {
+      playClick();
+      const vinylEl = document.getElementById("vinylRecord");
+      const b33 = document.getElementById("btnRpm33");
+      const b45 = document.getElementById("btnRpm45");
+
+      if (rpm === 33) {
+        vinylEl.style.animationDuration = "3.2s";
+        b33.className = "px-2 py-1 rounded bg-[#20202e] text-white font-bold border border-white/20 active-rpm";
+        b45.className = "px-2 py-1 rounded bg-[#161622] text-neutral-400 border border-white/10";
+      } else {
+        vinylEl.style.animationDuration = "2.1s";
+        b45.className = "px-2 py-1 rounded bg-[#20202e] text-white font-bold border border-white/20 active-rpm";
+        b33.className = "px-2 py-1 rounded bg-[#161622] text-neutral-400 border border-white/10";
+      }
+    }
+
+    function updateCrossfader(val) {
+      const display = document.getElementById("crossfaderValue");
+      if (val < 45) {
+        display.textContent = `DECK A (${100 - val}% / ${val}%)`;
+      } else if (val > 55) {
+        display.textContent = `DECK B (${100 - val}% / ${val}%)`;
+      } else {
+        display.textContent = "CENTRE (50/50)";
+      }
+    }
+
+    // ── 4. TAP TEMPO ENGINE (CALCUL DE BPM RÉEL AU TOUCHER) ────────
+    let tapTimes = [];
+    function tapBpm() {
+      playClick();
+      const now = performance.now();
+      tapTimes.push(now);
+      if (tapTimes.length > 5) tapTimes.shift();
+
+      if (tapTimes.length >= 2) {
+        const deltas = [];
+        for (let i = 1; i < tapTimes.length; i++) {
+          deltas.push(tapTimes[i] - tapTimes[i - 1]);
+        }
+        const avgDelta = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+        const bpm = Math.round(60000 / avgDelta);
+        if (bpm >= 60 && bpm <= 200) {
+          document.getElementById("vuBpmDisplay").textContent = `${bpm} BPM`;
+        }
+      }
+    }
+
+    // ── 5. VU-MÈTRES LEDS ANIMÉS EN TEMPS RÉEL ─────────────────────
+    function initVuMeters() {
+      const meterL = document.getElementById("vuMeterL");
+      const meterR = document.getElementById("vuMeterR");
+      if (!meterL || !meterR) return;
+
+      const segmentsCount = 10;
+      meterL.innerHTML = "";
+      meterR.innerHTML = "";
+
+      for (let i = 0; i < segmentsCount; i++) {
+        let colorClass = "green";
+        if (i >= 7 && i < 9) colorClass = "yellow";
+        if (i >= 9) colorClass = "red";
+
+        meterL.appendChild(createSegment(colorClass));
+        meterR.appendChild(createSegment(colorClass));
+      }
+
+      function createSegment(colorClass) {
+        const el = document.createElement("div");
+        el.className = `vu-segment ${colorClass}`;
+        return el;
+      }
+
+      // Battement périodique simulant le tempo audio
+      setInterval(() => {
+        if (!isVinylPlaying) {
+          meterL.querySelectorAll(".vu-segment").forEach(s => s.classList.remove("lit"));
+          meterR.querySelectorAll(".vu-segment").forEach(s => s.classList.remove("lit"));
+          return;
+        }
+
+        const litLevelL = Math.floor(Math.random() * 5) + 5;
+        const litLevelR = Math.floor(Math.random() * 5) + 5;
+
+        meterL.querySelectorAll(".vu-segment").forEach((s, idx) => {
+          s.classList.toggle("lit", idx < litLevelL);
+        });
+        meterR.querySelectorAll(".vu-segment").forEach((s, idx) => {
+          s.classList.toggle("lit", idx < litLevelR);
+        });
+      }, 90);
+    }
+
+    // ── 6. PERSONNALISATEUR DE TICKET LIVE ─────────────────────────
+    function updateTicketLive() {
+      const name = document.getElementById("ticketEventNameInput").value || "GALA LE ROOFTOP 2026";
+      const venue = document.getElementById("ticketVenueInput").value || "Le Rooftop Club • Paris";
+
+      document.getElementById("ticketEventNameDisplay").textContent = name;
+      document.getElementById("ticketVenueDisplay").textContent = venue;
+    }
+
+    function setTicketTheme(theme) {
+      playClick();
+      document.getElementById("ticketThemeDisplay").textContent = `SESSION ${theme}`;
+      event.target.parentElement.querySelectorAll("button").forEach(b => {
+        b.className = "pro-tactile py-2 rounded-lg font-mono-code text-xs font-bold bg-[#14141e] border border-white/10 text-neutral-400";
+      });
+      event.target.className = "pro-tactile py-2 rounded-lg font-mono-code text-xs font-bold bg-[#1d1d2b] border border-white/20 text-white active-tag";
+    }
+
+    // ── 7. UTILITAIRES & INITIALISATION ────────────────────────────
     function escapeHtml(str) {
       const div = document.createElement("div");
       div.textContent = str;
       return div.innerHTML;
     }
 
-    // Gestion du champ recherche dans la démo
     document.addEventListener("DOMContentLoaded", () => {
-      renderDemo();
+      renderQueue();
+      initVuMeters();
 
-      const searchInput = document.getElementById("demoSearchInput");
-      if (searchInput) {
-        searchInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && searchInput.value.trim().length > 0) {
-            const query = searchInput.value.trim();
-            addDemoTrack("Artiste live", query, "124 BPM");
-            searchInput.value = "";
-          }
+      const input = document.getElementById("simTrackInput");
+      if (input) {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") addSimulatedTrack();
         });
       }
+
+      // Timer session incrémental
+      let seconds = 6139;
+      setInterval(() => {
+        seconds++;
+        const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+        const s = String(seconds % 60).padStart(2, '0');
+        const el = document.getElementById("sessionTimer");
+        if (el) el.textContent = `${h}:${m}:${s}`;
+      }, 1000);
     });
 
-    // Toast erreur Spotify si redirection OAuth
+    // Toast de retour OAuth Spotify en cas d'erreur
     (function() {
       const msgs = {
         spotify_denied:  "Connexion Spotify annulée.",

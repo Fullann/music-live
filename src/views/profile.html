@@ -1,75 +1,156 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profil — Music Live</title>
+  <title>Profil DJ & Configuration — Music Live</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
-</head>
-<body style="background:var(--bg-base);color:var(--text-primary)">
 
-<div class="min-h-screen flex flex-col max-w-lg mx-auto px-4 py-6">
-  <header class="flex items-center gap-3 mb-8">
-    <a href="/dashboard" class="btn btn-ghost btn-icon btn-sm shrink-0" aria-label="Retour">
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    </a>
-    <div>
-      <h1 class="text-lg font-semibold" style="color:var(--text-primary)">Profil DJ</h1>
-      <p class="text-xs" style="color:var(--text-muted)">Nom affiché, stats et Spotify</p>
+  <style>
+    body {
+      background-color: #09090e;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--text-primary);
+    }
+    .gaffer-tape {
+      background: #e6dfc8;
+      color: #111;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+    }
+    .studio-panel {
+      background: #0f0f16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen py-8 px-4 sm:px-6">
+
+<div class="max-w-xl mx-auto space-y-6">
+  
+  <!-- Header with return back to dashboard -->
+  <header class="flex items-center justify-between pb-4 border-b border-white/10">
+    <div class="flex items-center gap-3">
+      <a href="/dashboard" class="p-2 rounded-xl border border-white/10 bg-[#14141e] hover:border-white/30 text-white transition" aria-label="Retour au Dashboard">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </a>
+      <div>
+        <span class="gaffer-tape mb-0.5">COMPTE RÉGIE</span>
+        <h1 class="font-display font-black text-xl uppercase tracking-tight text-white leading-none">
+          Profil DJ & Connexions
+        </h1>
+      </div>
     </div>
+
+    <!-- Theme Toggle -->
+    <button data-theme-toggle class="p-2 rounded-xl border border-white/10 bg-[#14141e] hover:border-white/30 text-white transition" title="Alterner thème">
+      <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </header>
 
-  <section class="card p-5 mb-4">
-    <p class="text-xs font-medium uppercase tracking-widest mb-3" style="color:var(--text-muted)">Compte</p>
-    <div id="djMeta" class="flex items-center gap-3 mb-4">
-      <img id="djAvatar" src="" alt="" class="w-14 h-14 rounded-2xl object-cover hidden" />
+  <!-- DJ Account Card -->
+  <section class="studio-panel p-6 rounded-2xl border">
+    <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+      <span class="font-mono-code text-xs font-bold uppercase text-neutral-400">IDENTITÉ DJ</span>
+      <span class="font-mono-code text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+        COMPTE ACTIF
+      </span>
+    </div>
+
+    <div id="djMeta" class="flex items-center gap-4 mb-5">
+      <img id="djAvatar" src="" alt="Avatar" class="w-14 h-14 rounded-xl object-cover border border-white/20 hidden shadow-lg" />
+      <div class="w-14 h-14 rounded-xl bg-black border border-white/15 flex items-center justify-center font-mono-code font-black text-lg text-[#d4ff00] shrink-0" id="djAvatarFallback">
+        DJ
+      </div>
       <div class="min-w-0 flex-1">
-        <p id="djEmail" class="text-xs truncate" style="color:var(--text-muted)">—</p>
-        <p id="djSpotifyId" class="text-xs truncate mt-0.5" style="color:var(--text-muted)">—</p>
+        <p id="djEmail" class="font-mono-code text-xs text-neutral-300 truncate">—</p>
+        <p id="djSpotifyId" class="font-mono-code text-[11px] text-neutral-400 truncate mt-0.5">—</p>
       </div>
     </div>
-    <label class="label">Nom affiché</label>
-    <input type="text" id="displayName" maxlength="80" class="input mb-3" placeholder="Ton nom de DJ" />
-    <button type="button" id="btnSaveName" class="btn btn-primary btn-sm btn-full">Enregistrer le nom</button>
+
+    <div>
+      <label class="block font-mono-code text-xs font-bold uppercase text-neutral-300 mb-1.5">
+        Nom de scène affiché en régie :
+      </label>
+      <input type="text" id="displayName" maxlength="80" class="w-full bg-black border border-white/20 text-white rounded-lg px-3.5 py-2.5 font-grotesk text-sm mb-3 focus:outline-none focus:border-[#d4ff00]" placeholder="Votre nom de DJ" />
+      <button type="button" id="btnSaveName" class="w-full py-2.5 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-black transition" style="background:#d4ff00">
+        Enregistrer le nom de scène
+      </button>
+    </div>
   </section>
 
-  <section class="card p-5 mb-4">
-    <p class="text-xs font-medium uppercase tracking-widest mb-3" style="color:var(--text-muted)">Statistiques globales</p>
+  <!-- Global Metrics Card -->
+  <section class="studio-panel p-6 rounded-2xl border">
+    <div class="pb-3 mb-4 border-b border-white/10">
+      <span class="font-mono-code text-xs font-bold uppercase text-neutral-400">STATISTIQUES CUMULÉES</span>
+    </div>
+
     <div class="grid grid-cols-3 gap-3 text-center">
-      <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-        <p id="statEvents" class="text-2xl font-bold" style="color:var(--accent)">—</p>
-        <p class="text-xs mt-1" style="color:var(--text-muted)">Soirées</p>
+      <div class="p-4 rounded-xl bg-black border border-white/10">
+        <p id="statEvents" class="font-display font-black text-2xl text-white">—</p>
+        <p class="font-mono-code text-[10px] text-neutral-400 uppercase mt-1">Soirées</p>
       </div>
-      <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-        <p id="statLive" class="text-2xl font-bold" style="color:var(--green)">—</p>
-        <p class="text-xs mt-1" style="color:var(--text-muted)">Actives</p>
+      <div class="p-4 rounded-xl bg-black border border-white/10">
+        <p id="statLive" class="font-display font-black text-2xl text-emerald-400">—</p>
+        <p class="font-mono-code text-[10px] text-neutral-400 uppercase mt-1">En Direct</p>
       </div>
-      <div class="p-3 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-        <p id="statRequests" class="text-2xl font-bold" style="color:var(--text-primary)">—</p>
-        <p class="text-xs mt-1" style="color:var(--text-muted)">Demandes</p>
+      <div class="p-4 rounded-xl bg-black border border-white/10">
+        <p id="statRequests" class="font-display font-black text-2xl text-amber-400">—</p>
+        <p class="font-mono-code text-[10px] text-neutral-400 uppercase mt-1">Demandes</p>
       </div>
     </div>
   </section>
 
-  <section class="card p-5 mb-6">
-    <p class="text-xs font-medium uppercase tracking-widest mb-2" style="color:var(--text-muted)">Spotify</p>
-    <p class="text-xs mb-4" style="color:var(--text-secondary)">Révoque les jetons stockés sur ce serveur. Les soirées en cours peuvent perdre la lecture jusqu’à nouvelle connexion.</p>
-    <button type="button" id="btnDisconnectSpotify" class="btn btn-ghost btn-sm btn-full" style="border:1px solid var(--border)">
+  <!-- Spotify Link & Management -->
+  <section class="studio-panel p-6 rounded-2xl border">
+    <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+      <span class="font-mono-code text-xs font-bold uppercase text-neutral-400">INTÉGRATION SPOTIFY</span>
+      <span class="font-mono-code text-xs text-emerald-400 font-bold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        CONNECTÉ
+      </span>
+    </div>
+    
+    <p class="font-grotesk text-xs text-neutral-400 mb-4 leading-relaxed">
+      Révoque les jetons d'accès Spotify stockés sur le serveur. Les soirées actuellement en cours perdront la lecture automatique jusqu'à votre prochaine reconnexion.
+    </p>
+
+    <button type="button" id="btnDisconnectSpotify" class="w-full py-2.5 rounded-xl font-mono-code text-xs font-bold text-neutral-300 hover:text-white border border-white/15 bg-black/40 hover:bg-black transition">
       Déconnecter Spotify
     </button>
   </section>
 
-  <button type="button" id="btnLogout" class="btn btn-danger btn-full">Se déconnecter</button>
+  <!-- Logout Action -->
+  <button type="button" id="btnLogout" class="w-full py-3 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-red-400 bg-red-500/10 border border-red-500/25 hover:bg-red-500/20 transition">
+    Se déconnecter de la régie
+  </button>
+
 </div>
 
 <script src="/js/csrf.js"></script>
 <script>
   function toast(msg, err) {
     const t = document.createElement("div");
-    t.className = "fixed bottom-6 left-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-medium text-center shadow-lg";
-    t.style.background = err ? "var(--red)" : "var(--green)";
+    t.className = "fixed bottom-6 left-4 right-4 z-50 px-4 py-3 rounded-xl font-mono-code text-xs font-bold text-center shadow-2xl";
+    t.style.background = err ? "#ef4444" : "#10b981";
     t.style.color = "#fff";
     t.textContent = msg;
     document.body.appendChild(t);
@@ -88,11 +169,12 @@
       const d = me.dj;
       document.getElementById("displayName").value = d.name || "";
       document.getElementById("djEmail").textContent = d.email || "—";
-      document.getElementById("djSpotifyId").textContent = d.spotify_id ? `Spotify : ${d.spotify_id}` : "Spotify non lié";
+      document.getElementById("djSpotifyId").textContent = d.spotify_id ? `Spotify ID : ${d.spotify_id}` : "Spotify non lié";
       if (d.spotify_avatar) {
         const img = document.getElementById("djAvatar");
         img.src = d.spotify_avatar;
         img.classList.remove("hidden");
+        document.getElementById("djAvatarFallback")?.classList.add("hidden");
       }
       if (st.stats) {
         document.getElementById("statEvents").textContent   = st.stats.events_total   ?? 0;
@@ -112,10 +194,10 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
     });
-    if (res.ok) toast("Nom enregistré");
+    if (res.ok) toast("Nom de scène enregistré !");
     else {
       const j = await res.json().catch(() => ({}));
-      toast(j.error || "Erreur", true);
+      toast(j.error || "Erreur de sauvegarde", true);
     }
   });
 
@@ -123,7 +205,7 @@
     if (!confirm("Déconnecter Spotify de ce compte ?")) return;
     const res = await fetch("/api/auth/spotify/disconnect", { method: "POST" });
     if (res.ok) toast("Spotify déconnecté");
-    else toast("Erreur", true);
+    else toast("Erreur lors de la déconnexion", true);
   });
 
   document.getElementById("btnLogout").addEventListener("click", async () => {

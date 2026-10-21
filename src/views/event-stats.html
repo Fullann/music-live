@@ -1,257 +1,320 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Statistiques Soirée — Music Live</title>
+  <title>Statistiques & Métriques Live — Music Live</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
   <style>
+    body {
+      background-color: #09090e;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--text-primary);
+    }
+    .gaffer-tape {
+      background: #e6dfc8;
+      color: #111;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+    }
+    .studio-box {
+      background: #0f0f16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+    .kpi-card {
+      background: #14141f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 1.15rem;
+    }
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.12s ease;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    .side-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .side-link.active {
+      background: rgba(212, 255, 0, 0.08);
+      color: #d4ff00;
+      border-left-color: #d4ff00;
+      font-weight: 700;
+    }
+    .side-link.danger {
+      color: var(--red);
+    }
+    .side-link.danger:hover {
+      background: var(--red-dim);
+    }
+
     /* Barres du graphique */
-    .bar-track { background: var(--bg-elevated); border-radius: 6px; overflow: hidden; height: 32px; border: 1px solid var(--border); }
-    .bar-fill  { height: 100%; border-radius: 6px; transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1); background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%); }
-    .bar-fill.peak { background: linear-gradient(90deg, #10b981 0%, #34d399 100%); box-shadow: 0 0 14px var(--green-glow); }
+    .bar-track { background: #08080c; border-radius: 6px; overflow: hidden; height: 32px; border: 1px solid rgba(255,255,255,0.1); }
+    .bar-fill  { height: 100%; border-radius: 6px; transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1); background: linear-gradient(90deg, #d4ff00 0%, #10b981 100%); }
+    .bar-fill.peak { background: #d4ff00; box-shadow: 0 0 14px rgba(212,255,0,0.5); }
 
     /* Feed ligne */
-    .feed-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); transition: background 0.15s ease; }
+    .feed-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); transition: background 0.15s ease; }
     .feed-row:last-child { border-bottom: none; }
     .feed-row:hover { background: rgba(255, 255, 255, 0.02); }
   </style>
 </head>
-<body style="background:var(--bg-base);color:var(--text-primary)">
+<body class="antialiased min-h-screen">
 
 <div class="flex h-screen overflow-hidden">
 
-  <!-- ── Sidebar ───────────────────────────────────────────── -->
-  <aside class="hidden lg:flex flex-col w-64 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-    <!-- Logo App -->
-    <div class="flex items-center gap-3.5 px-6 py-5" style="border-bottom:1px solid var(--border)">
-      <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%);box-shadow:0 0 20px var(--accent-glow)">
-        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-        </svg>
-      </div>
-      <div>
-        <span class="font-extrabold text-base tracking-tight" style="color:var(--text-primary)">Music Live</span>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--cyan)"></span>
-          <p class="text-[10px] uppercase font-bold tracking-widest text-gradient-cyan">Analytics DJ</p>
+  <!-- ── SIDEBAR DESKTOP ───────────────────────────────────── -->
+  <aside class="hidden lg:flex flex-col w-64 shrink-0 border-r"
+         style="background: #0f0f16; border-color: rgba(255,255,255,0.1);">
+    
+    <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
+      <a href="/dashboard" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center border border-white/20"
+             style="background: #000; color: #d4ff00;">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
         </div>
-      </div>
+        <div>
+          <span class="font-display font-black text-sm uppercase tracking-tight text-white">MUSIC<span style="color:#d4ff00">LIVE</span></span>
+          <span class="block font-mono-code text-[9px] text-neutral-400">ANALYTICS SET</span>
+        </div>
+      </a>
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
     </div>
 
-    <nav class="flex-1 p-3 space-y-1.5 pt-4">
-      <a href="/dashboard" class="nav-item">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard Live
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <a href="/dashboard" class="side-link">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Console Live & Hub</span>
       </a>
-      <a href="/history" class="nav-item active">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Historique & Stats
+      <a href="/history" class="side-link active">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Historique & Stats</span>
       </a>
-      <a href="/profile" class="nav-item">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Mon Profil
+      <a href="/profile" class="side-link">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Mon Profil</span>
       </a>
     </nav>
-    <div class="p-3" style="border-top:1px solid var(--border)">
-      <button id="btnLogout" class="nav-item danger w-full">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Déconnexion
+
+    <div class="p-3 border-t border-white/10">
+      <button id="btnLogout" class="side-link danger w-full">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Déconnexion</span>
       </button>
     </div>
   </aside>
 
-  <!-- ── Main ──────────────────────────────────────────────── -->
+  <!-- ── MAIN CONTENT ──────────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="flex items-center gap-3 px-5 sm:px-7 py-3.5 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
-      <a id="backBtn" href="/history" class="btn btn-ghost btn-icon btn-sm shrink-0" title="Retour">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </a>
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2.5">
-          <h1 id="eventName" class="text-base sm:text-lg font-extrabold truncate" style="color:var(--text-primary)">Chargement…</h1>
-          <!-- Badge LIVE injecté par JS -->
-          <span id="liveBadge" class="hidden items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black shadow-sm" style="background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.35);color:var(--red)">
-            <span class="w-2 h-2 rounded-full live-pulse-dot" style="background:var(--red);box-shadow:0 0 10px var(--red)"></span>
-            LIVE
-          </span>
+    <header class="h-16 px-4 sm:px-7 border-b border-white/10 flex items-center justify-between shrink-0"
+            style="background: #0f0f16;">
+      
+      <div class="flex items-center gap-3 min-w-0">
+        <a id="backBtn" href="/history" class="p-2 rounded-lg border border-white/10 bg-[#14141f] text-neutral-300 hover:text-white shrink-0" title="Retour">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 id="eventName" class="font-display font-black text-base sm:text-lg uppercase tracking-tight text-white truncate">Chargement…</h1>
+            <span id="liveBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full font-mono-code text-[10px] font-black tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              EN DIRECT
+            </span>
+          </div>
+          <p id="eventDate" class="font-mono-code text-xs text-neutral-400 truncate">…</p>
         </div>
-        <p id="eventDate" class="text-xs mt-0.5" style="color:var(--text-secondary)">…</p>
       </div>
 
-      <!-- Durée soirée -->
-      <div id="durationBadge" class="hidden shrink-0 text-right px-3 py-1 rounded-xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-        <p id="liveClock" class="text-sm font-black tabular-nums text-gradient-purple">00:00</p>
-        <p class="text-[10px] uppercase tracking-wider font-bold" style="color:var(--text-muted)">En direct</p>
+      <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        <!-- Live Clock -->
+        <div id="durationBadge" class="hidden px-2.5 py-1 rounded-lg border border-white/10 bg-black text-right">
+          <p id="liveClock" class="font-mono-code text-xs font-black text-[#d4ff00]">00:00</p>
+          <p class="font-mono-code text-[9px] uppercase text-neutral-400">EN DIRECT</p>
+        </div>
+
+        <!-- DJ Live link -->
+        <a id="djLink" href="#" class="hidden px-3.5 py-1.5 rounded-lg font-mono-code font-bold text-xs uppercase text-black" style="background:#d4ff00">
+          Régie DJ →
+        </a>
+
+        <!-- Export CSV -->
+        <a id="exportCsvBtn" href="#" class="px-3 py-1.5 rounded-lg border border-white/15 text-xs font-mono-code font-bold text-neutral-300 hover:text-white" title="Export CSV">
+          Export CSV
+        </a>
+
+        <!-- Refresh -->
+        <button id="refreshBtn" class="p-2 rounded-lg border border-white/10 text-neutral-300 hover:text-white" title="Rafraîchir">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+
+        <button data-theme-toggle class="p-2 rounded-lg border border-white/10 text-neutral-300 hover:text-white" title="Alterner thème">
+          <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <button id="btnLogoutTop" class="p-2 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20" title="Déconnexion">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
       </div>
 
-      <!-- Lien DJ si live -->
-      <a id="djLink" href="#" class="hidden btn btn-primary btn-sm font-bold shadow-md shadow-purple-500/25 shrink-0">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-        <span class="hidden sm:inline">Régie DJ</span>
-      </a>
-
-      <!-- Refresh & Export -->
-      <a id="exportCsvBtn" href="#" class="btn btn-ghost btn-sm shrink-0 font-semibold" title="Télécharger les logs de demandes en CSV">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span class="hidden sm:inline">Export CSV</span>
-      </a>
-      <button id="refreshBtn" class="btn btn-ghost btn-icon btn-sm shrink-0" title="Rafraîchir les données">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-      </button>
-      <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Alterner mode clair / sombre">
-        <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-      <button id="btnLogoutTop" class="btn btn-danger btn-sm" title="Se déconnecter" aria-label="Se déconnecter">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        <span class="hidden sm:inline">Déconnexion</span>
-      </button>
     </header>
 
-    <!-- Contenu scrollable -->
-    <main class="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
 
-      <!-- ── KPIs ────────────────────────────────────────────── -->
-      <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        <div class="stat-card p-4 flex flex-col justify-between">
-          <p class="stat-label">Demandes</p>
-          <p class="stat-value text-gradient-purple mt-2" id="kTotal">—</p>
+      <!-- ── 6 KPIs Grid ──────────────────────────────────────── -->
+      <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="kpi-card p-3.5 flex flex-col justify-between">
+          <p class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">DEMANDES</p>
+          <p class="font-display font-black text-2xl text-white mt-1.5" id="kTotal">—</p>
         </div>
-        <div class="stat-card p-4 flex flex-col justify-between">
-          <p class="stat-label">Personnes</p>
-          <p class="stat-value text-gradient-cyan mt-2" id="kUsers">—</p>
+        <div class="kpi-card p-3.5 flex flex-col justify-between">
+          <p class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">PERSONNES</p>
+          <p class="font-display font-black text-2xl text-cyan-400 mt-1.5" id="kUsers">—</p>
         </div>
-        <div class="stat-card p-4 flex flex-col justify-between">
-          <p class="stat-label">Jouées</p>
-          <p class="stat-value mt-2" style="color:var(--green)" id="kPlayed">—</p>
+        <div class="kpi-card p-3.5 flex flex-col justify-between">
+          <p class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">JOUÉES</p>
+          <p class="font-display font-black text-2xl text-emerald-400 mt-1.5" id="kPlayed">—</p>
         </div>
-        <div class="stat-card p-4 flex flex-col justify-between">
-          <p class="stat-label">En queue</p>
-          <p class="stat-value mt-2" style="color:var(--text-primary)" id="kQueue">—</p>
+        <div class="kpi-card p-3.5 flex flex-col justify-between">
+          <p class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">EN QUEUE</p>
+          <p class="font-display font-black text-2xl text-white mt-1.5" id="kQueue">—</p>
         </div>
-        <div class="stat-card p-4 flex flex-col justify-between">
-          <p class="stat-label">En attente</p>
-          <p class="stat-value mt-2" style="color:var(--amber)" id="kPending">—</p>
+        <div class="kpi-card p-3.5 flex flex-col justify-between">
+          <p class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">EN ATTENTE</p>
+          <p class="font-display font-black text-2xl text-amber-400 mt-1.5" id="kPending">—</p>
         </div>
-        <div class="stat-card p-4 flex flex-col justify-between">
-          <p class="stat-label">Refusées</p>
-          <p class="stat-value mt-2" style="color:var(--red)" id="kRejected">—</p>
+        <div class="kpi-card p-3.5 flex flex-col justify-between">
+          <p class="font-mono-code text-[10px] uppercase font-bold text-neutral-400">REFUSÉES</p>
+          <p class="font-display font-black text-2xl text-red-400 mt-1.5" id="kRejected">—</p>
         </div>
       </div>
 
-      <!-- ── Chanson chaude + Top artistes ─────────────────── -->
+      <!-- ── Chanson chaude + Top artistes ───────────────────── -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <!-- Chanson la plus votée en attente -->
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
-            <div class="flex items-center gap-2">
-              <span class="text-base">🔥</span>
-              <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Chanson la plus voulue du public</h2>
-            </div>
-            <span class="badge badge-amber text-xs">En attente</span>
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 flex items-center justify-between border-b border-white/10">
+            <h2 class="font-display font-black text-sm uppercase text-white">Chanson la plus voulue</h2>
+            <span class="gaffer-tape">TOP SOUHAIT</span>
           </div>
-          <div id="hotPending" class="p-6">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Aucune demande en attente</p>
+          <div id="hotPending" class="p-5">
+            <p class="text-xs text-center py-4 font-mono-code text-neutral-400">Aucune demande en attente</p>
           </div>
         </div>
 
-        <!-- Top 5 artistes -->
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
-            <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:var(--accent-dim);color:var(--accent)">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </div>
-            <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Top Artistes de la Soirée</h2>
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 flex items-center justify-between border-b border-white/10">
+            <h2 class="font-display font-black text-sm uppercase text-white">Top Artistes de la Soirée</h2>
+            <span class="font-mono-code text-[10px] text-neutral-400">POPULARITÉ</span>
           </div>
-          <div id="topArtists" class="p-6 space-y-3">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
+          <div id="topArtists" class="p-5 space-y-2.5">
+            <p class="text-xs text-center py-4 font-mono-code text-neutral-400">Chargement…</p>
           </div>
+        </div>
+
+      </div>
+
+      <!-- ── Graphique demandes / 15 min ─────────────────────── -->
+      <div class="studio-box rounded-2xl overflow-hidden border">
+        <div class="px-5 py-3.5 flex items-center justify-between gap-3 border-b border-white/10">
+          <div>
+            <h2 class="font-display font-black text-sm uppercase text-white">Activité & Pression du Public (par 15 min)</h2>
+            <p class="font-grotesk text-xs text-neutral-400">Fréquence des propositions au fil du set</p>
+          </div>
+          <span id="peakSlot" class="hidden px-2.5 py-0.5 rounded font-mono-code text-[11px] font-bold text-black" style="background:#d4ff00"></span>
+        </div>
+        <div id="activityChart" class="p-5 space-y-2 overflow-x-auto">
+          <p class="text-xs text-center py-4 font-mono-code text-neutral-400">Chargement…</p>
         </div>
       </div>
 
-      <!-- ── Graphique demandes / 15 min ───────────────────── -->
-      <div class="dash-card overflow-hidden">
-        <div class="px-6 py-4.5 flex items-center justify-between gap-3" style="border-bottom:1px solid var(--border)">
-          <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--cyan-dim);color:var(--cyan)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            </div>
-            <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Activité & Pression du Public (par quart d'heure)</h2>
-          </div>
-          <span id="peakSlot" class="text-xs hidden px-3 py-1 rounded-full font-bold" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,0.3)"></span>
-        </div>
-        <div id="activityChart" class="p-6 space-y-2.5 overflow-x-auto">
-          <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
-        </div>
-      </div>
-
-      <!-- ── Analytics live avancées ─────────────────────────── -->
+      <!-- ── Analytics live avancées (3 colonnes) ─────────────── -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-extrabold">Heatmap Horaire</h2>
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 border-b border-white/10">
+            <h2 class="font-display font-black text-xs uppercase text-white">Heatmap Horaire</h2>
           </div>
-          <div id="hourlyHeatmap" class="p-6 space-y-2">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
-          </div>
-        </div>
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-extrabold">Top Tempos (BPM)</h2>
-          </div>
-          <div id="topTempos" class="p-6 space-y-2.5">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
+          <div id="hourlyHeatmap" class="p-5 space-y-2">
+            <p class="text-xs text-center py-4 font-mono-code text-neutral-400">Chargement…</p>
           </div>
         </div>
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-extrabold">Skips & Votes</h2>
+
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 border-b border-white/10">
+            <h2 class="font-display font-black text-xs uppercase text-white">Top Tempos (BPM)</h2>
           </div>
-          <div id="engagementStats" class="p-6 space-y-2.5">
-            <p class="text-sm text-center py-4" style="color:var(--text-muted)">Chargement…</p>
+          <div id="topTempos" class="p-5 space-y-2">
+            <p class="text-xs text-center py-4 font-mono-code text-neutral-400">Chargement…</p>
+          </div>
+        </div>
+
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 border-b border-white/10">
+            <h2 class="font-display font-black text-xs uppercase text-white">Skips & Votes</h2>
+          </div>
+          <div id="engagementStats" class="p-5 space-y-2">
+            <p class="text-xs text-center py-4 font-mono-code text-neutral-400">Chargement…</p>
           </div>
         </div>
       </div>
 
-      <!-- ── Top chansons + Feed live ──────────────────────── -->
+      <!-- ── Top chansons + Feed live ────────────────────────── -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <!-- Top 5 chansons demandées -->
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
-            <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Chansons les plus demandées</h2>
-            <span class="text-xs font-bold text-gradient-purple">Top 5</span>
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 flex items-center justify-between border-b border-white/10">
+            <h2 class="font-display font-black text-sm uppercase text-white">Chansons les plus demandées</h2>
+            <span class="gaffer-tape">TOP 5</span>
           </div>
-          <div id="topSongs" class="divide-y" style="border-color:var(--border)">
-            <p class="text-sm text-center py-6" style="color:var(--text-muted)">Chargement…</p>
+          <div id="topSongs" class="divide-y divide-white/10">
+            <p class="text-xs text-center py-6 font-mono-code text-neutral-400">Chargement…</p>
           </div>
         </div>
 
-        <!-- Feed live des dernières demandes -->
-        <div class="dash-card overflow-hidden">
-          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
+        <div class="studio-box rounded-2xl overflow-hidden border">
+          <div class="px-5 py-3.5 flex items-center justify-between border-b border-white/10">
             <div class="flex items-center gap-2">
-              <h2 class="text-sm font-extrabold" style="color:var(--text-primary)">Dernières demandes</h2>
-              <span id="feedLiveDot" class="hidden w-2 h-2 rounded-full live-pulse-dot" style="background:var(--green)"></span>
+              <h2 class="font-display font-black text-sm uppercase text-white">Dernières demandes</h2>
+              <span id="feedLiveDot" class="hidden w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
-            <span class="text-xs" style="color:var(--text-muted)">Temps réel</span>
+            <span class="font-mono-code text-xs text-neutral-400">TEMPS RÉEL</span>
           </div>
           <div id="feedList" class="max-h-[380px] overflow-y-auto">
-            <p class="text-sm text-center py-6" style="color:var(--text-muted)">Chargement…</p>
+            <p class="text-xs text-center py-6 font-mono-code text-neutral-400">Chargement…</p>
           </div>
         </div>
+
       </div>
 
     </main>

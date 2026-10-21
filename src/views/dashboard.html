@@ -1,397 +1,755 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Console DJ & Statistiques — Music Live</title>
+  <title>Console Régie DJ & Dashboard — Music Live</title>
+  <meta name="description" content="Dashboard officiel de la régie DJ Music Live : pilotez vos sessions en direct, consultez les votes du public et analysez les métriques de vos soirées." />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <script src="/js/theme.js"></script>
+
+  <style>
+    :root {
+      --font-display: 'Syne', sans-serif;
+      --font-grotesk: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --acid-volt: #d4ff00;
+      --acid-volt-dim: rgba(212, 255, 0, 0.12);
+      --hazard-orange: #ff4d00;
+      --spotify-green: #1db954;
+      --console-dark: #09090e;
+      --console-surface: #0f0f16;
+      --console-panel: #14141f;
+      --console-border: rgba(255, 255, 255, 0.1);
+      --grid-line: rgba(255, 255, 255, 0.04);
+    }
+
+    html.light {
+      --acid-volt: #a4c900;
+      --acid-volt-dim: rgba(164, 201, 0, 0.15);
+      --console-dark: #f4f4f7;
+      --console-surface: #ffffff;
+      --console-panel: #fbfbfd;
+      --console-border: rgba(0, 0, 0, 0.1);
+      --grid-line: rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+      background-color: var(--console-dark);
+      background-image: 
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--text-primary);
+    }
+
+    /* Boîte châssis studio */
+    .studio-box {
+      background: var(--console-surface);
+      border: 1px solid var(--console-border);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Cartes KPI épurées et lisibles */
+    .kpi-card {
+      background: var(--console-panel);
+      border: 1px solid var(--console-border);
+      border-radius: 14px;
+      padding: 1.15rem;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .kpi-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Navigation latérale pro / Onglets de côté */
+    .side-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-family: var(--font-grotesk);
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      border-left: 3px solid transparent;
+      transition: all 0.14s ease;
+      text-align: left;
+      cursor: pointer;
+    }
+    .side-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .side-tab-btn.active {
+      background: rgba(212, 255, 0, 0.08);
+      color: var(--acid-volt);
+      border-color: rgba(212, 255, 0, 0.2);
+      border-left-color: var(--acid-volt);
+      font-weight: 700;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.12s ease;
+      text-decoration: none;
+    }
+    .side-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .side-link.danger {
+      color: var(--red);
+    }
+    .side-link.danger:hover {
+      background: var(--red-dim);
+    }
+
+    /* Étiquette gaffer adhésive */
+    .gaffer-tape {
+      background: #e6dfc8;
+      color: #111;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+      border-left: 2px dashed rgba(0,0,0,0.3);
+      border-right: 2px dashed rgba(0,0,0,0.3);
+    }
+
+    /* Barre d'égalisation vivante */
+    .equalizer-live {
+      display: flex;
+      align-items: flex-end;
+      gap: 2.5px;
+      height: 14px;
+    }
+    .equalizer-live span {
+      width: 2.5px;
+      background: var(--acid-volt);
+      border-radius: 1px;
+      animation: eqDance 0.8s ease-in-out infinite alternate;
+    }
+    .equalizer-live span:nth-child(1) { height: 35%; animation-delay: 0.1s; }
+    .equalizer-live span:nth-child(2) { height: 95%; animation-delay: 0.3s; }
+    .equalizer-live span:nth-child(3) { height: 60%; animation-delay: 0.15s; }
+    .equalizer-live span:nth-child(4) { height: 80%; animation-delay: 0.25s; }
+
+    @keyframes eqDance {
+      0% { transform: scaleY(0.25); }
+      100% { transform: scaleY(1); }
+    }
+    #sidebar {
+      display: flex;
+      flex-direction: column;
+      width: 270px;
+      min-width: 270px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--console-border);
+      background: var(--console-surface);
+      height: 100vh;
+    }
+
+    @media (max-width: 1023px) {
+      #sidebar {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
-<body style="background:var(--bg-base);color:var(--text-primary)">
+
+<body class="antialiased min-h-screen">
 
 <div class="flex h-screen overflow-hidden">
 
-  <!-- ── Barre Latérale Navigation (Desktop) ─────────────────────────── -->
-  <aside id="sidebar" class="hidden lg:flex flex-col w-64 shrink-0" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-    <!-- Logo App -->
-    <div class="flex items-center gap-3.5 px-6 py-5" style="border-bottom:1px solid var(--border)">
-      <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%);box-shadow:0 0 20px var(--accent-glow)">
-        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-        </svg>
-      </div>
-      <div>
-        <span class="font-extrabold text-base tracking-tight" style="color:var(--text-primary)">Music Live</span>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <span class="w-1.5 h-1.5 rounded-full" style="background:var(--accent)"></span>
-          <p class="text-[10px] uppercase font-bold tracking-widest text-gradient-purple">Console DJ</p>
+  <!-- ── 1. SIDEBAR ONGLET PRINCIPAUX (DESKTOP) ────────────────── -->
+  <aside id="sidebar">
+    
+    <!-- Logo Brand Identity -->
+    <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color: var(--console-border);">
+      <a href="/dashboard" class="flex items-center gap-3 group">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center border border-white/20"
+             style="background: #000; color: var(--acid-volt);">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
         </div>
-      </div>
+        <div class="flex flex-col leading-none">
+          <div class="flex items-center gap-1.5">
+            <span class="font-display font-black text-sm tracking-tight text-white">MUSIC<span style="color:var(--acid-volt)">LIVE</span></span>
+            <span class="font-mono-code text-[9px] px-1 py-0.2 rounded font-bold text-black" style="background:var(--acid-volt)">PRO</span>
+          </div>
+          <span class="font-mono-code text-[9px] text-neutral-400 mt-0.5 tracking-wider">CONSOLE RÉGIE</span>
+        </div>
+      </a>
+
+      <!-- Quick status dot -->
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Système opérationnel"></span>
     </div>
 
-    <!-- Profil DJ connecté -->
-    <a href="/profile" class="mx-3 my-3 p-3 rounded-xl flex items-center gap-3 transition-all hover:bg-white/[0.04] group" style="background:var(--bg-elevated);border:1px solid var(--border)">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black text-white uppercase shrink-0 shadow-sm" style="background:linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%)">
-        DJ
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-[10px] uppercase tracking-wider font-bold" style="color:var(--text-muted)">DJ Connecté</p>
-        <p class="text-sm font-bold truncate dj-name-text group-hover:text-purple-400 transition" style="color:var(--text-primary)">Chargement...</p>
-      </div>
-      <svg class="w-4 h-4 text-muted group-hover:translate-x-0.5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-    </a>
+    <!-- DJ Profile Badge / Quick Link -->
+    <div class="p-3">
+      <a href="/profile" class="p-2.5 rounded-xl border flex items-center gap-3 transition hover:border-white/30 group"
+         style="background: var(--console-panel); border-color: var(--console-border);">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono-code font-black text-xs text-black shrink-0"
+             style="background: var(--acid-volt);">
+          DJ
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="font-mono-code text-[9px] uppercase tracking-wider text-neutral-400">RÉGIE ACTIVE</p>
+          <p class="font-grotesk text-xs font-bold text-white truncate dj-name-text">Chargement...</p>
+        </div>
+        <svg class="w-3.5 h-3.5 text-neutral-400 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
 
-    <!-- Liens de navigation -->
-    <nav class="flex-1 p-3 space-y-1.5 pt-2">
-      <a href="/dashboard" class="nav-item active">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-        </svg>
-        Dashboard Live
-      </a>
-      <a href="/history" class="nav-item">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-        </svg>
-        Historique Soirées
-      </a>
-      <a href="/profile" class="nav-item">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-        Mon Profil
-      </a>
-    </nav>
+    <!-- ONGLETS DE NAVIGATION SUR LE CÔTÉ -->
+    <div class="flex-1 px-3 py-2 space-y-4 overflow-y-auto">
+      
+      <div>
+        <div class="px-2 pb-1.5 font-mono-code text-[9px] uppercase font-bold text-neutral-400 tracking-wider">
+          ONGLETS DU DASHBOARD
+        </div>
 
-    <!-- Déconnexion -->
-    <div class="p-3" style="border-top:1px solid var(--border)">
-      <button id="btnLogout" class="nav-item danger w-full">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
+        <nav class="space-y-1">
+          <!-- Onglet 1: Vue d'Ensemble -->
+          <button class="dash-tab-btn side-tab-btn active" data-tab="all" title="Vue d'ensemble et métriques globales">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            <span class="flex-1">Vue d'Ensemble</span>
+          </button>
+
+          <!-- Onglet 2: Sessions en Direct -->
+          <button class="dash-tab-btn side-tab-btn" data-tab="active" title="Soirées en direct ouvertes aux votes">
+            <span class="relative flex h-2 w-2 shrink-0">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="flex-1">En Direct (Live)</span>
+            <span id="sidebarActiveCount" class="font-mono-code text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0</span>
+          </button>
+
+          <!-- Onglet 3: Soirées Passées -->
+          <button class="dash-tab-btn side-tab-btn" data-tab="past" title="Archives et récapitulatif des sets passés">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span class="flex-1">Soirées Passées</span>
+            <span id="sidebarPastCount" class="font-mono-code text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/10 text-neutral-300">0</span>
+          </button>
+
+          <!-- Onglet 4: Hit-Parade -->
+          <button class="dash-tab-btn side-tab-btn" data-tab="top" title="Top des morceaux les plus joués et votés">
+            <svg class="w-4 h-4 shrink-0 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span class="flex-1">Hit-Parade</span>
+            <span class="font-mono-code text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">TOP</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Outils Régie & Accès Externes -->
+      <div>
+        <div class="px-2 pb-1.5 font-mono-code text-[9px] uppercase font-bold text-neutral-400 tracking-wider">
+          OUTILS RÉGIE
+        </div>
+
+        <nav class="space-y-1">
+          <a href="/history" class="side-link">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            <span>Stats & Historique</span>
+          </a>
+
+          <a href="/profile" class="side-link">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profil & Racks</span>
+          </a>
+
+          <a href="/" target="_blank" class="side-link">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            <span>Site Public</span>
+          </a>
+        </nav>
+      </div>
+
+    </div>
+
+    <!-- Sidebar Bottom Action -->
+    <div class="p-3 border-t space-y-2" style="border-color: var(--console-border);">
+      <button onclick="openCreateEventModal()" class="w-full py-2.5 px-3 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-black flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-98 transition"
+              style="background: var(--acid-volt);">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>+ Nouvelle Soirée</span>
+      </button>
+
+      <button id="btnLogout" class="side-link danger w-full justify-center">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
         </svg>
-        Déconnexion
+        <span>Déconnexion</span>
       </button>
     </div>
+
   </aside>
 
-  <!-- ── Contenu Principal ───────────────────────────────────────────── -->
+  <!-- ── 2. MAIN CONTENT AREA ──────────────────────────────────── -->
   <div class="flex-1 flex flex-col overflow-hidden">
-
-    <!-- Topbar Mobile & Desktop -->
-    <header class="flex items-center justify-between px-5 sm:px-8 py-3.5 shrink-0" style="background:var(--bg-surface);border-bottom:1px solid var(--border)">
+    
+    <!-- Topbar (Hardware Header) -->
+    <header class="h-16 px-4 sm:px-8 border-b flex items-center justify-between shrink-0"
+            style="background: var(--console-surface); border-color: var(--console-border);">
+      
       <div class="flex items-center gap-3">
-        <!-- Bouton hamburger (strictement masqué sur desktop) -->
-        <button id="mobileSidebarBtn" class="lg:hidden btn btn-ghost btn-icon mr-1">
+        <!-- Hamburger Button Mobile -->
+        <button id="mobileSidebarBtn" class="lg:hidden p-2 rounded-lg border border-white/10 hover:border-white/30 text-white">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div>
-          <div class="flex items-center gap-2.5">
-            <h1 class="text-base sm:text-lg font-extrabold tracking-tight" style="color:var(--text-primary)">Console Régie & Analytics</h1>
+
+        <!-- Breadcrumb & Tab Header -->
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-mono-code text-[11px] uppercase tracking-wider text-neutral-400">RÉGIE DJ</span>
+            <span class="text-neutral-500">/</span>
+            <h1 id="dashboardTabTitle" class="font-display font-black text-sm sm:text-base uppercase tracking-tight text-white truncate">
+              Vue d'Ensemble & Régie
+            </h1>
             <div id="liveStatusPill"></div>
           </div>
-          <p class="text-xs" style="color:var(--text-secondary)">Vue d'ensemble en direct, votes du public & historique des sets</p>
+          <p id="dashboardTabDesc" class="font-grotesk text-xs text-neutral-400 hidden sm:block truncate">
+            Pilotage centralisé, métriques d'audience et accès rapide à vos sessions
+          </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-2.5">
-        <a href="/history" class="btn btn-ghost btn-sm hidden sm:inline-flex" title="Consulter l'historique complet">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Historique
-        </a>
-        <button id="btnCreateEvent" class="btn btn-primary btn-sm font-semibold">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <!-- Topbar Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Bouton Créer une soirée (Principal) -->
+        <button id="btnCreateEvent" class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-lg font-mono-code font-bold text-xs uppercase tracking-wider text-black shadow-lg hover:brightness-110 transition"
+                style="background: var(--acid-volt);">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span class="hidden sm:inline">Nouvelle Soirée</span>
-          <span class="sm:hidden">Soirée</span>
+          <span class="sm:hidden">+</span>
         </button>
-        <button data-theme-toggle class="btn btn-ghost btn-icon btn-sm" title="Alterner mode clair / sombre">
-          <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+
+        <!-- Theme Toggle -->
+        <button data-theme-toggle class="p-2 rounded-lg border border-white/10 hover:border-white/30 text-neutral-300 hover:text-white transition"
+                title="Alterner thème clair / sombre">
+          <svg class="w-4 h-4 icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="w-4 h-4 icon-moon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button id="btnLogoutTop" class="btn btn-danger btn-sm" title="Se déconnecter" aria-label="Se déconnecter">
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          <span class="hidden sm:inline">Déconnexion</span>
+
+        <!-- Déconnexion Top -->
+        <button id="btnLogoutTop" class="p-2 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition"
+                title="Se déconnecter" aria-label="Se déconnecter">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
+
       </div>
+
     </header>
 
-    <!-- Zone de contenu avec scroll fluide -->
+    <!-- Zone de défilement principale -->
     <main class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
-
-      <!-- ── Bannière Hero & Statut DJ ───────────────────────────────── -->
-      <div class="dash-card p-6 sm:p-7 relative overflow-hidden" style="background:radial-gradient(circle at 10% 20%, rgba(139,92,246,0.18) 0%, rgba(6,182,212,0.08) 50%, rgba(15,15,24,0.95) 100%), var(--bg-surface);border:1px solid rgba(139,92,246,0.28);box-shadow:0 10px 40px -10px rgba(139,92,246,0.15)">
+      
+      <!-- ── COMMAND HERO BANNER (Visible sur Vue d'ensemble) ───── -->
+      <div id="overviewHeroBanner" class="studio-box p-6 sm:p-7 rounded-2xl relative overflow-hidden border">
+        
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm" style="background:linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);color:#fff">
-                Espace Régie DJ
+            
+            <div class="flex items-center gap-3">
+              <span class="gaffer-tape">
+                RÉGIE PRINCIPALE #DJ-CONSOLE
               </span>
-              <div class="equalizer-bar ml-1">
+              <div class="equalizer-live" title="Audio engine prêt">
                 <span></span><span></span><span></span><span></span>
               </div>
             </div>
-            <h2 id="welcomeDjTitle" class="text-2xl sm:text-3xl font-black tracking-tight" style="color:var(--text-primary)">
-              Bienvenue sur <span class="text-gradient-purple">Music Live</span>
+
+            <h2 id="welcomeDjTitle" class="font-display font-black text-2xl sm:text-3xl uppercase tracking-tight text-white">
+              Bienvenue sur <span style="color:var(--acid-volt)">Music Live</span>
             </h2>
-            <p class="text-xs sm:text-sm max-w-xl leading-relaxed" style="color:var(--text-secondary)">
-              Pilotez les votes de votre public en direct, projetez votre QR code sur grand écran et analysez l'impact de chacune de vos performances.
+
+            <p class="font-grotesk text-xs sm:text-sm text-neutral-300 max-w-xl leading-relaxed">
+              Pilotez les votes de votre public en direct, projetez votre QR code sur grand écran et analysez l'impact de chaque set.
             </p>
+
           </div>
-          <div class="flex flex-wrap items-center gap-3 shrink-0">
-            <button id="btnCreateEventHero" class="btn btn-primary btn-lg font-bold">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Lancer une Soirée
+
+          <div class="flex items-center gap-3 shrink-0">
+            <button id="btnCreateEventHero" class="px-5 py-3 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-black flex items-center gap-2 shadow-xl hover:brightness-110 transition"
+                    style="background: var(--acid-volt);">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Lancer une Soirée</span>
             </button>
           </div>
         </div>
+
       </div>
 
-      <!-- ── 4 Cartes Métriques Audio Pro (KPIs) ─────────────────────── -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        <!-- KPI 1 : Soirées -->
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <span class="stat-label">Soirées Total</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--accent-dim);color:var(--accent)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <!-- ── 4 CARTES KPI (MÉTRIQUES AUDIO PRO) ────────────────── -->
+      <div id="overviewKpiSection" class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        
+        <!-- KPI 1 : Soirées Total -->
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-wider text-neutral-400">SOIRÉES TOTAL</span>
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center font-mono-code text-xs font-bold"
+                 style="background: rgba(212,255,0,0.12); color: var(--acid-volt);">
+              #
             </div>
           </div>
           <div>
-            <p id="statTotalEvents" class="stat-value text-gradient-purple">0</p>
-            <p class="text-[11px]" style="color:var(--text-muted)">Sessions live & passées</p>
+            <p id="statTotalEvents" class="font-display font-black text-2xl sm:text-3xl text-white">0</p>
+            <p class="font-grotesk text-[11px] text-neutral-400 mt-0.5">Sessions créées</p>
           </div>
         </div>
 
-        <!-- KPI 2 : Morceaux joués -->
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <span class="stat-label">Morceaux Joués</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--green-dim);color:var(--green)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <!-- KPI 2 : Morceaux Joués -->
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-wider text-neutral-400">DIFFUSÉS AU PUBLIC</span>
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                 style="background: rgba(16,185,129,0.12); color: var(--green);">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
             </div>
           </div>
           <div>
-            <p id="statTotalSongs" class="stat-value" style="color:var(--green)">0</p>
-            <p class="text-[11px]" style="color:var(--text-muted)">Diffusés au public</p>
+            <p id="statTotalSongs" class="font-display font-black text-2xl sm:text-3xl text-emerald-400">0</p>
+            <p class="font-grotesk text-[11px] text-neutral-400 mt-0.5">Titres joués dans le set</p>
           </div>
         </div>
 
-        <!-- KPI 3 : Taux d'acceptation -->
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <span class="stat-label">Taux d'Acceptation</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--cyan-dim);color:var(--cyan)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <!-- KPI 3 : Taux d'Acceptation -->
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-wider text-neutral-400">TAUX VALIDATION</span>
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                 style="background: rgba(6,182,212,0.12); color: var(--cyan);">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
           </div>
           <div>
-            <p id="statAcceptRate" class="stat-value text-gradient-cyan">0%</p>
-            <p class="text-[11px]" style="color:var(--text-muted)">Validation des demandes</p>
+            <p id="statAcceptRate" class="font-display font-black text-2xl sm:text-3xl text-cyan-400">0%</p>
+            <p class="font-grotesk text-[11px] text-neutral-400 mt-0.5">Demandes approuvées</p>
           </div>
         </div>
 
-        <!-- KPI 4 : Votes moyens -->
-        <div class="stat-card">
-          <div class="flex items-center justify-between gap-2 mb-3">
-            <span class="stat-label">Engagement Public</span>
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--amber-dim);color:var(--amber)">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+        <!-- KPI 4 : Votes Moyens -->
+        <div class="kpi-card flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono-code text-[10px] font-bold uppercase tracking-wider text-neutral-400">ENGAGEMENT SALLE</span>
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                 style="background: rgba(245,158,11,0.12); color: var(--amber);">
+              ★
             </div>
           </div>
           <div>
-            <div class="flex items-baseline gap-1">
-              <p id="statAvgVotes" class="stat-value text-gradient-gold">0.0</p>
-              <span class="text-xs font-bold" style="color:var(--amber)">votes / son</span>
+            <div class="flex items-baseline gap-1.5">
+              <p id="statAvgVotes" class="font-display font-black text-2xl sm:text-3xl text-amber-400">0.0</p>
+              <span class="font-mono-code text-[10px] font-bold text-neutral-400">votes / son</span>
             </div>
-            <p class="text-[11px]" style="color:var(--text-muted)">Indice de ferveur</p>
+            <p class="font-grotesk text-[11px] text-neutral-400 mt-0.5">Ferveur du public</p>
           </div>
         </div>
+
       </div>
 
-      <!-- ── Barre d'onglets de filtrage rapide ─────────────────────── -->
-      <div class="flex flex-wrap items-center justify-between gap-3 p-1.5 rounded-2xl" style="background:var(--bg-elevated);border:1px solid var(--border)">
-        <div class="flex flex-wrap items-center gap-1.5">
-          <button class="dash-tab-btn active" data-tab="all">
-            Toutes les sections
-          </button>
-          <button class="dash-tab-btn" data-tab="active">
-            🟢 En Direct & À Venir (<span id="activeBadgeCount">0</span>)
-          </button>
-          <button class="dash-tab-btn" data-tab="past">
-            📁 Soirées Passées (<span id="pastBadgeCount">0</span>)
-          </button>
-          <button class="dash-tab-btn" data-tab="top">
-            🔥 Top Morceaux
-          </button>
-        </div>
-      </div>
-
-      <!-- ── SECTION 1 : Soirées en direct & actives ───── -->
+      <!-- ── SECTION 1 : SOIRÉES EN DIRECT & ACTIVES ──────────── -->
       <section id="sectionActiveEvents" class="space-y-3">
         <div class="flex items-center justify-between px-1">
-          <div class="flex items-center gap-2.5">
-            <span class="live-pulse-dot"></span>
-            <h2 class="text-base font-extrabold tracking-tight" style="color:var(--text-primary)">
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <h2 class="font-display font-black text-base uppercase tracking-tight text-white">
               Soirées Actives & En Direct
             </h2>
+            <span class="font-mono-code text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/25">
+              <span id="activeBadgeCount">0</span>
+            </span>
           </div>
-          <span class="text-xs" style="color:var(--text-muted)">Sessions ouvertes aux votes des invités</span>
+          <span class="font-mono-code text-xs text-neutral-400 hidden sm:inline">Sessions ouvertes aux votes des invités</span>
         </div>
 
         <div id="activeEventsList">
-          <div class="p-8 text-center text-sm" style="color:var(--text-muted)">Chargement de la console live...</div>
+          <div class="p-8 text-center text-sm font-mono-code text-neutral-400">Chargement de la console live...</div>
         </div>
       </section>
 
-      <!-- ── SECTION 2 : Soirées Passées & Accès Direct aux Statistiques ── -->
+      <!-- ── SECTION 2 : SOIRÉES PASSÉES & HISTORIQUE ─────────── -->
       <section id="sectionPastEvents" class="space-y-3">
-        <div class="flex items-center justify-between px-1">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
           <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 shrink-0" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            <svg class="w-4 h-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
-            <h2 class="text-base font-extrabold tracking-tight" style="color:var(--text-primary)">
-              Soirées Passées — Performances & Analytics
+            <h2 class="font-display font-black text-base uppercase tracking-tight text-white">
+              Soirées Passées — Performances & Sets
             </h2>
+            <span class="font-mono-code text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-300 font-bold">
+              <span id="pastBadgeCount">0</span>
+            </span>
           </div>
-          <a href="/history" class="text-xs font-bold hover:underline text-gradient-purple">
-            Voir tout l'historique complet →
-          </a>
+
+          <!-- Instant Search Past Events -->
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              <input type="text" id="pastEventsSearchInput" placeholder="Rechercher une soirée..."
+                     class="w-48 sm:w-64 px-3 py-1.5 pl-8 rounded-lg bg-black/40 border border-white/10 text-xs font-grotesk text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4ff00] transition" />
+              <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <a href="/history" class="font-mono-code text-xs font-bold text-purple-400 hover:underline shrink-0">
+              Voir tout →
+            </a>
+          </div>
         </div>
 
         <div id="pastEventsList">
-          <div class="p-8 text-center text-sm" style="color:var(--text-muted)">Chargement des soirées passées...</div>
+          <div class="p-8 text-center text-sm font-mono-code text-neutral-400">Chargement des soirées passées...</div>
         </div>
       </section>
 
-      <!-- ── SECTION 3 : Top Chansons & Hits du Public ───────────────── -->
-      <section id="sectionTopSongs" class="dash-card overflow-hidden">
-        <div class="flex items-center justify-between p-5 sm:p-6" style="border-bottom:1px solid var(--border)">
+      <!-- ── SECTION 3 : HIT-PARADE (TOP MORCEAUX) ─────────────── -->
+      <section id="sectionTopSongs" class="studio-box rounded-2xl overflow-hidden border">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b" style="border-color: var(--console-border);">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style="background:var(--amber-dim);color:var(--amber)">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-              </svg>
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-amber-400 shrink-0"
+                 style="background: rgba(245,158,11,0.12);">
+              ★
             </div>
             <div>
-              <h2 class="text-base font-extrabold" style="color:var(--text-primary)">Hit-Parade — Morceaux les plus demandés</h2>
-              <p class="text-xs" style="color:var(--text-secondary)">Statistiques globales de popularité auprès de votre public</p>
+              <h2 class="font-display font-black text-base uppercase tracking-tight text-white">
+                Hit-Parade — Morceaux les plus demandés
+              </h2>
+              <p class="font-grotesk text-xs text-neutral-400">Statistiques globales de popularité auprès de votre public</p>
             </div>
           </div>
+
+          <!-- Instant Search Songs -->
+          <div class="relative">
+            <input type="text" id="topSongsSearchInput" placeholder="Filtrer titre ou artiste..."
+                   class="w-full sm:w-64 px-3 py-1.5 pl-8 rounded-lg bg-black/40 border border-white/10 text-xs font-grotesk text-white placeholder-neutral-500 focus:outline-none focus:border-[#d4ff00] transition" />
+            <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
         </div>
+        
         <div id="topSongsList">
-          <div class="p-8 text-center text-sm" style="color:var(--text-muted)">Chargement des titres phares...</div>
+          <div class="p-8 text-center text-sm font-mono-code text-neutral-400">Chargement des titres phares...</div>
         </div>
       </section>
 
     </main>
   </div>
+
 </div>
 
-<!-- ─── Tiroir Navigation Mobile (Sidebar Drawer) ───────────────────── -->
-<div id="mobileSidebarOverlay" class="hidden fixed inset-0 z-40 lg:hidden" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)"></div>
-<aside id="mobileSidebar" class="hidden fixed left-0 top-0 bottom-0 z-50 flex flex-col w-64 lg:hidden" style="background:var(--bg-surface);border-right:1px solid var(--border)">
-  <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--border)">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm" style="background:linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)">
-        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+<!-- ── 3. TIROIR NAVIGATION MOBILE (DRAWER) ───────────────────── -->
+<div id="mobileSidebarOverlay" class="hidden fixed inset-0 z-40 lg:hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);"></div>
+<aside id="mobileSidebar" class="hidden fixed left-0 top-0 bottom-0 z-50 flex flex-col w-64 lg:hidden border-r"
+       style="background: var(--console-surface); border-color: var(--console-border);">
+  
+  <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color: var(--console-border);">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-full flex items-center justify-center border border-white/20"
+           style="background: #000; color: var(--acid-volt);">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
         </svg>
       </div>
-      <span class="font-bold text-sm">Music Live</span>
+      <span class="font-display font-black text-sm tracking-tight text-white">MUSIC<span style="color:var(--acid-volt)">LIVE</span></span>
     </div>
-    <button id="mobileSidebarCloseBtn" class="btn btn-ghost btn-icon btn-sm">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <button id="mobileSidebarCloseBtn" class="p-1.5 rounded-lg text-neutral-400 hover:text-white">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-  <nav class="flex-1 p-3 space-y-1.5">
-    <a href="/dashboard" class="nav-item active">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      Dashboard Live
-    </a>
-    <a href="/history" class="nav-item">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Historique Soirées
-    </a>
-    <a href="/profile" class="nav-item">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Mon Profil
-    </a>
-  </nav>
-  <div class="p-3" style="border-top:1px solid var(--border)">
-    <button id="btnLogoutMobile2" class="nav-item danger w-full">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Déconnexion
+
+  <div class="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
+    <div>
+      <div class="px-2 pb-1.5 font-mono-code text-[9px] uppercase font-bold text-neutral-400 tracking-wider">
+        ONGLETS DU DASHBOARD
+      </div>
+      <nav class="space-y-1">
+        <button class="dash-tab-btn side-tab-btn active" data-tab="all">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          <span class="flex-1">Vue d'Ensemble</span>
+        </button>
+
+        <button class="dash-tab-btn side-tab-btn" data-tab="active">
+          <span class="relative flex h-2 w-2 shrink-0">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="flex-1">En Direct (Live)</span>
+          <span id="mobileSidebarActiveCount" class="font-mono-code text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">0</span>
+        </button>
+
+        <button class="dash-tab-btn side-tab-btn" data-tab="past">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span class="flex-1">Soirées Passées</span>
+          <span id="mobileSidebarPastCount" class="font-mono-code text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/10 text-neutral-300">0</span>
+        </button>
+
+        <button class="dash-tab-btn side-tab-btn" data-tab="top">
+          <svg class="w-4 h-4 shrink-0 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <span class="flex-1">Hit-Parade</span>
+          <span class="font-mono-code text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">TOP</span>
+        </button>
+      </nav>
+    </div>
+
+    <div>
+      <div class="px-2 pb-1.5 font-mono-code text-[9px] uppercase font-bold text-neutral-400 tracking-wider">
+        OUTILS RÉGIE
+      </div>
+      <nav class="space-y-1">
+        <a href="/history" class="side-link">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Stats & Historique</span>
+        </a>
+        <a href="/profile" class="side-link">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>Mon Profil</span>
+        </a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="p-3 border-t space-y-2" style="border-color: var(--console-border);">
+    <button onclick="openCreateEventModal(); closeMobileSidebar();" class="w-full py-2.5 px-3 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-black flex items-center justify-center gap-2 shadow-lg"
+            style="background: var(--acid-volt);">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>+ Nouvelle Soirée</span>
+    </button>
+    <button id="btnLogoutMobile" class="side-link danger w-full justify-center">
+      <span>Déconnexion</span>
     </button>
   </div>
 </aside>
 
-<!-- ─── Modale Nouvelle Soirée ──────────────────────────────────────── -->
-<div id="createEventModal" class="hidden modal-backdrop">
-  <div class="modal max-w-md p-6 sm:p-7">
-    <div class="flex items-center justify-between mb-5">
+<!-- ── 4. MODALE DE CRÉATION DE SOIRÉE ────────────────────────── -->
+<div id="createEventModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+  <div class="studio-box w-full max-w-lg rounded-2xl border p-6 sm:p-7 relative fade-in" style="border-color: rgba(255,255,255,0.18);">
+    
+    <div class="flex items-center justify-between pb-4 border-b" style="border-color: var(--console-border);">
       <div>
-        <h2 class="text-base font-bold" style="color:var(--text-primary)">Lancer une nouvelle soirée</h2>
-        <p class="text-xs" style="color:var(--text-muted)">Un QR code unique sera généré pour vos invités</p>
+        <span class="gaffer-tape mb-1">NOUVELLE SESSION</span>
+        <h3 class="font-display font-black text-xl uppercase tracking-tight text-white mt-1">
+          Lancer une soirée
+        </h3>
       </div>
-      <button id="btnCancelModal" class="btn btn-ghost btn-icon btn-sm">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button id="btnCancelModal" class="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <form id="createEventForm">
-      <label class="label">Nom de la soirée ou du club</label>
-      <input type="text" id="eventName" required class="input mb-4" placeholder="Ex: Club Le Rex - Set Electro" />
+
+    <form id="createEventForm" class="space-y-5 mt-5">
+      <div>
+        <label class="block font-mono-code text-[11px] font-bold uppercase tracking-wider text-neutral-300 mb-2">
+          Nom de la soirée ou du club :
+        </label>
+        <input type="text" id="eventName" required placeholder="Ex: Club Le Rex — Set Electro"
+               class="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white placeholder-neutral-500 font-grotesk text-sm focus:border-[#d4ff00] focus:outline-none transition shadow-inner" />
+      </div>
 
       <!-- Planification optionnelle -->
-      <div class="mb-5 p-3.5 rounded-xl" style="background:var(--bg-base);border:1px solid var(--border)">
-        <label class="flex items-center gap-2.5 cursor-pointer">
-          <input type="checkbox" id="scheduleToggle" class="sr-only" />
-          <span class="toggle-track"></span>
-          <span class="text-xs font-semibold" style="color:var(--text-secondary)">Planifier une heure de début</span>
+      <div class="p-4 rounded-xl border bg-black/30" style="border-color: var(--console-border);">
+        <label class="flex items-center justify-between cursor-pointer">
+          <span class="font-grotesk text-xs text-neutral-300 font-semibold">Planifier une heure de début</span>
+          <input type="checkbox" id="scheduleToggle" class="sr-only peer" />
+          <div class="w-10 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4ff00]"></div>
         </label>
-        <div id="scheduleFields" class="hidden mt-3">
-          <label class="label">Date et heure d'ouverture des demandes</label>
-          <input type="datetime-local" id="startsAt" class="input" />
-          <p class="text-[11px] mt-1" style="color:var(--text-muted)">Le public verra « Soirée à venir » jusqu'à cette heure.</p>
+
+        <div id="scheduleFields" class="hidden mt-3 pt-3 border-t" style="border-color: var(--console-border);">
+          <label class="block font-mono-code text-[10px] uppercase text-neutral-400 mb-1.5">Date et heure d'ouverture :</label>
+          <input type="datetime-local" id="startsAt" class="w-full px-3 py-2 rounded-lg bg-black/60 border border-white/20 text-white text-xs font-mono-code focus:border-[#d4ff00] focus:outline-none" />
         </div>
       </div>
 
-      <div class="flex gap-3">
-        <button type="button" id="btnCancelModal2" class="btn btn-ghost flex-1">Annuler</button>
-        <button type="submit" class="btn btn-primary flex-1 font-bold">Créer la soirée</button>
+      <div class="flex items-center justify-end gap-3 pt-3 border-t" style="border-color: var(--console-border);">
+        <button type="button" id="btnCancelModal2" class="px-4 py-2.5 rounded-xl font-mono-code text-xs uppercase tracking-wider text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 transition border border-white/10">
+          Annuler
+        </button>
+        <button type="submit" class="px-5 py-2.5 rounded-xl font-mono-code font-extrabold text-xs uppercase tracking-wider text-black bg-[#d4ff00] hover:bg-[#b8e000] active:scale-98 transition shadow-lg flex items-center gap-2">
+          <span>Créer la soirée</span>
+        </button>
       </div>
     </form>
+
   </div>
 </div>
 
-<!-- ─── Modale QR Code ─────────────────────────────────────────────── -->
-<div id="qrModal" class="hidden modal-backdrop">
-  <div class="modal max-w-sm">
-    <div class="p-6 text-center">
-      <h2 id="qrModalTitle" class="text-base font-bold mb-4" style="color:var(--text-primary)">QR Code — Partager la soirée</h2>
-      <div class="inline-block p-4 rounded-2xl mb-4 shadow-xl" style="background:#fff">
-        <img id="qrModalImage" src="" alt="QR Code Soirée" class="w-52 h-52 object-contain" />
-      </div>
-      <div class="mb-4 text-left">
-        <label class="label">Lien direct pour vos invités</label>
-        <div class="input-group">
-          <input type="text" id="qrModalLink" readonly class="input text-xs font-mono" />
-          <button id="qrModalCopy" class="btn btn-ghost btn-sm shrink-0 font-bold">Copier</button>
-        </div>
-      </div>
-      <button id="qrModalClose" class="btn btn-ghost btn-full">Fermer</button>
+<!-- ── 5. MODALE QR CODE ──────────────────────────────────────── -->
+<div id="qrModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+  <div class="studio-box w-full max-w-sm rounded-2xl border p-6 text-center relative fade-in" style="border-color: rgba(255,255,255,0.18);">
+    
+    <div class="flex items-center justify-between pb-3 border-b mb-4" style="border-color: var(--console-border);">
+      <h3 id="qrModalTitle" class="font-display font-black text-base uppercase text-white truncate">
+        QR Code Soirée
+      </h3>
+      <button id="qrModalClose" class="p-1.5 rounded-lg text-neutral-400 hover:text-white">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
+
+    <div class="p-4 rounded-xl bg-white inline-block shadow-2xl mb-4">
+      <img id="qrModalImage" src="" alt="QR Code Soirée" class="w-48 h-48 object-contain" />
+    </div>
+
+    <div class="space-y-3">
+      <input type="text" id="qrModalLink" readonly class="w-full px-3 py-2 rounded-lg bg-black/60 border border-white/20 text-white font-mono-code text-xs text-center select-all focus:outline-none" />
+      <button id="qrModalCopy" class="w-full py-2.5 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-black bg-[#d4ff00] hover:bg-[#b8e000] transition">
+        Copier le lien direct
+      </button>
+    </div>
+
   </div>
 </div>
 
-<script src="/js/csrf.js"></script>
-<script src="/js/dashboard.js" defer></script>
+<script src="/js/dashboard.js"></script>
 </body>
 </html>
