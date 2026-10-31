@@ -2982,4 +2982,32 @@
 
   loadLocalDjCache();
 
-  window.addEventListener("beforeunload", stopProgressUpdate);
+  // ── Maintien de l'écran allumé (Wake Lock API) ──
+  let djScreenWakeLock = null;
+  async function acquireDjWakeLock() {
+    if ("wakeLock" in navigator && !djScreenWakeLock) {
+      try {
+        djScreenWakeLock = await navigator.wakeLock.request("screen");
+        djScreenWakeLock.addEventListener("release", () => {
+          djScreenWakeLock = null;
+        });
+      } catch (e) {
+        console.debug("Wake Lock non disponible ou refusé:", e.message);
+      }
+    }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && !djScreenWakeLock) {
+      acquireDjWakeLock();
+    }
+  });
+  window.addEventListener("load", acquireDjWakeLock);
+  window.addEventListener("click", () => { if (!djScreenWakeLock) acquireDjWakeLock(); }, { once: true });
+
+  window.addEventListener("beforeunload", () => {
+    stopProgressUpdate();
+    if (djScreenWakeLock) {
+      djScreenWakeLock.release().catch(() => {});
+      djScreenWakeLock = null;
+    }
+  });
