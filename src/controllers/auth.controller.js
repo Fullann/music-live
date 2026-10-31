@@ -8,13 +8,17 @@ class AuthController {
     const state = crypto.randomBytes(20).toString("hex");
     req.session.oauthState = state;
 
-    // Inclure les scopes playback pour éviter une 2e autorisation sur la page DJ
+    // Inclure les scopes playback et playlists pour éviter les blocages de lecture de secours
     const scopes = [
       "user-read-private",
       "user-read-email",
       "user-read-playback-state",
       "user-modify-playback-state",
       "streaming",
+      "playlist-read-private",
+      "playlist-read-collaborative",
+      "playlist-modify-public",
+      "playlist-modify-private",
     ].join(" ");
 
     const params = new URLSearchParams({
@@ -106,7 +110,10 @@ class AuthController {
       }
 
       req.session.djId = djId;
-      res.redirect("/dashboard");
+      req.session.save((err) => {
+        if (err) console.error("Erreur sauvegarde session:", err);
+        res.redirect("/dashboard");
+      });
     } catch (err) {
       console.error(
         "Erreur auth Spotify login:",

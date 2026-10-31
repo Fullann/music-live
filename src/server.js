@@ -245,21 +245,25 @@ app.get("/register", (req, res) => {
 
 app.get("/dashboard", (req, res) => {
   if (!req.session.djId) return res.redirect("/");
+  res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
   res.sendFile(path.join(__dirname, "/views/dashboard.html"));
 });
 
 app.get("/profile", (req, res) => {
   if (!req.session.djId) return res.redirect("/");
+  res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
   res.sendFile(path.join(__dirname, "/views/profile.html"));
 });
 
 app.get("/history", (req, res) => {
   if (!req.session.djId) return res.redirect("/");
+  res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
   res.sendFile(__dirname + "/views/history.html");
 });
 
 app.get("/event/:eventId/stats", (req, res) => {
   if (!req.session.djId) return res.redirect("/");
+  res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
   res.sendFile(__dirname + "/views/event-stats.html");
 });
 
@@ -291,6 +295,7 @@ app.get("/dj/:eventId", async (req, res) => {
       return renderErrorPage(res, 403, "Accès refusé", "Ce n'est pas votre événement");
     }
 
+    res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
     res.sendFile(path.join(__dirname, "/views/dj.html"));
   } catch (error) {
     console.error("Erreur route /dj/:eventId:", error);

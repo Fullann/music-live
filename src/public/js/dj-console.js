@@ -29,6 +29,7 @@
   let fallbackPlaylistPreviewKey = null;
   let isFallbackFetching   = false;
   let isAutoPlayLocked     = false;
+  let lastPlayerState      = null;
   let currentPlayingRequestId = null;
   let currentPlayingUri = null;
   let projectionVisualsEnabled = false;
@@ -297,17 +298,40 @@
         });
       }, 300);
 
-      // Fin de piste -> Auto-play
-      if (state.position === 0 && state.paused && autoPlayEnabled && !isAutoPlayLocked && !isCrossfading) {
-        isAutoPlayLocked = true;
-        setTimeout(() => { isAutoPlayLocked = false; }, 5000);
-        if (queue.length > 0) {
-          playNextInQueue();
-        } else if (fallbackPlaylistUri) {
-          playFallbackTrack();
-        }
+      // ── Fin de piste -> Auto-play robuste ──
+      const wasPlaying = lastPlayerState && !lastPlayerState.paused;
+      const isNowPaused = state.paused;
+      const reachedEnd =
+        state.position === 0 ||
+        (state.duration > 0 && state.position >= state.duration - 2000) ||
+        (lastPlayerState && lastPlayerState.duration > 0 && lastPlayerState.position >= lastPlayerState.duration - 2500) ||
+        (lastPlayerState && state.track_window?.previous_tracks?.some((t) => t.id === lastPlayerState.trackId));
+
+      const isTrackEnded = wasPlaying && isNowPaused && reachedEnd;
+
+      lastPlayerState = {
+        paused: state.paused,
+        position: state.position,
+        duration: state.duration,
+        trackId: track.id,
+      };
+
+      if (isTrackEnded) {
+        handleTrackEnd();
       }
     });
+
+  function handleTrackEnd() {
+    if (!autoPlayEnabled || isAutoPlayLocked || isCrossfading) return;
+    isAutoPlayLocked = true;
+    setTimeout(() => { isAutoPlayLocked = false; }, 4000);
+
+    if (queue.length > 0) {
+      playNextInQueue();
+    } else if (fallbackPlaylistUri) {
+      playFallbackTrack();
+    }
+  }
 
     spotifyPlayer.addListener("initialization_error", ({ message }) => {
       console.error("Spotify initialization_error:", message);
@@ -350,6 +374,8 @@
         // Si aucun état actif (ex: première lecture ou réveil)
         if (queue.length > 0) {
           await playNextInQueue();
+        } else if (fallbackPlaylistUri) {
+          await playFallbackTrack();
         } else {
           // Essayer de reprendre via l'API REST
           const res = await fetch(`/api/spotify/resume/${eventId}`, {
@@ -365,6 +391,10 @@
       }
 
       if (state.paused) {
+        if (state.position === 0 || (state.duration > 0 && state.position >= state.duration - 1500)) {
+          if (queue.length > 0) return playNextInQueue();
+          if (fallbackPlaylistUri) return playFallbackTrack();
+        }
         await spotifyPlayer.resume().catch(async () => {
           await fetch(`/api/spotify/resume/${eventId}`, {
             method: "POST",
@@ -384,8 +414,12 @@
     } catch (err) {
       console.error("Erreur togglePlayPause:", err);
       // Dernier recours : tenter de relancer le prochain titre si la lecture est coupée
-      if (!isPlaying && queue.length > 0) {
-        playNextInQueue();
+      if (!isPlaying) {
+        if (queue.length > 0) {
+          playNextInQueue();
+        } else if (fallbackPlaylistUri) {
+          playFallbackTrack();
+        }
       }
     }
   }
@@ -400,10 +434,22 @@
   }
   function startProgressUpdate() {
     stopProgressUpdate();
-    progressInterval = setInterval(() => {
+    progressInterval = setInterval(async () => {
       if (isPlaying && currentDuration > 0) {
         currentPosition = Math.min(currentPosition + 1000, currentDuration);
         updateProgress();
+
+        // Watchdog fin de piste : si la lecture arrive à terme et que le SDK tarde à déclencher l'événement
+        if (currentPosition >= currentDuration - 500 && autoPlayEnabled && !isAutoPlayLocked && !isCrossfading) {
+          try {
+            const st = await spotifyPlayer?.getCurrentState();
+            if (st && (st.paused || st.position === 0 || st.position >= st.duration - 1500)) {
+              handleTrackEnd();
+            }
+          } catch {
+            handleTrackEnd();
+          }
+        }
       }
     }, 1000);
   }
@@ -1987,9 +2033,14 @@
   function extractPlaylistId(input) {
     if (!input) return null;
     input = input.trim();
-    if (input.startsWith("spotify:playlist:")) return input.split(":")[2];
+    if (input.startsWith("spotify:playlist:")) {
+      return input.split(":")[2]?.split("?")[0] || null;
+    }
     const m = input.match(/playlist\/([A-Za-z0-9]+)/);
-    return m ? m[1] : null;
+    if (m) return m[1];
+    // Accepter aussi un ID brut Spotify (22 caractères)
+    if (/^[A-Za-z0-9]{22}$/.test(input)) return input;
+    return null;
   }
 
   function updateFallbackPlaylistUI() {
@@ -2056,7 +2107,7 @@
 
   async function saveFallbackPlaylist() {
     const input = document.getElementById("fallbackPlaylistInput");
-    const val   = input.value.trim();
+    const val   = input ? input.value.trim() : "";
     const id    = val ? extractPlaylistId(val) : null;
 
     if (val && !id) {
@@ -2069,27 +2120,43 @@
     updateFallbackPlaylistUI();
     await loadFallbackPlaylistPreview();
     showToast(fallbackPlaylistUri ? "Playlist de secours enregistrée" : "Playlist de secours retirée");
+
+    // Lancer automatiquement si la queue est vide et rien ne joue
+    if (fallbackPlaylistUri && queue.length === 0 && (!isPlaying || currentPosition === 0)) {
+      tryStartFallback();
+    }
   }
 
   function tryStartFallback() {
-    if (autoPlayEnabled && queue.length === 0 && fallbackPlaylistUri && deviceId) {
+    if (autoPlayEnabled && queue.length === 0 && fallbackPlaylistUri) {
       playFallbackTrack();
     }
   }
 
   async function playFallbackTrack() {
-    if (!fallbackPlaylistUri || !deviceId || isFallbackFetching) return;
+    if (!fallbackPlaylistUri || isFallbackFetching) return;
     const playlistId = extractPlaylistId(fallbackPlaylistUri);
     if (!playlistId) return;
+
+    if (!deviceId) {
+      await reconnectSpotifyPlayer(true);
+      if (!deviceId) return;
+    }
 
     isFallbackFetching = true;
     isAutoPlayLocked   = true; // Bloquer l'auto-play pendant le chargement
     try {
       const res = await fetch(`/api/spotify/playlist/${eventId}/${playlistId}`);
-      if (!res.ok) return;
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        showToast("Erreur playlist secours : " + (errData.error || "Impossible de charger"), "error");
+        return;
+      }
       const track = await res.json();
       if (!track.uri) return;
       await _startPlayback(track.uri);
+      currentPlayingRequestId = null;
+      currentPlayingUri = track.uri;
       try {
         const csrf = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] || "";
         await fetch(`/api/events/${eventId}/fallback-played`, {
@@ -2103,12 +2170,13 @@
       } catch (traceErr) {
         console.warn("Trace fallback-played:", traceErr);
       }
-      showToast(`Secours : ${track.name} — ${track.artist}`);
+      showToast(`Secours : ${track.name} — ${track.artist}`, "info");
     } catch (e) {
       console.error("Erreur fallback playlist:", e);
+      showToast("Erreur lors de la lecture de la playlist de secours", "error");
     } finally {
-      // Libérer les verrous après 8 s (délai de démarrage + stabilisation)
-      setTimeout(() => { isFallbackFetching = false; isAutoPlayLocked = false; }, 8000);
+      // Libérer les verrous après 4 s
+      setTimeout(() => { isFallbackFetching = false; isAutoPlayLocked = false; }, 4000);
     }
   }
 

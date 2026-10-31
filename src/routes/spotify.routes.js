@@ -154,6 +154,10 @@ router.get(
       "streaming",
       "user-read-email",
       "user-read-private",
+      "playlist-read-private",
+      "playlist-read-collaborative",
+      "playlist-modify-public",
+      "playlist-modify-private",
     ];
 
     const authUrl =
@@ -495,7 +499,13 @@ router.get(
   eventIdValidator,
   handleValidationErrors,
   async (req, res) => {
-    const { eventId, playlistId } = req.params;
+    let { eventId, playlistId } = req.params;
+    if (playlistId.startsWith("spotify:playlist:")) {
+      playlistId = playlistId.split(":")[2]?.split("?")[0] || playlistId;
+    }
+    const cleanMatch = playlistId.match(/([A-Za-z0-9]{22})/);
+    if (cleanMatch) playlistId = cleanMatch[1];
+
     try {
       const token = await getValidEventToken(eventId);
       if (!token) {
@@ -523,7 +533,10 @@ router.get(
         "Erreur playlist-info:",
         error.response?.data || error.message,
       );
-      return res.status(500).json({ error: "Erreur lors de la récupération de la playlist" });
+      const msg = error.response?.status === 404
+        ? "Playlist introuvable ou privée (vérifiez vos permissions)"
+        : "Erreur lors de la récupération de la playlist";
+      return res.status(error.response?.status || 500).json({ error: msg });
     }
   },
 );
@@ -536,7 +549,12 @@ router.get(
   eventIdValidator,
   handleValidationErrors,
   async (req, res) => {
-    const { eventId, playlistId } = req.params;
+    let { eventId, playlistId } = req.params;
+    if (playlistId.startsWith("spotify:playlist:")) {
+      playlistId = playlistId.split(":")[2]?.split("?")[0] || playlistId;
+    }
+    const cleanMatch = playlistId.match(/([A-Za-z0-9]{22})/);
+    if (cleanMatch) playlistId = cleanMatch[1];
 
     try {
       const token = await getValidEventToken(eventId);
@@ -559,26 +577,49 @@ router.get(
         return res.status(404).json({ error: "Playlist vide" });
       }
 
-      // 2. Tenter jusqu'à 5 fois d'obtenir une piste valide (éviter fichiers locaux)
+      // 2. Récupérer un lot de pistes (jusqu'à 20) autour d'un offset aléatoire
+      const batchSize = Math.min(20, total);
+      const maxOffset = Math.max(0, total - batchSize);
+      const offset = Math.floor(Math.random() * (maxOffset + 1));
+
+      const tracksRes = await axios.get(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        {
+          params: {
+            fields: "items(track(id,name,uri,artists(name),album(images),duration_ms))",
+            limit: batchSize,
+            offset,
+          },
+          headers,
+        },
+      );
+
+      const items = tracksRes.data.items || [];
+      const validTracks = items
+        .map((it) => it.track)
+        .filter((t) => t && t.uri && t.uri.startsWith("spotify:track:"));
+
       let track = null;
-      for (let attempt = 0; attempt < 5; attempt++) {
-        const offset = Math.floor(Math.random() * total);
-        const tracksRes = await axios.get(
+      if (validTracks.length > 0) {
+        track = validTracks[Math.floor(Math.random() * validTracks.length)];
+      } else {
+        // En dernier recours, tenter depuis les 10 premières pistes
+        const fallbackRes = await axios.get(
           `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
           {
             params: {
-              fields: "items(track(id,name,uri,artists,album,preview_url,duration_ms))",
-              limit:  1,
-              offset,
+              fields: "items(track(id,name,uri,artists(name),album(images),duration_ms))",
+              limit: Math.min(10, total),
+              offset: 0,
             },
             headers,
           },
         );
-
-        const item = tracksRes.data.items?.[0]?.track;
-        if (item && item.uri && item.uri.startsWith("spotify:track:")) {
-          track = item;
-          break;
+        const fbValid = (fallbackRes.data.items || [])
+          .map((it) => it.track)
+          .filter((t) => t && t.uri && t.uri.startsWith("spotify:track:"));
+        if (fbValid.length > 0) {
+          track = fbValid[Math.floor(Math.random() * fbValid.length)];
         }
       }
 
@@ -589,9 +630,9 @@ router.get(
       res.json({
         id:           track.id,
         name:         track.name,
-        artist:       track.artists.map((a) => a.name).join(", "),
+        artist:       (track.artists || []).map((a) => a.name).join(", "),
         uri:          track.uri,
-        image:        track.album.images?.[0]?.url || null,
+        image:        track.album?.images?.[0]?.url || null,
         duration_ms:  track.duration_ms,
         playlistName,
       });
@@ -600,7 +641,10 @@ router.get(
         "Erreur playlist fallback:",
         error.response?.data || error.message,
       );
-      res.status(500).json({ error: "Erreur lors de la récupération de la playlist" });
+      const msg = error.response?.status === 404
+        ? "Playlist introuvable ou privée"
+        : "Erreur lors de la récupération de la playlist";
+      res.status(error.response?.status || 500).json({ error: msg });
     }
   },
 );
