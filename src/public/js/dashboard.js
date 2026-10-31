@@ -47,13 +47,23 @@ function goToDJ(eventId) {
   window.location.href = `/dj/${eventId}`;
 }
 
+// ── Helper CSRF ──
+function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 // ── Clôturer une soirée ──
 async function endEvent(eventId, eventName) {
   if (!confirm(`Terminer la soirée "${eventName}" ?\n\nCela va archiver la soirée et sauvegarder l'historique et les statistiques complètes.`)) return;
   try {
+    const csrf = getCsrfToken();
     const response = await fetch(`/api/events/${eventId}/end`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrf ? { "x-csrf-token": csrf } : {}),
+      },
       cache: "no-cache",
     });
     const data = await response.json();
@@ -71,7 +81,11 @@ async function endEvent(eventId, eventName) {
 async function reopenEvent(eventId, name) {
   if (!confirm(`Rouvrir la soirée "${name}" ?\n\nLa soirée redeviendra active et vous pourrez reprendre les demandes en direct.`)) return;
   try {
-    const res = await fetch(`/api/events/${eventId}/reopen`, { method: "POST" });
+    const csrf = getCsrfToken();
+    const res = await fetch(`/api/events/${eventId}/reopen`, {
+      method: "POST",
+      headers: csrf ? { "x-csrf-token": csrf } : {},
+    });
     const data = await res.json();
     if (data.success) {
       window.location.href = `/dj/${eventId}`;
@@ -94,9 +108,13 @@ async function handleCreateEvent(e) {
     : null;
 
   try {
+    const csrf = getCsrfToken();
     const response = await fetch("/api/events", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrf ? { "x-csrf-token": csrf } : {}),
+      },
       body: JSON.stringify({ name, starts_at }),
     });
     const data = await response.json();
@@ -115,7 +133,13 @@ async function handleCreateEvent(e) {
 
 // ── Déconnexion ──
 async function logout() {
-  try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+  try {
+    const csrf = getCsrfToken();
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: csrf ? { "x-csrf-token": csrf } : {},
+    });
+  } catch {}
   window.location.href = "/login";
 }
 

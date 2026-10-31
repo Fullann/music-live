@@ -1,8 +1,11 @@
 (() => {
+  if (typeof window === "undefined" || window.__csrf_fetch_patched) return;
+  window.__csrf_fetch_patched = true;
+
   function getCookie(name) {
-    const cookies = document.cookie ? document.cookie.split("; ") : [];
+    const cookies = document.cookie ? document.cookie.split(";") : [];
     for (const cookie of cookies) {
-      const [key, ...valueParts] = cookie.split("=");
+      const [key, ...valueParts] = cookie.trim().split("=");
       if (key === name) {
         return decodeURIComponent(valueParts.join("="));
       }
@@ -13,14 +16,22 @@
   const originalFetch = window.fetch.bind(window);
 
   window.fetch = (input, init = {}) => {
-    const method = (init.method || "GET").toUpperCase();
+    const method = (
+      init.method ||
+      (typeof input === "object" && input?.method) ||
+      "GET"
+    ).toUpperCase();
     const isSafeMethod = method === "GET" || method === "HEAD" || method === "OPTIONS";
 
     if (isSafeMethod) {
       return originalFetch(input, init);
     }
 
-    const headers = new Headers(init.headers || {});
+    const headers = new Headers(
+      init.headers ||
+      (typeof input === "object" && input?.headers) ||
+      {}
+    );
     const csrfToken = getCookie("XSRF-TOKEN");
 
     if (csrfToken && !headers.has("x-csrf-token")) {

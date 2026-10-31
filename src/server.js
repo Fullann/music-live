@@ -106,6 +106,7 @@ app.use((req, res, next) => {
 
   // Exposer le token dans un cookie lisible par JS (double-submit cookie pattern)
   res.cookie("XSRF-TOKEN", req.session.csrfToken, {
+    path: "/",
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     httpOnly: false,

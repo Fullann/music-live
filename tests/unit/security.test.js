@@ -38,4 +38,20 @@ describe("Security Middleware Tests", () => {
     assert.strictEqual(nextCalled, true);
     assert.strictEqual(req.query.q, "Search Query");
   });
+
+  it("should ensure views with mutating actions include csrf.js", () => {
+    const fs = require("fs");
+    const path = require("path");
+
+    const viewsToCheck = ["dashboard.html", "dj.html", "history.html", "event-stats.html"];
+    for (const viewName of viewsToCheck) {
+      const filePath = path.join(__dirname, "../../src/views", viewName);
+      const content = fs.readFileSync(filePath, "utf8");
+      assert.match(
+        content,
+        /src=["']\/js\/csrf\.js(\?v=[^"']+)?["']/,
+        `Expected ${viewName} to include /js/csrf.js`
+      );
+    }
+  });
 });
