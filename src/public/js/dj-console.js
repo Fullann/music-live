@@ -5,7 +5,10 @@
     throw new Error("EventId manquant");
   }
 
-  const socket = io();
+  const socket = io({
+    transports: ["polling"],
+    upgrade: false,
+  });
   let pendingRequests  = [];
   let queue            = [];
   let queueSortable    = null; // instance SortableJS unique pour la queue
@@ -228,7 +231,7 @@
       volume: 0.8,
     });
 
-    spotifyPlayer.addListener("ready", ({ device_id }) => {
+    spotifyPlayer.addListener("ready", async ({ device_id }) => {
       deviceId = device_id;
       console.log("Spotify Web Playback SDK ready on device:", deviceId);
       document.getElementById("spotifyPlayer").classList.remove("hidden");
@@ -237,13 +240,20 @@
       hideSpotifyError();
 
       // Transférer la lecture sur le web player pour s'assurer qu'il est actif
-      fetch(`/api/spotify/transfer/${eventId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ device_id: deviceId, play: false }),
-      }).catch(() => {});
+      try {
+        await fetch(`/api/spotify/transfer/${eventId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_id: deviceId, play: false }),
+        });
+      } catch (err) {
+        console.warn("Transfer initialisation player:", err);
+      }
 
-      tryStartFallback();
+      // Laisser un court délai de synchronisation Spotify Connect avant de tenter la lecture de secours
+      setTimeout(() => {
+        tryStartFallback();
+      }, 1000);
     });
 
     spotifyPlayer.addListener("not_ready", ({ device_id }) => {
@@ -1810,7 +1820,10 @@
     } catch { alert("Erreur lors de la fin de la soirée"); }
   }
 
-  async function _startPlayback(uri) {
+  async function _startPlayback(uri, isRetry = false) {
+    if (!deviceId) {
+      await reconnectSpotifyPlayer(true);
+    }
     const response = await fetch(`/api/spotify/play/${eventId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1818,6 +1831,21 @@
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
+
+      // Si appareil non reconnu (404), tentative de synchronisation via transfer puis rejeu unique
+      if (!isRetry && (response.status === 404 || response.status === 400) && deviceId) {
+        console.warn("[_startPlayback] Appareil non synchronisé, tentative transfert et réessai...");
+        try {
+          await fetch(`/api/spotify/transfer/${eventId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_id: deviceId, play: false }),
+          });
+          await new Promise((r) => setTimeout(r, 800));
+          return await _startPlayback(uri, true);
+        } catch {}
+      }
+
       if (response.status === 404) {
         showSpotifyError("Aucun appareil Spotify actif — ouvre Spotify sur cet appareil et réessaie.");
       } else if (response.status === 403) {
@@ -2250,10 +2278,9 @@
       } catch (traceErr) {
         console.warn("Trace fallback-played:", traceErr);
       }
-      showToast(`Secours : ${track.name} — ${track.artist}`, "info");
     } catch (e) {
-      console.error("Erreur fallback playlist:", e);
-      showToast("Erreur lors de la lecture de la playlist de secours", "error");
+      console.warn("Erreur lecture playlist de secours:", e?.message || e);
+      showToast("Lecture de secours en attente de synchronisation du lecteur", "info");
     } finally {
       // Libérer les verrous après 4 s
       setTimeout(() => { isFallbackFetching = false; isAutoPlayLocked = false; }, 4000);

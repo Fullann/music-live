@@ -1,5 +1,8 @@
   const eventId = window.location.pathname.split("/")[2];
-  const socket  = io();
+  const socket  = io({
+    transports: ["polling"],
+    upgrade: false,
+  });
 
   let fullQueue        = [];
   let searchTimeout;

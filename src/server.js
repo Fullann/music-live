@@ -4,8 +4,10 @@ const app = express();
 app.set('trust proxy', 1);
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, {
-  // Désactivé : perMessageDeflate utilise des bits réservés WebSocket
-  // que certains proxies (nginx / Cloudflare) ne gèrent pas, causant des erreurs 'reserved bits are on'.
+  // Désactivé : perMessageDeflate et les upgrades WebSocket provoquent des erreurs de bits réservés
+  // derrière les proxys mutualisés (o2switch / Phusion Passenger / Apache).
+  allowUpgrades: false,
+  transports: ["polling"],
   perMessageDeflate: false,
   httpCompression: false,
 });

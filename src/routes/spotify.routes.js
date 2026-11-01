@@ -221,53 +221,80 @@ router.post(
         ? `https://api.spotify.com/v1/me/player/play?device_id=${device_id}`
         : "https://api.spotify.com/v1/me/player/play";
 
-      await axios.put(
-        playUrl,
-        { uris: [uri] },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      let lastError;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          await axios.put(
+            playUrl,
+            { uris: [uri] },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
+          return res.json({ success: true, device_id });
+        } catch (err) {
+          lastError = err;
+          // Si 404 (appareil non trouvé) et device_id fourni, forcer un transfert actif puis re-essayer
+          if (err.response?.status === 404 && device_id && attempt === 1) {
+            try {
+              await axios.put(
+                "https://api.spotify.com/v1/me/player",
+                { device_ids: [device_id], play: false },
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                },
+              );
+              await new Promise((r) => setTimeout(r, 600));
+              continue;
+            } catch {}
+          }
+          break;
+        }
+      }
 
-      res.json({ success: true, device_id });
-    } catch (error) {
       console.error(
         "Erreur lecture Spotify:",
-        error.response?.data || error.message,
+        lastError.response?.data || lastError.message,
       );
 
       // Gérer les erreurs spécifiques
-      if (error.response?.status === 404) {
-        const errorReason = error.response.data?.error?.reason;
+      if (lastError.response?.status === 404) {
+        const errorReason = lastError.response.data?.error?.reason;
 
         if (errorReason === "NO_ACTIVE_DEVICE") {
           return res.status(404).json({
             error:
               "Aucun appareil actif. Ouvrez Spotify Desktop ou attendez que le Web Player se connecte.",
-            details: error.response.data,
+            details: lastError.response.data,
           });
         }
 
         return res.status(404).json({
           error: "Appareil non trouvé",
-          details: error.response.data,
+          details: lastError.response.data,
         });
       }
 
-      if (error.response?.status === 403) {
+      if (lastError.response?.status === 403) {
         return res.status(403).json({
           error: "Spotify Premium requis",
-          details: error.response.data,
+          details: lastError.response.data,
         });
       }
 
       res.status(500).json({
         error: "Erreur lors de la lecture",
-        details: error.response?.data,
+        details: lastError.response?.data,
       });
+    } catch (error) {
+      console.error("Erreur lecture Spotify:", error);
+      res.status(500).json({ error: "Erreur serveur" });
     }
   },
 );
@@ -343,17 +370,35 @@ router.post(
       const token = await getValidEventToken(eventId);
       if (!token) return res.status(401).json({ error: "Token Spotify non valide" });
 
-      await axios.put(
-        "https://api.spotify.com/v1/me/player",
-        { device_ids: [device_id], play: !!play },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      res.json({ success: true, device_id });
+      let lastError;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await axios.put(
+            "https://api.spotify.com/v1/me/player",
+            { device_ids: [device_id], play: !!play },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
+          return res.json({ success: true, device_id });
+        } catch (err) {
+          lastError = err;
+          // Si 404, Spotify Connect peut prendre quelques centaines de millisecondes pour synchroniser le nouveau device_id
+          if (err.response?.status === 404 && attempt < 3) {
+            await new Promise((r) => setTimeout(r, 500 * attempt));
+            continue;
+          }
+          break;
+        }
+      }
+
+      res.status(lastError?.response?.status || 500).json({
+        error: "Impossible de transférer la lecture",
+        details: lastError?.response?.data,
+      });
     } catch (error) {
       res.status(error.response?.status || 500).json({ error: "Impossible de transférer la lecture", details: error.response?.data });
     }
@@ -825,36 +870,55 @@ router.post(
         return res.status(400).json({ error: "Aucun morceau joué à exporter dans la playlist" });
       }
 
-      // 2. Récupérer l'ID utilisateur Spotify du DJ
-      const meRes = await axios.get("https://api.spotify.com/v1/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const spotifyUserId = meRes.data?.id;
-      if (!spotifyUserId) {
-        return res.status(400).json({ error: "Impossible de récupérer le profil Spotify" });
-      }
-
-      // 3. Créer la playlist publique sur Spotify
+      // 2. Créer la playlist sur Spotify via le nouvel endpoint POST /v1/me/playlists
       const dateStr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
-      const createRes = await axios.post(
-        `https://api.spotify.com/v1/users/${spotifyUserId}/playlists`,
-        {
-          name: `Music Live — ${eventName} (${dateStr})`,
-          description: `Playlist officielle de la soirée "${eventName}" mixée en direct sur Music Live 🎵`,
-          public: true,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+      const playlistName = `Music Live — ${eventName} (${dateStr})`;
+      const playlistDesc = `Playlist officielle de la soirée "${eventName}" mixée en direct sur Music Live`;
+
+      let createRes;
+      try {
+        // Tentative de création en public
+        createRes = await axios.post(
+          "https://api.spotify.com/v1/me/playlists",
+          {
+            name: playlistName,
+            description: playlistDesc,
+            public: true,
           },
-        },
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      } catch (pubErr) {
+        // Si 403 Forbidden sur public: true, basculer automatiquement en privé (scope playlist-modify-private)
+        if (pubErr.response?.status === 403 || pubErr.response?.status === 400) {
+          console.warn("Création playlist publique refusée, bascule en playlist privée:", pubErr.response?.data || pubErr.message);
+          createRes = await axios.post(
+            "https://api.spotify.com/v1/me/playlists",
+            {
+              name: playlistName,
+              description: playlistDesc,
+              public: false,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
+        } else {
+          throw pubErr;
+        }
+      }
 
       const playlistId = createRes.data?.id;
       const playlistUrl = createRes.data?.external_urls?.spotify || `https://open.spotify.com/playlist/${playlistId}`;
 
-      // 4. Ajouter les morceaux par lots de 100
+      // 3. Ajouter les morceaux par lots de 100
       const uris = playedRows.map((r) => r.spotify_uri).filter(Boolean);
       for (let i = 0; i < uris.length; i += 100) {
         const batch = uris.slice(i, i + 100);
@@ -870,7 +934,7 @@ router.post(
         );
       }
 
-      // 5. Sauvegarder l'URL sur l'événement
+      // 4. Sauvegarder l'URL sur l'événement
       await db.query(
         "UPDATE events SET after_party_playlist_url = ? WHERE id = ?",
         [playlistUrl, eventId],
@@ -884,7 +948,22 @@ router.post(
       });
     } catch (error) {
       console.error("Erreur export playlist Spotify:", error.response?.data || error.message);
-      res.status(500).json({ error: "Erreur lors de la création de la playlist Spotify" });
+      if (error.response?.status === 403) {
+        return res.status(403).json({
+          error: "Permissions Spotify insuffisantes pour créer une playlist. Reconnectez votre compte Spotify.",
+          details: error.response.data,
+        });
+      }
+      if (error.response?.status === 401) {
+        return res.status(401).json({
+          error: "Session Spotify expirée. Reconnectez-vous.",
+          details: error.response.data,
+        });
+      }
+      res.status(error.response?.status || 500).json({
+        error: error.response?.data?.error?.message || "Erreur lors de la création de la playlist Spotify",
+        details: error.response?.data,
+      });
     }
   },
 );

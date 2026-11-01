@@ -652,8 +652,10 @@
     }, 20000);
   }
 
-  // ── Socket : mises à jour immédiates quand live ──
-  const socket = io();
+  const socket = io({
+    transports: ["polling"],
+    upgrade: false,
+  });
   socket.on("connect", () => {
     if (isLive) socket.emit("join-event", eventId);
   });
