@@ -243,19 +243,29 @@ describe("Stage Experience, Hype Meter, Blind-Test & Harmonic Matching Tests", (
       assert.match(qrDisplayHtml, /profile-stage/);
     });
 
-    it("should verify that user.html contains blindTestGuestModal", () => {
+    it("should verify that user.html contains blindTestGuestModal and myTrackAlertBanner", () => {
       const userHtml = fs.readFileSync(path.join(__dirname, "../../src/views/user.html"), "utf8");
       assert.match(userHtml, /id="blindTestGuestModal"/);
       assert.match(userHtml, /id="guestBtOptionsContainer"/);
       assert.match(userHtml, /id="guestBtTimerBar"/);
+      assert.match(userHtml, /id="myTrackAlertBanner"/);
+      assert.match(userHtml, /id="myTrackAlertTitle"/);
+      assert.match(userHtml, /id="btnCloseMyTrackAlert"/);
     });
 
-    it("should verify that dj.html contains blind-test and screen profile controls", () => {
+    it("should verify that dj.html contains soundboard, secours offline, and export modal", () => {
       const djHtml = fs.readFileSync(path.join(__dirname, "../../src/views/dj.html"), "utf8");
       assert.match(djHtml, /id="btnBlindTestFlash"/);
       assert.match(djHtml, /id="blindTestDjModal"/);
       assert.match(djHtml, /id="btnOpenScreenBar"/);
       assert.match(djHtml, /id="btnOpenScreenStage"/);
+      assert.match(djHtml, /id="btnToggleSoundboard"/);
+      assert.match(djHtml, /id="djSoundboardPanel"/);
+      assert.match(djHtml, /id="btnEmergencyOfflineToggle"/);
+      assert.match(djHtml, /id="emergencyOfflineBar"/);
+      assert.match(djHtml, /id="spotifyExportModal"/);
+      assert.match(djHtml, /id="spotifyExportQrImg"/);
     });
   });
 });
+

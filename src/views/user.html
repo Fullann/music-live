@@ -153,6 +153,26 @@
   <!-- ── TAB : PROPOSER ──────────────────────────────────────── -->
   <div id="tab-search" class="tab-panel active no-scrollbar px-4 pt-4 gap-3">
 
+    <!-- Alerte interactive : Morceau à venir ou en cours de diffusion (Idée 4) -->
+    <div id="myTrackAlertBanner" class="hidden shrink-0 rounded-2xl p-4 mb-2 shadow-2xl transition-all duration-300 border border-purple-500/40" style="background: radial-gradient(circle at 10% 50%, rgba(139,92,246,0.3) 0%, rgba(236,72,153,0.2) 60%, var(--bg-surface) 100%)">
+      <div class="flex items-center gap-3.5">
+        <div id="myTrackAlertIcon" class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-purple-500/30 border border-purple-400/40 shadow-inner animate-bounce">
+          🚨
+        </div>
+        <div class="flex-1 min-w-0">
+          <p id="myTrackAlertTitle" class="text-xs font-black uppercase tracking-wider text-purple-300">
+            Prépare-toi !
+          </p>
+          <p id="myTrackAlertDesc" class="text-xs font-bold text-white mt-0.5 truncate">
+            Ton morceau passe dans quelques instants !
+          </p>
+        </div>
+        <button id="btnCloseMyTrackAlert" type="button" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white bg-white/5 border border-white/10 shrink-0 cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
     <!-- My request status card (hidden until request made) -->
     <div id="myRequestCard" class="hidden shrink-0 rounded-2xl p-4" style="background:var(--bg-surface);border:1px solid var(--border)">
       <div class="flex items-center gap-3">

@@ -572,7 +572,7 @@
       const data = await res.json();
       if (res.ok && data.success) {
         showToast(`🎵 Playlist Spotify créée (${data.totalTracks} titres) !`);
-        window.open(data.playlistUrl, "_blank");
+        openSpotifyExportModal(data.playlistUrl, data.totalTracks);
       } else {
         showToast(data.error || "Erreur lors de la création de la playlist", "error");
       }
@@ -2616,6 +2616,434 @@
   }
   function markPlayed(requestId)    { socket.emit("mark-played", { eventId, requestId }); }
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // ── IDÉE 1 : SOUNDBOARD DJ & JINGLES INSTANTANÉS (WEB AUDIO API) ─────────
+  // ═════════════════════════════════════════════════════════════════════════
+  let _djAudioCtx = null;
+  function getDjAudioContext() {
+    if (!_djAudioCtx) {
+      _djAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (_djAudioCtx.state === "suspended") {
+      _djAudioCtx.resume().catch(() => {});
+    }
+    return _djAudioCtx;
+  }
+
+  function getSoundboardVolume() {
+    const el = document.getElementById("soundboardVolume");
+    return el ? (parseFloat(el.value) || 0.8) : 0.8;
+  }
+
+  function playSoundboardSound(type) {
+    try {
+      const ctx = getDjAudioContext();
+      const masterVol = getSoundboardVolume();
+      const now = ctx.currentTime;
+
+      // Animation visuelle de frappe sur le pad
+      const pad = document.querySelector(`.soundboard-pad[data-sound="${type}"]`);
+      if (pad) {
+        pad.classList.add("ring-2", "ring-white", "scale-95");
+        setTimeout(() => pad.classList.remove("ring-2", "ring-white", "scale-95"), 180);
+      }
+
+      const mainGain = ctx.createGain();
+      mainGain.gain.setValueAtTime(masterVol, now);
+      mainGain.connect(ctx.destination);
+
+      if (type === "airhorn") {
+        // Riff légendaire Reggae Stadium Airhorn (3 bips courts + 1 grand blast cuivré avec pitch bend)
+        const notes = [
+          { time: 0, dur: 0.11 },
+          { time: 0.15, dur: 0.11 },
+          { time: 0.30, dur: 0.11 },
+          { time: 0.46, dur: 0.58, bend: true },
+        ];
+        const freqs = [466.16, 587.33, 783.99]; // Accord cuivré riche Bb4, D5, G5
+
+        notes.forEach(({ time, dur, bend }) => {
+          const startTime = now + time;
+          const stopTime = startTime + dur;
+          const noteGain = ctx.createGain();
+          noteGain.gain.setValueAtTime(0, startTime);
+          noteGain.gain.linearRampToValueAtTime(0.35, startTime + 0.02);
+          noteGain.gain.setValueAtTime(0.35, stopTime - 0.03);
+          noteGain.gain.exponentialRampToValueAtTime(0.001, stopTime);
+          noteGain.connect(mainGain);
+
+          freqs.forEach((freq) => {
+            [-8, 0, 8].forEach((detune) => {
+              const osc = ctx.createOscillator();
+              osc.type = "sawtooth";
+              osc.frequency.setValueAtTime(freq, startTime);
+              osc.detune.setValueAtTime(detune, startTime);
+              if (bend) {
+                osc.frequency.setValueAtTime(freq, startTime + 0.28);
+                osc.frequency.exponentialRampToValueAtTime(freq * 0.72, stopTime);
+              }
+              const filter = ctx.createBiquadFilter();
+              filter.type = "lowpass";
+              filter.frequency.setValueAtTime(3400, startTime);
+              osc.connect(filter);
+              filter.connect(noteGain);
+              osc.start(startTime);
+              osc.stop(stopTime);
+            });
+          });
+        });
+      } else if (type === "scratch") {
+        // Scratch Vinyle Réaliste (Bruit blanc & balayage fréquentiel résonant)
+        const bufferSize = Math.floor(ctx.sampleRate * 0.45);
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.Q.setValueAtTime(8, now);
+        filter.frequency.setValueAtTime(400, now);
+        filter.frequency.exponentialRampToValueAtTime(2900, now + 0.09);
+        filter.frequency.exponentialRampToValueAtTime(600, now + 0.18);
+        filter.frequency.exponentialRampToValueAtTime(3200, now + 0.28);
+        filter.frequency.exponentialRampToValueAtTime(300, now + 0.42);
+
+        const scratchGain = ctx.createGain();
+        scratchGain.gain.setValueAtTime(0.85, now);
+        scratchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+
+        whiteNoise.connect(filter);
+        filter.connect(scratchGain);
+        scratchGain.connect(mainGain);
+        whiteNoise.start(now);
+        whiteNoise.stop(now + 0.45);
+      } else if (type === "drumroll") {
+        // Roulement de caisse claire en crescendo + Crash Cymbale final
+        const rollDuration = 0.95;
+        const hits = 18;
+        for (let i = 0; i < hits; i++) {
+          const hitTime = now + (i / hits) * rollDuration;
+          const hitVol = 0.12 + (i / hits) * 0.65;
+          const noise = ctx.createBufferSource();
+          const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.05), ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let j = 0; j < data.length; j++) data[j] = Math.random() * 2 - 1;
+          noise.buffer = buf;
+
+          const nFilter = ctx.createBiquadFilter();
+          nFilter.type = "highpass";
+          nFilter.frequency.setValueAtTime(1200, hitTime);
+
+          const nGain = ctx.createGain();
+          nGain.gain.setValueAtTime(hitVol, hitTime);
+          nGain.gain.exponentialRampToValueAtTime(0.001, hitTime + 0.045);
+
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(mainGain);
+          noise.start(hitTime);
+          noise.stop(hitTime + 0.05);
+        }
+
+        // Cymbale Crash finale
+        const crashTime = now + rollDuration;
+        const crashBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 1.5), ctx.sampleRate);
+        const cData = crashBuf.getChannelData(0);
+        for (let j = 0; j < cData.length; j++) cData[j] = Math.random() * 2 - 1;
+        const crash = ctx.createBufferSource();
+        crash.buffer = crashBuf;
+
+        const crashFilter = ctx.createBiquadFilter();
+        crashFilter.type = "highpass";
+        crashFilter.frequency.setValueAtTime(3600, crashTime);
+
+        const crashGain = ctx.createGain();
+        crashGain.gain.setValueAtTime(0.85, crashTime);
+        crashGain.gain.exponentialRampToValueAtTime(0.001, crashTime + 1.4);
+
+        crash.connect(crashFilter);
+        crashFilter.connect(crashGain);
+        crashGain.connect(mainGain);
+        crash.start(crashTime);
+        crash.stop(crashTime + 1.5);
+      } else if (type === "cheer") {
+        // Clameur & applaudissements de foule
+        const cheerDur = 2.0;
+        const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * cheerDur), ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        const cheerSource = ctx.createBufferSource();
+        cheerSource.buffer = buf;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(1100, now);
+        filter.Q.setValueAtTime(1.4, now);
+
+        const cheerGain = ctx.createGain();
+        cheerGain.gain.setValueAtTime(0.01, now);
+        cheerGain.gain.linearRampToValueAtTime(0.85, now + 0.35);
+        cheerGain.gain.setValueAtTime(0.85, now + 1.1);
+        cheerGain.gain.exponentialRampToValueAtTime(0.001, now + cheerDur);
+
+        cheerSource.connect(filter);
+        filter.connect(cheerGain);
+        cheerGain.connect(mainGain);
+        cheerSource.start(now);
+        cheerSource.stop(now + cheerDur);
+      } else if (type === "bassdrop") {
+        // 808 Sub-Bass Drop profond & percutant
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(155, now);
+        osc.frequency.exponentialRampToValueAtTime(36, now + 1.6);
+
+        const drive = ctx.createGain();
+        drive.gain.setValueAtTime(1.15, now);
+
+        const dropGain = ctx.createGain();
+        dropGain.gain.setValueAtTime(0.95, now);
+        dropGain.gain.setValueAtTime(0.95, now + 0.35);
+        dropGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+        osc.connect(drive);
+        drive.connect(dropGain);
+        dropGain.connect(mainGain);
+        osc.start(now);
+        osc.stop(now + 1.85);
+      } else if (type === "laser") {
+        // Laser Club Rapide (3 tirs)
+        for (let i = 0; i < 3; i++) {
+          const zapTime = now + i * 0.11;
+          const osc = ctx.createOscillator();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(3200, zapTime);
+          osc.frequency.exponentialRampToValueAtTime(120, zapTime + 0.08);
+
+          const zapGain = ctx.createGain();
+          zapGain.gain.setValueAtTime(0.55, zapTime);
+          zapGain.gain.exponentialRampToValueAtTime(0.001, zapTime + 0.08);
+
+          osc.connect(zapGain);
+          zapGain.connect(mainGain);
+          osc.start(zapTime);
+          osc.stop(zapTime + 0.09);
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur Web Audio Soundboard:", e);
+    }
+  }
+
+  // Bindings panneau Soundboard
+  document.getElementById("btnToggleSoundboard")?.addEventListener("click", () => {
+    document.getElementById("djSoundboardPanel")?.classList.toggle("hidden");
+  });
+  document.getElementById("btnCloseSoundboard")?.addEventListener("click", () => {
+    document.getElementById("djSoundboardPanel")?.classList.add("hidden");
+  });
+  document.querySelectorAll(".soundboard-pad").forEach((pad) => {
+    pad.addEventListener("click", () => {
+      const sound = pad.dataset.sound;
+      if (sound) playSoundboardSound(sound);
+    });
+  });
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // ── IDÉE 5 : SECOURS HORS-LIGNE & BEAT SYNTHÉTISÉ AUTONOME (WEB AUDIO) ───
+  // ═════════════════════════════════════════════════════════════════════════
+  let _isEmergencyOffline = false;
+  let _emergencyTimer = null;
+  let _emergencyMasterGain = null;
+  let _emergencyStep = 0;
+
+  function getEmergencyVolume() {
+    const el = document.getElementById("emergencyVolume");
+    return el ? (parseFloat(el.value) || 0.75) : 0.75;
+  }
+
+  function startEmergencyOfflinePlayer() {
+    if (_isEmergencyOffline) return;
+    try {
+      const ctx = getDjAudioContext();
+      _isEmergencyOffline = true;
+      _emergencyStep = 0;
+
+      _emergencyMasterGain = ctx.createGain();
+      _emergencyMasterGain.gain.setValueAtTime(0.01, ctx.currentTime);
+      _emergencyMasterGain.gain.linearRampToValueAtTime(getEmergencyVolume(), ctx.currentTime + 0.3);
+      _emergencyMasterGain.connect(ctx.destination);
+
+      const stepIntervalMs = Math.round((60000 / 124) / 4); // 124 BPM 16th note (~121ms)
+
+      _emergencyTimer = setInterval(() => {
+        playEmergencyStep(ctx, _emergencyMasterGain, _emergencyStep);
+        _emergencyStep = (_emergencyStep + 1) % 16;
+      }, stepIntervalMs);
+
+      // MAJ interface
+      document.getElementById("emergencyOfflineBar")?.classList.remove("hidden");
+      const btnToggle = document.getElementById("btnEmergencyOfflineToggle");
+      if (btnToggle) {
+        btnToggle.classList.add("bg-amber-500/30", "border-amber-400", "text-amber-200");
+      }
+      showToast("🛡️ Mode Secours activé — sonorisation locale autonome !", "warning");
+    } catch (e) {
+      console.error("Erreur lancement secours hors-ligne:", e);
+    }
+  }
+
+  function stopEmergencyOfflinePlayer(resumeSpotify = true) {
+    if (!_isEmergencyOffline) return;
+    try {
+      if (_emergencyTimer) {
+        clearInterval(_emergencyTimer);
+        _emergencyTimer = null;
+      }
+      if (_emergencyMasterGain && _djAudioCtx) {
+        _emergencyMasterGain.gain.setValueAtTime(_emergencyMasterGain.gain.value, _djAudioCtx.currentTime);
+        _emergencyMasterGain.gain.exponentialRampToValueAtTime(0.001, _djAudioCtx.currentTime + 0.35);
+      }
+      _isEmergencyOffline = false;
+
+      // MAJ interface
+      document.getElementById("emergencyOfflineBar")?.classList.add("hidden");
+      const btnToggle = document.getElementById("btnEmergencyOfflineToggle");
+      if (btnToggle) {
+        btnToggle.classList.remove("bg-amber-500/30", "border-amber-400", "text-amber-200");
+      }
+
+      if (resumeSpotify && spotifyPlayer) {
+        spotifyPlayer.resume().catch(() => {});
+        showToast("Reprise de la diffusion Spotify", "info");
+      }
+    } catch (e) {
+      console.error("Erreur arrêt secours hors-ligne:", e);
+    }
+  }
+
+  function playEmergencyStep(ctx, masterGain, step) {
+    const t = ctx.currentTime;
+
+    // 1. Kick puissant 4-on-the-floor sur les temps 0, 4, 8, 12
+    if (step % 4 === 0) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.setValueAtTime(140, t);
+      osc.frequency.exponentialRampToValueAtTime(42, t + 0.12);
+      gain.gain.setValueAtTime(0.85, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    }
+
+    // 2. Charleston / Hi-Hat ouvert sur les contre-temps 2, 6, 10, 14
+    if (step % 4 === 2) {
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.05), ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      const noise = ctx.createBufferSource();
+      noise.buffer = buf;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.setValueAtTime(6500, t);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.35, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain);
+      noise.start(t);
+      noise.stop(t + 0.055);
+    }
+
+    // 3. Synth Bassline entraînante sur les pas 0, 3, 6, 8, 11, 14
+    const bassSteps = [0, 3, 6, 8, 11, 14];
+    if (bassSteps.includes(step)) {
+      const bassNotes = [55, 65.4, 73.4, 82.4, 65.4, 55]; // Ligne de basse A1, C2, D2, E2
+      const noteFreq = bassNotes[bassSteps.indexOf(step)] || 55;
+      const bOsc = ctx.createOscillator();
+      bOsc.type = "sawtooth";
+      bOsc.frequency.setValueAtTime(noteFreq, t);
+
+      const bFilter = ctx.createBiquadFilter();
+      bFilter.type = "lowpass";
+      bFilter.frequency.setValueAtTime(420, t);
+      bFilter.frequency.exponentialRampToValueAtTime(120, t + 0.15);
+
+      const bGain = ctx.createGain();
+      bGain.gain.setValueAtTime(0.45, t);
+      bGain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+      bOsc.connect(bFilter);
+      bFilter.connect(bGain);
+      bGain.connect(masterGain);
+      bOsc.start(t);
+      bOsc.stop(t + 0.19);
+    }
+  }
+
+  // Bindings Secours Hors-Ligne
+  document.getElementById("btnEmergencyOfflineToggle")?.addEventListener("click", () => {
+    if (_isEmergencyOffline) {
+      stopEmergencyOfflinePlayer(true);
+    } else {
+      startEmergencyOfflinePlayer();
+    }
+  });
+  document.getElementById("btnStopEmergencyOffline")?.addEventListener("click", () => {
+    stopEmergencyOfflinePlayer(true);
+  });
+  document.getElementById("emergencyVolume")?.addEventListener("input", (e) => {
+    if (_emergencyMasterGain && _djAudioCtx) {
+      _emergencyMasterGain.gain.setValueAtTime(parseFloat(e.target.value) || 0.75, _djAudioCtx.currentTime);
+    }
+  });
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // ── IDÉE 2 : MODALE EXPORT PLAYLIST SPOTIFY DE LA SOIRÉE ─────────────────
+  // ═════════════════════════════════════════════════════════════════════════
+  function openSpotifyExportModal(url, count) {
+    const modal = document.getElementById("spotifyExportModal");
+    if (!modal) return;
+    const subtitle = document.getElementById("spotifyExportSubtitle");
+    if (subtitle) {
+      subtitle.textContent = `${count} morceau${count > 1 ? "x" : ""} de votre soirée enregistré${count > 1 ? "s" : ""} dans votre nouvelle playlist publique Spotify. Partagez le QR code aux invités !`;
+    }
+    const qrImg = document.getElementById("spotifyExportQrImg");
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+    }
+    const input = document.getElementById("spotifyExportUrlInput");
+    if (input) input.value = url;
+    const openLink = document.getElementById("spotifyExportOpenLink");
+    if (openLink) openLink.href = url;
+    modal.classList.remove("hidden");
+  }
+
+  function closeSpotifyExportModal() {
+    document.getElementById("spotifyExportModal")?.classList.add("hidden");
+  }
+
+  document.getElementById("btnCloseSpotifyExportModal")?.addEventListener("click", closeSpotifyExportModal);
+  document.getElementById("spotifyExportModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "spotifyExportModal") closeSpotifyExportModal();
+  });
+  document.getElementById("btnCopyExportPlaylistUrl")?.addEventListener("click", async () => {
+    const url = document.getElementById("spotifyExportUrlInput")?.value;
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast("Lien Spotify copié dans le presse-papier !");
+    } catch {
+      showToast("Impossible de copier automatiquement", "error");
+    }
+  });
+
   // ── Raccourcis Clavier Pro Régie DJ ──────────────────────
   function isInputFocused() {
     const el = document.activeElement;
@@ -2626,6 +3054,22 @@
 
   document.addEventListener("keydown", (e) => {
     if (isInputFocused()) return;
+
+    // Touches 1 à 6 : Soundboard DJ & Jingles Instantanés
+    const soundKeyMap = {
+      "1": "airhorn", "&": "airhorn", "Digit1": "airhorn", "Numpad1": "airhorn",
+      "2": "scratch", "é": "scratch", "Digit2": "scratch", "Numpad2": "scratch",
+      "3": "drumroll", '"': "drumroll", "Digit3": "drumroll", "Numpad3": "drumroll",
+      "4": "cheer", "'": "cheer", "Digit4": "cheer", "Numpad4": "cheer",
+      "5": "bassdrop", "(": "bassdrop", "Digit5": "bassdrop", "Numpad5": "bassdrop",
+      "6": "laser", "-": "laser", "§": "laser", "Digit6": "laser", "Numpad6": "laser",
+    };
+    const soundType = soundKeyMap[e.key] || soundKeyMap[e.code];
+    if (soundType) {
+      e.preventDefault();
+      playSoundboardSound(soundType);
+      return;
+    }
 
     if (e.code === "Space") {
       e.preventDefault();
@@ -2670,6 +3114,8 @@
       document.getElementById("settingsPanel")?.classList.add("hidden");
       document.getElementById("messagePanel")?.classList.add("hidden");
       document.getElementById("addSongPanel")?.classList.add("hidden");
+      document.getElementById("djSoundboardPanel")?.classList.add("hidden");
+      document.getElementById("spotifyExportModal")?.classList.add("hidden");
     }
   });
 

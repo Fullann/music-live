@@ -277,7 +277,17 @@
 
       <!-- CLUSTER 3: Export & Clôture -->
       <div class="flex items-center gap-1.5">
-        <button id="btnExportSpotifyPlaylist" type="button" class="dj-tool-btn text-emerald-400 hover:text-emerald-300 border-emerald-500/30 bg-emerald-500/10" title="Créer la playlist Spotify publique avec tous les morceaux joués">
+        <button id="btnToggleSoundboard" type="button" class="dj-tool-btn text-purple-300 hover:text-purple-200 border-purple-500/30 bg-purple-500/10 font-bold" title="Soundboard DJ & Jingles Live (Touches 1-6)">
+          <span>📢</span>
+          <span class="hidden sm:inline">Soundboard</span>
+        </button>
+
+        <button id="btnEmergencyOfflineToggle" type="button" class="dj-tool-btn text-amber-300 hover:text-amber-200 border-amber-500/30 bg-amber-500/10 font-bold" title="Mode Secours Hors-Ligne (Zéro Coupure Sonore si Wi-Fi perdu)">
+          <span>🛡️</span>
+          <span class="hidden sm:inline">Secours</span>
+        </button>
+
+        <button id="btnExportSpotifyPlaylist" type="button" class="dj-tool-btn text-emerald-400 hover:text-emerald-300 border-emerald-500/30 bg-emerald-500/10 font-bold" title="Créer la playlist Spotify publique avec tous les morceaux joués">
           <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
           <span class="hidden sm:inline">Export</span>
         </button>
@@ -311,6 +321,31 @@
 <div id="djNetworkBanner" class="hidden px-4 py-2 text-xs font-bold text-center flex items-center justify-center gap-2 transition-all duration-300 z-40 bg-rose-500/20 text-rose-300 border-b border-rose-500/30">
   <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
   <span id="djNetworkBannerText">📶 Mode Hors-Ligne — Connexion perdue. Les données sont conservées en local.</span>
+</div>
+
+<!-- BANNIÈRE SECOURS HORS-LIGNE (Anti-coupure Wi-Fi autonome Web Audio) -->
+<div id="emergencyOfflineBar" class="hidden px-4 py-3 bg-gradient-to-r from-amber-950/90 via-amber-900/80 to-slate-900 border-b border-amber-500/40 text-amber-200 z-40 transition-all shadow-xl">
+  <div class="max-w-[1720px] mx-auto flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping shrink-0"></span>
+      <div>
+        <p class="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+          <span>🛡️ Mode Secours Hors-Ligne Actif</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">Zéro Coupure Sonore</span>
+        </p>
+        <p class="text-[11px] text-amber-200/80 mt-0.5">Diffusion locale autonome par synthèse Web Audio — votre sono reste animée même sans Wi-Fi ni Spotify.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-white/10 text-xs">
+        <span class="text-[10px] text-slate-400 font-bold uppercase">Volume</span>
+        <input type="range" id="emergencyVolume" min="0" max="1" step="0.05" value="0.75" class="w-20 h-1.5 accent-amber-400 cursor-pointer" />
+      </div>
+      <button id="btnStopEmergencyOffline" type="button" class="btn btn-primary btn-sm text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 cursor-pointer shadow-md">
+        Reprendre Spotify
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ═════════════════════════════════════════════════════════════════════════
@@ -411,6 +446,71 @@
     <button onclick="this.closest('#spotifyErrorBanner').classList.add('hidden')" class="opacity-70 hover:opacity-100 p-1">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
+  </div>
+
+  <!-- ── SOUNDBOARD DJ & JINGLES INSTANTANÉS (Touches 1-6) ── -->
+  <div id="djSoundboardPanel" class="hidden studio-deck p-4 border border-purple-500/30 shadow-xl bg-slate-900/90 transition-all duration-300">
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300 text-base shrink-0">
+          📢
+        </div>
+        <div>
+          <h3 class="text-xs font-black uppercase tracking-wider text-purple-300" style="font-family:'Syne', sans-serif">
+            Soundboard DJ & Jingles Instantanés
+          </h3>
+          <p class="text-[11px] text-slate-400">Effets audio temps réel superposés au mix sans couper Spotify (Touches 1 à 6)</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-950 border border-white/10 text-xs">
+          <span class="text-[10px] text-slate-400 font-bold uppercase">Volume</span>
+          <input type="range" id="soundboardVolume" min="0" max="1" step="0.05" value="0.8" class="w-20 h-1.5 accent-purple-400 cursor-pointer" />
+        </div>
+        <button id="btnCloseSoundboard" type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition" title="Fermer le soundboard">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 6 Tactile Pads Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      <button type="button" data-sound="airhorn" class="soundboard-pad group relative p-3 rounded-2xl bg-slate-950/80 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 active:scale-95 transition flex flex-col items-center justify-center text-center gap-1 shadow-lg shadow-amber-950/20 cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition transform">📢</span>
+        <span class="text-xs font-extrabold text-amber-300">Airhorn</span>
+        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Touche 1</span>
+      </button>
+
+      <button type="button" data-sound="scratch" class="soundboard-pad group relative p-3 rounded-2xl bg-slate-950/80 border border-cyan-500/30 hover:border-cyan-400 hover:bg-cyan-500/10 active:scale-95 transition flex flex-col items-center justify-center text-center gap-1 shadow-lg shadow-cyan-950/20 cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition transform">💿</span>
+        <span class="text-xs font-extrabold text-cyan-300">Scratch</span>
+        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Touche 2</span>
+      </button>
+
+      <button type="button" data-sound="drumroll" class="soundboard-pad group relative p-3 rounded-2xl bg-slate-950/80 border border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 active:scale-95 transition flex flex-col items-center justify-center text-center gap-1 shadow-lg shadow-purple-950/20 cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition transform">🥁</span>
+        <span class="text-xs font-extrabold text-purple-300">Drum Roll</span>
+        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Touche 3</span>
+      </button>
+
+      <button type="button" data-sound="cheer" class="soundboard-pad group relative p-3 rounded-2xl bg-slate-950/80 border border-emerald-500/30 hover:border-emerald-400 hover:bg-emerald-500/10 active:scale-95 transition flex flex-col items-center justify-center text-center gap-1 shadow-lg shadow-emerald-950/20 cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition transform">👏</span>
+        <span class="text-xs font-extrabold text-emerald-300">Clameur</span>
+        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Touche 4</span>
+      </button>
+
+      <button type="button" data-sound="bassdrop" class="soundboard-pad group relative p-3 rounded-2xl bg-slate-950/80 border border-rose-500/30 hover:border-rose-400 hover:bg-rose-500/10 active:scale-95 transition flex flex-col items-center justify-center text-center gap-1 shadow-lg shadow-rose-950/20 cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition transform">💣</span>
+        <span class="text-xs font-extrabold text-rose-300">Bass Drop</span>
+        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Touche 5</span>
+      </button>
+
+      <button type="button" data-sound="laser" class="soundboard-pad group relative p-3 rounded-2xl bg-slate-950/80 border border-sky-500/30 hover:border-sky-400 hover:bg-sky-500/10 active:scale-95 transition flex flex-col items-center justify-center text-center gap-1 shadow-lg shadow-sky-950/20 cursor-pointer">
+        <span class="text-2xl group-hover:scale-110 transition transform">🚨</span>
+        <span class="text-xs font-extrabold text-sky-300">Laser Club</span>
+        <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Touche 6</span>
+      </button>
+    </div>
   </div>
 
   <!-- ── RETOUR VISUEL MINIATURE : Mini Monitor Grand Écran ── -->
@@ -1144,6 +1244,35 @@
   </div>
 </div>
 
+<!-- Modal: Playlist Spotify Souvenir Exportée (Idée 2) -->
+<div id="spotifyExportModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+  <div class="modal w-full max-w-md bg-[#0a0e17] border border-white/10 rounded-2xl shadow-2xl p-6 text-center">
+    <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-emerald-500/20">
+      🎵
+    </div>
+    <h3 class="text-lg font-black text-white" style="font-family:'Syne', sans-serif">Playlist Spotify de la Soirée</h3>
+    <p id="spotifyExportSubtitle" class="text-xs text-slate-400 mt-1">Tous les morceaux diffusés ont été enregistrés dans votre nouvelle playlist publique Spotify.</p>
+    
+    <div id="spotifyExportQrWrap" class="my-5 p-4 bg-white rounded-2xl inline-block shadow-xl">
+      <img id="spotifyExportQrImg" src="" alt="QR Code Playlist" class="w-44 h-44 mx-auto" />
+    </div>
+
+    <div class="space-y-2 mb-4">
+      <div class="flex gap-2">
+        <input id="spotifyExportUrlInput" type="text" readonly class="input text-xs font-mono flex-1 bg-slate-950" />
+        <button id="btnCopyExportPlaylistUrl" type="button" class="btn btn-primary btn-sm font-bold shrink-0">Copier</button>
+      </div>
+    </div>
+
+    <div class="flex gap-2">
+      <a id="spotifyExportOpenLink" href="#" target="_blank" class="btn btn-success btn-sm flex-1 font-bold flex items-center justify-center gap-2">
+        <span>Ouvrir sur Spotify ↗</span>
+      </a>
+      <button id="btnCloseSpotifyExportModal" type="button" class="btn btn-ghost btn-sm font-bold border border-white/10">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Bloquer un invité -->
 <div id="banModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
   <div class="modal w-full max-w-sm">
@@ -1346,6 +1475,10 @@
           <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
             <span class="text-slate-300">Karaoké Grand Écran</span>
             <kbd class="px-2 py-1 rounded font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">K</kbd>
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5">
+            <span class="text-slate-300">Soundboard Jingles Live</span>
+            <kbd class="px-2 py-1 rounded font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Touches 1 à 6</kbd>
           </div>
         </div>
       </div>

@@ -637,7 +637,84 @@
     stopTitleBlink();
   }
 
+  // ── Alerte Invité : Morceau à venir ou en cours (Idée 4) ──
+  function showTrackAlertBanner(type, songName) {
+    const banner = document.getElementById("myTrackAlertBanner");
+    if (!banner) return;
+    const title = document.getElementById("myTrackAlertTitle");
+    const desc = document.getElementById("myTrackAlertDesc");
+    const icon = document.getElementById("myTrackAlertIcon");
+
+    if (type === "next") {
+      if (title) title.textContent = "🔥 C'EST TON TOUR !";
+      if (desc) desc.textContent = `"${songName}" est la prochaine sur la piste ! Prépare-toi !`;
+      if (icon) icon.textContent = "🔥";
+      banner.style.background = "radial-gradient(circle at 10% 50%, rgba(234,88,12,0.35) 0%, rgba(245,158,11,0.2) 60%, var(--bg-surface) 100%)";
+      banner.style.borderColor = "rgba(245,158,11,0.5)";
+    } else if (type === "playing") {
+      if (title) title.textContent = "🎉 SUR LA PISTE EN CE MOMENT !";
+      if (desc) desc.textContent = `Ton morceau "${songName}" passe en live ! Profite !`;
+      if (icon) icon.textContent = "🎉";
+      banner.style.background = "radial-gradient(circle at 10% 50%, rgba(139,92,246,0.35) 0%, rgba(236,72,153,0.25) 60%, var(--bg-surface) 100%)";
+      banner.style.borderColor = "rgba(168,85,247,0.5)";
+    }
+    banner.classList.remove("hidden");
+    banner.classList.add("status-pulse");
+    setTimeout(() => banner.classList.remove("status-pulse"), 500);
+
+    // Vibration haptique mobile festive
+    if (navigator.vibrate) {
+      navigator.vibrate([120, 60, 120, 60, 250, 80, 350]);
+    }
+
+    launchCelebrationConfetti();
+  }
+
+  function launchCelebrationConfetti() {
+    try {
+      const colors = ["#ec4899", "#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.inset = "0";
+      container.style.pointerEvents = "none";
+      container.style.zIndex = "99999";
+      container.style.overflow = "hidden";
+      document.body.appendChild(container);
+
+      for (let i = 0; i < 40; i++) {
+        const p = document.createElement("div");
+        const size = Math.random() * 8 + 6;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        p.style.position = "absolute";
+        p.style.width = `${size}px`;
+        p.style.height = `${size * (Math.random() > 0.5 ? 1 : 2)}px`;
+        p.style.backgroundColor = color;
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.top = "-20px";
+        p.style.opacity = "1";
+        p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+        p.style.transform = `rotate(${Math.random() * 360}deg)`;
+        p.style.transition = `all ${1.8 + Math.random() * 1.5}s cubic-bezier(0.25, 1, 0.5, 1)`;
+        container.appendChild(p);
+
+        requestAnimationFrame(() => {
+          p.style.top = `${100 + Math.random() * 20}%`;
+          p.style.transform = `rotate(${Math.random() * 720}deg) translateX(${(Math.random() - 0.5) * 120}px)`;
+          p.style.opacity = "0";
+        });
+      }
+
+      setTimeout(() => container.remove(), 3500);
+    } catch {}
+  }
+
+  document.getElementById("btnCloseMyTrackAlert")?.addEventListener("click", () => {
+    document.getElementById("myTrackAlertBanner")?.classList.add("hidden");
+  });
+
   function notifyNext(songName) {
+    showTrackAlertBanner("next", songName);
+
     // Vibration triple — distincte de "acceptée"
     if (navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 200]);
 
@@ -670,6 +747,7 @@
   }
 
   function notifyPlayed(songName) {
+    showTrackAlertBanner("playing", songName);
     if (navigator.vibrate) navigator.vibrate([200]);
     stopTitleBlink();
     document.title = `♪ En train de jouer — ${songName}`;
