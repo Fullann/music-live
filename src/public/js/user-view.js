@@ -118,6 +118,17 @@
     if (e.key === "Enter") searchInput.blur();
   });
 
+  // Quick Mood Chips
+  document.querySelectorAll(".mood-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const q = chip.dataset.query;
+      if (!q) return;
+      searchInput.value = q;
+      clearBtn.classList.remove("hidden");
+      searchSpotify(q);
+    });
+  });
+
   function showEmptyState() {
     const container = document.getElementById("searchResults");
     container.innerHTML = `
@@ -163,22 +174,26 @@
       const isExplicitBlocked = filterExplicitEnabled && t.explicit;
       const j = JSON.stringify(t).replace(/"/g, "&quot;");
       return `
-        <div class="track-item flex items-center gap-3 px-1 py-2 rounded-2xl ${isExplicitBlocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}" ${isExplicitBlocked ? 'data-blocked="1"' : `data-track="${j}"`}>
-          <img src="${t.image}" alt="" class="w-14 h-14 rounded-xl object-cover shrink-0" loading="lazy" />
+        <div class="track-item flex items-center gap-3.5 p-3 rounded-2xl glass-card border border-white/5 hover:border-purple-500/40 hover:bg-white/[0.06] active:scale-[0.98] transition-all cursor-pointer ${isExplicitBlocked ? 'opacity-40 cursor-not-allowed' : ''}" ${isExplicitBlocked ? 'data-blocked="1"' : `data-track="${j}"`}>
+          <div class="relative shrink-0">
+            <img src="${t.image}" alt="" class="w-13 h-13 rounded-xl object-cover shadow-md" loading="lazy" />
+            <div class="absolute inset-0 rounded-xl border border-white/10 pointer-events-none"></div>
+          </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
-              <p class="text-sm font-semibold leading-snug" style="color:var(--text-primary)">${t.name}</p>
-              ${t.explicit ? `<span class="badge text-[10px] font-bold px-1.5 py-0.2 rounded" style="background:rgba(239,68,68,0.15);color:#ef4444">18+ Explicite</span>` : ""}
+              <p class="text-sm font-bold text-white leading-snug truncate">${t.name}</p>
+              ${t.explicit ? `<span class="badge text-[9px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">18+</span>` : ""}
             </div>
-            <p class="text-xs mt-0.5 truncate" style="color:var(--text-secondary)">${t.artist}</p>
-            <p class="text-xs mt-0.5" style="color:var(--text-muted)">${t.album || ""}</p>
+            <p class="text-xs text-slate-300 mt-0.5 truncate">${t.artist}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5 truncate">${t.album || ""}</p>
           </div>
           ${isExplicitBlocked ? `
-            <div class="shrink-0 text-xs font-bold text-red-400 px-2 py-1 rounded-lg" style="background:rgba(239,68,68,0.1)">Bloqué</div>
+            <div class="shrink-0 text-[11px] font-bold text-rose-400 px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20">Bloqué</div>
           ` : `
-            <div class="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--accent)">
-              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </div>
+            <button type="button" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold text-white flex items-center gap-1 shadow-md shadow-purple-950/40 transition hover:brightness-110 active:scale-95 cursor-pointer" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">
+              <span>+</span>
+              <span class="hidden sm:inline">Proposer</span>
+            </button>
           `}
         </div>`;
     }).join("");
@@ -1157,8 +1172,43 @@
     document.getElementById("donationBanner").classList.add("hidden");
   });
 
+  // ── Mode Émojis & Réactions Invités ──
+  let isGuestEmojisEnabled = true;
+  let clientCleanMode = localStorage.getItem("ml_client_clean_mode") === "1";
+
+  function applyGuestEmojiMode() {
+    const shouldHide = !isGuestEmojisEnabled || clientCleanMode;
+    document.body.classList.toggle("no-emojis", shouldHide);
+    const label = document.getElementById("cleanModeLabel");
+    if (label) {
+      label.textContent = shouldHide ? "Émoji: OFF" : "Émoji: ON";
+      label.className = shouldHide ? "text-[10px] font-extrabold font-mono text-purple-400" : "text-[10px] font-extrabold font-mono text-slate-300";
+    }
+  }
+
+  document.getElementById("btnToggleClientCleanMode")?.addEventListener("click", () => {
+    clientCleanMode = !clientCleanMode;
+    localStorage.setItem("ml_client_clean_mode", clientCleanMode ? "1" : "0");
+    applyGuestEmojiMode();
+    showToast(clientCleanMode ? "Mode sobre activé (émojis masqués)" : "Mode complet avec émojis", "info");
+  });
+
+  socket.on("guest-emojis-updated", (data) => {
+    if (typeof data?.enabled === "boolean") {
+      isGuestEmojisEnabled = data.enabled;
+      applyGuestEmojiMode();
+    }
+  });
+
+  // Initialisation du mode émoji
+  applyGuestEmojiMode();
+
   // Écouter les changements de settings en temps réel
   socket.on("event-settings-updated", (data) => {
+    if (typeof data.guestEmojisEnabled === "boolean") {
+      isGuestEmojisEnabled = data.guestEmojisEnabled;
+      applyGuestEmojiMode();
+    }
     if (data.votesEnabled !== undefined) {
       votesEnabled = data.votesEnabled;
       updateMyRequestCard();

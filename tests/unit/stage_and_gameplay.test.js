@@ -241,9 +241,19 @@ describe("Stage Experience, Hype Meter, Blind-Test & Harmonic Matching Tests", (
       assert.match(qrDisplayHtml, /id="blindTestPodiumList"/);
       assert.match(qrDisplayHtml, /profile-bar/);
       assert.match(qrDisplayHtml, /profile-stage/);
+      assert.match(qrDisplayHtml, /id="screenCustomTitleHeader"/);
+      assert.match(qrDisplayHtml, /id="hypeStatusLabel"/);
+      assert.match(qrDisplayHtml, /id="hypeComboPill"/);
+      assert.match(qrDisplayHtml, /id="hypeScreenAura"/);
+      assert.match(qrDisplayHtml, /theme-gold-luxury/);
+      assert.match(qrDisplayHtml, /theme-cyber-neon/);
+      assert.match(qrDisplayHtml, /theme-sunset-fever/);
+      assert.match(qrDisplayHtml, /theme-fire-energy/);
+      assert.match(qrDisplayHtml, /theme-midnight-dark/);
+      assert.match(qrDisplayHtml, /theme-club-laser/);
     });
 
-    it("should verify that user.html contains blindTestGuestModal and myTrackAlertBanner", () => {
+    it("should verify that user.html contains blindTestGuestModal, myTrackAlertBanner, clean emoji toggle, and mood chips", () => {
       const userHtml = fs.readFileSync(path.join(__dirname, "../../src/views/user.html"), "utf8");
       assert.match(userHtml, /id="blindTestGuestModal"/);
       assert.match(userHtml, /id="guestBtOptionsContainer"/);
@@ -251,9 +261,14 @@ describe("Stage Experience, Hype Meter, Blind-Test & Harmonic Matching Tests", (
       assert.match(userHtml, /id="myTrackAlertBanner"/);
       assert.match(userHtml, /id="myTrackAlertTitle"/);
       assert.match(userHtml, /id="btnCloseMyTrackAlert"/);
+      assert.match(userHtml, /id="btnToggleClientCleanMode"/);
+      assert.match(userHtml, /class="[^"]*mood-chip[^"]*"/);
+      assert.match(userHtml, /font-syne/);
+      assert.match(userHtml, /glass-card/);
+      assert.match(userHtml, /no-emojis/);
     });
 
-    it("should verify that dj.html contains soundboard, secours offline, and export modal", () => {
+    it("should verify that dj.html contains soundboard, secours offline, export modal, guest emojis toggle, and visualizer presets studio", () => {
       const djHtml = fs.readFileSync(path.join(__dirname, "../../src/views/dj.html"), "utf8");
       assert.match(djHtml, /id="btnBlindTestFlash"/);
       assert.match(djHtml, /id="blindTestDjModal"/);
@@ -265,6 +280,67 @@ describe("Stage Experience, Hype Meter, Blind-Test & Harmonic Matching Tests", (
       assert.match(djHtml, /id="emergencyOfflineBar"/);
       assert.match(djHtml, /id="spotifyExportModal"/);
       assert.match(djHtml, /id="spotifyExportQrImg"/);
+      assert.match(djHtml, /id="guestEmojisToggle"/);
+      assert.match(djHtml, /id="screenPresetsGallery"/);
+      assert.match(djHtml, /id="btnToggleSavePresetForm"/);
+      assert.match(djHtml, /id="customPresetsList"/);
+      assert.match(djHtml, /id="screenThemePaletteSelector"/);
+      assert.match(djHtml, /id="screenCustomTitleInput"/);
+      assert.match(djHtml, /id="screenQrSizeSelect"/);
+      assert.match(djHtml, /id="screenToggleNowPlaying"/);
+      assert.match(djHtml, /id="screenToggleHype"/);
+      assert.match(djHtml, /id="btnBroadcastScreenConfig"/);
+    });
+  });
+
+  // ── 7. Visualizer Presets & Hype Combo Logic ──
+  describe("7. Visualizer Presets & Hype Combo Logic", () => {
+    it("should calculate hype combo multiplier based on reaction timing", () => {
+      let lastTime = 0;
+      let combo = 1;
+      function recordReaction(timeMs) {
+        if (lastTime > 0 && timeMs - lastTime < 2400) {
+          combo = Math.min(8, combo + 1);
+        } else {
+          combo = 1;
+        }
+        lastTime = timeMs;
+        return combo;
+      }
+
+      assert.strictEqual(recordReaction(1000), 1);
+      assert.strictEqual(recordReaction(2000), 2);
+      assert.strictEqual(recordReaction(3200), 3);
+      assert.strictEqual(recordReaction(8000), 1); // Reset after gap
+    });
+
+    it("should apply full customization screen config correctly", () => {
+      const defaultConfig = {
+        theme: "theme-default",
+        customTitle: "Soirée",
+        qrSize: "standard",
+        hideQr: false,
+        hideNowPlaying: false,
+        hideQueue: false,
+        hideHypeMeter: false,
+        hideReactions: false,
+        hideFooter: false,
+      };
+
+      const presetChic = {
+        theme: "theme-gold-luxury",
+        customTitle: "Mariage & Soirée Privée",
+        qrSize: "standard",
+        hideHypeMeter: true,
+        hideReactions: true,
+      };
+
+      const merged = { ...defaultConfig, ...presetChic };
+      assert.strictEqual(merged.theme, "theme-gold-luxury");
+      assert.strictEqual(merged.customTitle, "Mariage & Soirée Privée");
+      assert.strictEqual(merged.hideHypeMeter, true);
+      assert.strictEqual(merged.hideReactions, true);
+      assert.strictEqual(merged.hideNowPlaying, false);
     });
   });
 });

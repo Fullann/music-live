@@ -3470,6 +3470,327 @@
     }
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // ── STUDIO & PRESETS GRAND ÉCRAN (FULL CUSTOMISATION) ──────────
+  // ═══════════════════════════════════════════════════════════════
+
+  // Toggle des émojis invités côté DJ
+  const guestEmojisToggle = document.getElementById("guestEmojisToggle");
+  guestEmojisToggle?.addEventListener("change", (e) => {
+    const enabled = e.target.checked;
+    socket.emit("update-event-settings", { eventId, guestEmojisEnabled: enabled });
+    showToast(enabled ? "Émojis & réactions invités activés" : "Mode Sobre : Émojis invités masqués", "info");
+  });
+
+  socket.on("guest-emojis-updated", (data) => {
+    if (data && typeof data.guestEmojisEnabled === "boolean" && guestEmojisToggle) {
+      guestEmojisToggle.checked = data.guestEmojisEnabled;
+    }
+  });
+
+  // Presets natifs prêts à l'emploi
+  const builtinScreenPresets = {
+    "preset-mariage-chic": {
+      name: "Mariage Chic & Épuré",
+      theme: "theme-gold-luxury",
+      customTitle: "Mariage & Soirée Privée",
+      qrSize: "standard",
+      hideNowPlaying: false,
+      hideQr: false,
+      hideQueue: false,
+      hideHypeMeter: true,
+      hideReactions: true,
+      hideFooter: false,
+      visualizerMode: "off",
+      backgroundFx: "aurora",
+    },
+    "preset-festival-club": {
+      name: "Festival & Club Électro",
+      theme: "theme-cyber-neon",
+      customTitle: "Mainstage Live",
+      qrSize: "standard",
+      hideNowPlaying: false,
+      hideQr: false,
+      hideQueue: false,
+      hideHypeMeter: false,
+      hideReactions: false,
+      hideFooter: false,
+      visualizerMode: "cyber-spectrum",
+      backgroundFx: "laser",
+    },
+    "preset-bar-lounge": {
+      name: "Bar Lounge & Afterwork",
+      theme: "theme-sunset-fever",
+      customTitle: "Lounge & Cocktails",
+      qrSize: "large",
+      hideNowPlaying: false,
+      hideQr: false,
+      hideQueue: false,
+      hideHypeMeter: false,
+      hideReactions: false,
+      hideFooter: false,
+      visualizerMode: "radial-spectrum",
+      backgroundFx: "pulse",
+    },
+    "preset-grosse-soiree": {
+      name: "Grosse Soirée / Anniv",
+      theme: "theme-fire-energy",
+      customTitle: "Soirée Anniversaire",
+      qrSize: "giant",
+      hideNowPlaying: false,
+      hideQr: false,
+      hideQueue: false,
+      hideHypeMeter: false,
+      hideReactions: false,
+      hideFooter: false,
+      visualizerMode: "bass-ripple",
+      backgroundFx: "party",
+    },
+    "preset-midnight-minimal": {
+      name: "Midnight Minimal",
+      theme: "theme-midnight-dark",
+      customTitle: "Deep Session",
+      qrSize: "compact",
+      hideNowPlaying: false,
+      hideQr: true,
+      hideQueue: true,
+      hideHypeMeter: true,
+      hideReactions: false,
+      hideFooter: true,
+      visualizerMode: "nebula-3d",
+      backgroundFx: "nebula",
+    },
+  };
+
+  let selectedScreenTheme = "theme-cyber-neon";
+
+  // Gestion des clics sur la palette de thèmes
+  const themePaletteButtons = document.querySelectorAll(".theme-palette-btn");
+  themePaletteButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedScreenTheme = btn.dataset.theme || "theme-cyber-neon";
+      updateThemePaletteSelectionUI();
+    });
+  });
+
+  function updateThemePaletteSelectionUI() {
+    themePaletteButtons.forEach((b) => {
+      if (b.dataset.theme === selectedScreenTheme) {
+        b.classList.add("ring-2", "ring-white", "shadow-lg");
+      } else {
+        b.classList.remove("ring-2", "ring-white", "shadow-lg");
+      }
+    });
+  }
+
+  // Lecture des valeurs courantes du studio
+  function getCurrentStudioScreenConfig() {
+    return {
+      theme: selectedScreenTheme,
+      customTitle: document.getElementById("screenCustomTitleInput")?.value?.trim() || "",
+      qrSize: document.getElementById("screenQrSizeSelect")?.value || "standard",
+      hideNowPlaying: !document.getElementById("screenToggleNowPlaying")?.checked,
+      hideQr: !document.getElementById("screenToggleQr")?.checked,
+      hideQueue: !document.getElementById("screenToggleQueue")?.checked,
+      hideHypeMeter: !document.getElementById("screenToggleHype")?.checked,
+      hideReactions: !document.getElementById("screenToggleReactions")?.checked,
+      hideFooter: !document.getElementById("screenToggleFooter")?.checked,
+      visualizerMode: document.getElementById("screenVisualizerSelect")?.value || "cyber-spectrum",
+      backgroundFx: document.getElementById("projectionVisualsMode")?.value || "aurora",
+    };
+  }
+
+  // Application d'une configuration aux champs du Studio
+  function applyConfigToStudioUI(cfg) {
+    if (!cfg) return;
+    if (cfg.theme) {
+      selectedScreenTheme = cfg.theme;
+      updateThemePaletteSelectionUI();
+    }
+    const titleInput = document.getElementById("screenCustomTitleInput");
+    if (titleInput && cfg.customTitle !== undefined) {
+      titleInput.value = cfg.customTitle;
+    }
+    const qrSizeSelect = document.getElementById("screenQrSizeSelect");
+    if (qrSizeSelect && cfg.qrSize) {
+      qrSizeSelect.value = cfg.qrSize;
+    }
+    const setCheck = (id, visible) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = !!visible;
+    };
+    setCheck("screenToggleNowPlaying", !cfg.hideNowPlaying);
+    setCheck("screenToggleQr", !cfg.hideQr);
+    setCheck("screenToggleQueue", !cfg.hideQueue);
+    setCheck("screenToggleHype", !cfg.hideHypeMeter);
+    setCheck("screenToggleReactions", !cfg.hideReactions);
+    setCheck("screenToggleFooter", !cfg.hideFooter);
+
+    if (cfg.visualizerMode) {
+      updateScreenVisualizerUI(cfg.visualizerMode);
+    }
+    const fxSelect = document.getElementById("projectionVisualsMode");
+    if (fxSelect && cfg.backgroundFx) {
+      fxSelect.value = cfg.backgroundFx;
+    }
+  }
+
+  // Diffuser la configuration actuelle en direct sur le Grand Écran
+  function broadcastStudioScreenConfig(cfg) {
+    const config = cfg || getCurrentStudioScreenConfig();
+    socket.emit("set-screen-config", { eventId, config });
+    if (config.visualizerMode) {
+      socket.emit("set-screen-visualizer", { eventId, visualizerMode: config.visualizerMode });
+    }
+    if (config.backgroundFx) {
+      socket.emit("update-event-settings", {
+        eventId,
+        projectionVisualsEnabled: true,
+        projectionVisualsMode: config.backgroundFx,
+      });
+    }
+
+    const feedback = document.getElementById("screenBroadcastFeedback");
+    if (feedback) {
+      feedback.classList.remove("hidden");
+      setTimeout(() => feedback.classList.add("hidden"), 3000);
+    }
+    showToast("Ambiance diffusée en direct sur le Grand Écran ⚡", "success");
+  }
+
+  document.getElementById("btnBroadcastScreenConfig")?.addEventListener("click", () => {
+    broadcastStudioScreenConfig();
+  });
+
+  // Gestion des Presets personnalisés du DJ dans localStorage
+  const LOCAL_SCREEN_PRESETS_KEY = "ml_dj_screen_presets";
+
+  function getStoredCustomPresets() {
+    try {
+      const raw = localStorage.getItem(LOCAL_SCREEN_PRESETS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveStoredCustomPresets(list) {
+    try {
+      localStorage.setItem(LOCAL_SCREEN_PRESETS_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.warn("Erreur sauvegarde preset localStorage:", e);
+    }
+  }
+
+  function renderCustomPresetsList() {
+    const container = document.getElementById("customPresetsList");
+    if (!container) return;
+    const presets = getStoredCustomPresets();
+    if (presets.length === 0) {
+      container.innerHTML = `
+        <div class="col-span-full p-4 rounded-xl border border-dashed border-white/10 text-center text-xs text-slate-400">
+          Aucun preset personnalisé enregistré pour le moment. Personnalisez l'écran ci-dessus et cliquez sur "Enregistrer la config actuelle" pour créer le vôtre !
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = presets.map((p) => `
+      <div class="group relative rounded-xl p-3.5 border border-purple-500/30 bg-gradient-to-b from-purple-500/10 to-slate-950 hover:border-purple-400/60 transition flex flex-col justify-between gap-3">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-purple-200 truncate">${p.name || "Preset DJ"}</span>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">Custom</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Titre : ${p.config?.customTitle || "Standard"} • QR: ${p.config?.qrSize || "standard"}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-sm btn-primary flex-1 text-xs font-bold btn-load-custom-preset" data-custom-id="${p.id}">
+            Charger ⚡
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost border border-red-500/30 text-red-400 hover:bg-red-500/20 px-2.5 text-xs font-bold btn-del-custom-preset" data-custom-id="${p.id}" title="Supprimer ce preset">
+            ✕
+          </button>
+        </div>
+      </div>
+    `).join("");
+
+    container.querySelectorAll(".btn-load-custom-preset").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.customId;
+        const found = getStoredCustomPresets().find((x) => x.id === id);
+        if (found && found.config) {
+          applyConfigToStudioUI(found.config);
+          broadcastStudioScreenConfig(found.config);
+          showToast(`Preset "${found.name}" chargé et synchronisé !`, "success");
+        }
+      });
+    });
+
+    container.querySelectorAll(".btn-del-custom-preset").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.customId;
+        const next = getStoredCustomPresets().filter((x) => x.id !== id);
+        saveStoredCustomPresets(next);
+        renderCustomPresetsList();
+        showToast("Preset supprimé", "info");
+      });
+    });
+  }
+
+  // Chargement des presets natifs (boutons "Charger ce preset")
+  document.querySelectorAll(".btn-load-preset").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const presetId = btn.dataset.presetId;
+      const preset = builtinScreenPresets[presetId];
+      if (preset) {
+        applyConfigToStudioUI(preset);
+        broadcastStudioScreenConfig(preset);
+        showToast(`Preset "${preset.name}" activé en direct !`, "success");
+      }
+    });
+  });
+
+  // Accordéon de sauvegarde de preset
+  const saveFormWrap = document.getElementById("savePresetFormWrap");
+  const newPresetInput = document.getElementById("newPresetNameInput");
+  document.getElementById("btnToggleSavePresetForm")?.addEventListener("click", () => {
+    saveFormWrap?.classList.toggle("hidden");
+    if (newPresetInput && !saveFormWrap?.classList.contains("hidden")) {
+      newPresetInput.focus();
+    }
+  });
+
+  document.getElementById("btnCancelSavePreset")?.addEventListener("click", () => {
+    saveFormWrap?.classList.add("hidden");
+  });
+
+  document.getElementById("btnConfirmSavePreset")?.addEventListener("click", () => {
+    const name = newPresetInput?.value?.trim();
+    if (!name) {
+      showToast("Veuillez saisir un nom pour ce preset", "error");
+      return;
+    }
+    const currentConfig = getCurrentStudioScreenConfig();
+    const existing = getStoredCustomPresets();
+    const newPreset = {
+      id: "preset-" + Date.now(),
+      name,
+      config: currentConfig,
+      created: Date.now(),
+    };
+    existing.unshift(newPreset);
+    saveStoredCustomPresets(existing);
+    renderCustomPresetsList();
+    if (newPresetInput) newPresetInput.value = "";
+    saveFormWrap?.classList.add("hidden");
+    showToast(`Preset "${name}" enregistré ! Il restera disponible pour toutes vos futures soirées.`, "success");
+  });
+
+  // Initialisation UI des Presets et thèmes
+  updateThemePaletteSelectionUI();
+  renderCustomPresetsList();
+
   loadLocalDjCache();
 
   // ── Maintien de l'écran allumé (Wake Lock API) ──

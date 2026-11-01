@@ -967,23 +967,287 @@
       <!-- ═══════════════════════════════════════════════════════════
            ONGLET 3 : GRAND ÉCRAN & SHOW
       ════════════════════════════════════════════════════════════ -->
-      <div id="tab-screen" class="settings-tab-pane hidden space-y-4">
+      <div id="tab-screen" class="settings-tab-pane hidden space-y-5">
         
-        <!-- Animation Visualiseur Audio -->
-        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
-          <div class="flex items-start justify-between gap-4 mb-2">
+        <!-- ── SECTION PRESETS VISUELS ENREGISTRABLES AVEC PREVIEW ── -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p class="text-sm font-bold text-white flex items-center gap-2">
-                <span>✨</span>
-                <span>Animation Visualiseur Audio (Grand Écran)</span>
+              <p class="text-sm font-black text-white flex items-center gap-2">
+                <span>🎨</span>
+                <span>Presets Grand Écran & Profils de Soirée</span>
               </p>
-              <p class="text-xs text-slate-400 mt-0.5">Animations interactives diffusées sur le grand écran du public (/qrspectre).</p>
+              <p class="text-xs text-slate-400 mt-0.5">Chargez instantanément une ambiance visuelle ou enregistrez vos propres profils d'une soirée à l'autre.</p>
+            </div>
+            <button type="button" id="btnToggleSavePresetForm" class="btn btn-sm btn-ghost border border-purple-500/30 text-purple-300 hover:bg-purple-500/15 text-xs font-bold flex items-center gap-1.5">
+              <span>💾</span>
+              <span>Enregistrer la config actuelle</span>
+            </button>
+          </div>
+
+          <!-- Formulaire de sauvegarde de nouveau preset (accordéon repliable) -->
+          <div id="savePresetFormWrap" class="hidden p-4 rounded-xl bg-purple-950/30 border border-purple-500/30 space-y-3">
+            <p class="text-xs font-bold text-purple-200">Sauvegarder la configuration actuelle comme Preset :</p>
+            <div class="flex gap-2">
+              <input type="text" id="newPresetNameInput" placeholder="Ex: Mariage Château 2026, Club Nuit Blanche..." class="input text-xs bg-slate-950 flex-1" />
+              <button type="button" id="btnConfirmSavePreset" class="btn btn-primary btn-sm font-bold text-xs shrink-0">Sauvegarder</button>
+              <button type="button" id="btnCancelSavePreset" class="btn btn-ghost btn-sm text-xs shrink-0">Annuler</button>
+            </div>
+          </div>
+
+          <!-- Galerie de Presets avec Mini Preview Visuelle -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="screenPresetsGallery">
+            
+            <!-- Preset 1 : Mariage Chic & Épuré -->
+            <div class="group relative rounded-xl p-3.5 border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-slate-950 hover:border-amber-400/60 transition flex flex-col justify-between gap-3">
+              <div class="space-y-2">
+                <!-- Mini Preview Visuelle CSS -->
+                <div class="h-14 rounded-lg bg-[#0a0702] border border-amber-500/40 p-2 flex items-center justify-between overflow-hidden relative shadow-inner">
+                  <div class="absolute inset-0 bg-radial from-amber-500/15 via-transparent to-transparent pointer-events-none"></div>
+                  <div class="flex items-center gap-1.5 z-10">
+                    <div class="w-6 h-6 rounded bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-[10px]">🎵</div>
+                    <div class="space-y-1">
+                      <div class="w-12 h-1.5 rounded bg-amber-200/60"></div>
+                      <div class="w-8 h-1 rounded bg-amber-400/30"></div>
+                    </div>
+                  </div>
+                  <div class="w-8 h-8 rounded bg-white p-0.5 flex items-center justify-center z-10 shadow">
+                    <div class="w-full h-full bg-slate-900 rounded-[2px] flex items-center justify-center text-[8px] font-black text-amber-300">QR</div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-amber-200">Mariage Chic & Épuré</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">Gold</span>
+                </div>
+                <p class="text-[11px] text-slate-400 line-clamp-2">Ambiance feutrée champagne, QR discret, Hype épuré, idéal pour les mariages et dîners de gala.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 w-full text-xs font-bold btn-load-preset" data-preset-id="preset-mariage-chic">
+                Charger ce preset ⚡
+              </button>
+            </div>
+
+            <!-- Preset 2 : Festival & Club Électro -->
+            <div class="group relative rounded-xl p-3.5 border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-slate-950 hover:border-cyan-400/60 transition flex flex-col justify-between gap-3">
+              <div class="space-y-2">
+                <!-- Mini Preview Visuelle CSS -->
+                <div class="h-14 rounded-lg bg-[#030712] border border-cyan-500/40 p-2 flex items-center justify-between overflow-hidden relative shadow-inner">
+                  <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 pointer-events-none"></div>
+                  <div class="flex items-center gap-1.5 z-10">
+                    <div class="w-6 h-6 rounded bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-[10px]">⚡</div>
+                    <div class="space-y-1">
+                      <div class="w-12 h-1.5 rounded bg-cyan-300/70"></div>
+                      <div class="w-8 h-1 rounded bg-purple-400/40"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 z-10">
+                    <span class="text-[9px] font-black text-pink-400 animate-pulse">HYPE 🔥</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-cyan-200">Festival & Club Électro</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">Cyber</span>
+                </div>
+                <p class="text-[11px] text-slate-400 line-clamp-2">Néons cybernétiques, lasers balayants, Hype Meter boosté et pluie de réactions folles.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 w-full text-xs font-bold btn-load-preset" data-preset-id="preset-festival-club">
+                Charger ce preset ⚡
+              </button>
+            </div>
+
+            <!-- Preset 3 : Bar Lounge & Afterwork -->
+            <div class="group relative rounded-xl p-3.5 border border-pink-500/30 bg-gradient-to-b from-pink-500/10 to-slate-950 hover:border-pink-400/60 transition flex flex-col justify-between gap-3">
+              <div class="space-y-2">
+                <!-- Mini Preview Visuelle CSS -->
+                <div class="h-14 rounded-lg bg-[#0e040a] border border-pink-500/40 p-2 flex items-center justify-between overflow-hidden relative shadow-inner">
+                  <div class="absolute inset-0 bg-radial from-pink-500/20 to-transparent pointer-events-none"></div>
+                  <div class="flex items-center gap-1.5 z-10">
+                    <div class="w-6 h-6 rounded bg-pink-500/20 border border-pink-400/40 flex items-center justify-center text-[10px]">🍸</div>
+                    <div class="space-y-1">
+                      <div class="w-10 h-1.5 rounded bg-pink-300/70"></div>
+                      <div class="w-6 h-1 rounded bg-amber-400/40"></div>
+                    </div>
+                  </div>
+                  <div class="w-9 h-9 rounded bg-white p-0.5 flex items-center justify-center z-10 shadow">
+                    <div class="w-full h-full bg-slate-900 rounded-[2px] flex items-center justify-center text-[8px] font-black text-pink-300">QR++</div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-pink-200">Bar Lounge & Afterwork</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40">Sunset</span>
+                </div>
+                <p class="text-[11px] text-slate-400 line-clamp-2">Coucher de soleil magenta et ambre, très grand QR Code pour scanner depuis les tables et le comptoir.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost border border-pink-500/30 text-pink-300 hover:bg-pink-500/20 w-full text-xs font-bold btn-load-preset" data-preset-id="preset-bar-lounge">
+                Charger ce preset ⚡
+              </button>
+            </div>
+
+            <!-- Preset 4 : Grosse Soirée / Anniversaire -->
+            <div class="group relative rounded-xl p-3.5 border border-red-500/30 bg-gradient-to-b from-red-500/10 to-slate-950 hover:border-red-400/60 transition flex flex-col justify-between gap-3">
+              <div class="space-y-2">
+                <!-- Mini Preview Visuelle CSS -->
+                <div class="h-14 rounded-lg bg-[#0e0303] border border-red-500/40 p-2 flex items-center justify-between overflow-hidden relative shadow-inner">
+                  <div class="absolute inset-0 bg-radial from-red-500/20 to-transparent pointer-events-none"></div>
+                  <div class="flex items-center gap-1.5 z-10">
+                    <div class="w-6 h-6 rounded bg-red-500/20 border border-red-400/40 flex items-center justify-center text-[10px]">🔥</div>
+                    <div class="space-y-1">
+                      <div class="w-12 h-1.5 rounded bg-red-300/70"></div>
+                      <div class="w-8 h-1 rounded bg-amber-400/40"></div>
+                    </div>
+                  </div>
+                  <div class="w-9 h-9 rounded bg-white p-0.5 flex items-center justify-center z-10 shadow">
+                    <div class="w-full h-full bg-slate-900 rounded-[2px] flex items-center justify-center text-[8px] font-black text-amber-400">QR</div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-red-200">Grosse Soirée / Anniv</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40">Fire</span>
+                </div>
+                <p class="text-[11px] text-slate-400 line-clamp-2">Énergie braise et or incandescent, ambiance festive maximale et combos public explosifs.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost border border-red-500/30 text-red-300 hover:bg-red-500/20 w-full text-xs font-bold btn-load-preset" data-preset-id="preset-grosse-soiree">
+                Charger ce preset ⚡
+              </button>
+            </div>
+
+            <!-- Preset 5 : Midnight Minimal Immersion -->
+            <div class="group relative rounded-xl p-3.5 border border-indigo-500/30 bg-gradient-to-b from-indigo-500/10 to-slate-950 hover:border-indigo-400/60 transition flex flex-col justify-between gap-3">
+              <div class="space-y-2">
+                <!-- Mini Preview Visuelle CSS -->
+                <div class="h-14 rounded-lg bg-[#02030a] border border-indigo-500/40 p-2 flex items-center justify-between overflow-hidden relative shadow-inner">
+                  <div class="absolute inset-0 bg-radial from-indigo-500/15 to-transparent pointer-events-none"></div>
+                  <div class="flex items-center gap-1.5 z-10">
+                    <div class="w-6 h-6 rounded bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-[10px]">🌌</div>
+                    <div class="space-y-1">
+                      <div class="w-14 h-1.5 rounded bg-indigo-200/60"></div>
+                      <div class="w-9 h-1 rounded bg-indigo-400/30"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 z-10">
+                    <span class="text-[9px] font-mono text-indigo-400">Audio Focus</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black text-indigo-200">Midnight Minimal</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Stealth</span>
+                </div>
+                <p class="text-[11px] text-slate-400 line-clamp-2">Plein écran immersif, sans QR ni file d'attente gênante, idéal pour les sets électro purs.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 w-full text-xs font-bold btn-load-preset" data-preset-id="preset-midnight-minimal">
+                Charger ce preset ⚡
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Liste des presets personnalisés sauvegardés par le DJ -->
+          <div id="customPresetsContainer" class="pt-2 border-t border-white/5 space-y-2">
+            <p class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <span>⭐</span>
+              <span>Vos Presets Personnalisés Enregistrés :</span>
+            </p>
+            <div id="customPresetsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <!-- Rempli dynamiquement depuis localStorage ml_dj_screen_presets -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION STUDIO FULL CUSTOMISATION EN DIRECT ── -->
+        <div class="p-5 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-black text-white flex items-center gap-2">
+                <span>🎛️</span>
+                <span>Studio de Personnalisation en Direct (Full Custom)</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-0.5">Ajustez chaque détail de l'écran en temps réel sans recharger la page.</p>
             </div>
             <span id="screenVisualizerCurrentBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30 shrink-0">Spectre Cyber</span>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end mt-3">
+
+          <!-- 1. Palette de Thème Couleur -->
+          <div class="space-y-1.5">
+            <label class="label text-xs">Palette de Couleurs & Thème</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2" id="screenThemePaletteSelector">
+              <button type="button" class="theme-palette-btn p-2 rounded-xl border border-amber-500/40 bg-amber-950/20 text-left hover:scale-105 transition flex items-center gap-2" data-theme="theme-gold-luxury">
+                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 shrink-0"></span>
+                <span class="text-[11px] font-bold text-amber-200 truncate">Gold Luxury</span>
+              </button>
+              <button type="button" class="theme-palette-btn p-2 rounded-xl border border-cyan-500/40 bg-cyan-950/20 text-left hover:scale-105 transition flex items-center gap-2" data-theme="theme-cyber-neon">
+                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-cyan-400 to-fuchsia-500 shrink-0"></span>
+                <span class="text-[11px] font-bold text-cyan-200 truncate">Cyber Neon</span>
+              </button>
+              <button type="button" class="theme-palette-btn p-2 rounded-xl border border-pink-500/40 bg-pink-950/20 text-left hover:scale-105 transition flex items-center gap-2" data-theme="theme-sunset-fever">
+                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-pink-500 to-amber-400 shrink-0"></span>
+                <span class="text-[11px] font-bold text-pink-200 truncate">Sunset Fever</span>
+              </button>
+              <button type="button" class="theme-palette-btn p-2 rounded-xl border border-red-500/40 bg-red-950/20 text-left hover:scale-105 transition flex items-center gap-2" data-theme="theme-fire-energy">
+                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-red-600 to-yellow-400 shrink-0"></span>
+                <span class="text-[11px] font-bold text-red-200 truncate">Fire Energy</span>
+              </button>
+              <button type="button" class="theme-palette-btn p-2 rounded-xl border border-indigo-500/40 bg-indigo-950/20 text-left hover:scale-105 transition flex items-center gap-2" data-theme="theme-midnight-dark">
+                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-slate-900 to-indigo-600 shrink-0"></span>
+                <span class="text-[11px] font-bold text-indigo-200 truncate">Midnight</span>
+              </button>
+              <button type="button" class="theme-palette-btn p-2 rounded-xl border border-emerald-500/40 bg-emerald-950/20 text-left hover:scale-105 transition flex items-center gap-2" data-theme="theme-club-laser">
+                <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 shrink-0"></span>
+                <span class="text-[11px] font-bold text-emerald-200 truncate">Club Laser</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Titre personnalisé & Taille QR -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="label text-xs">Style de visualisation</label>
+              <label class="label text-xs">Sous-titre / En-tête personnalisé</label>
+              <input type="text" id="screenCustomTitleInput" placeholder="Ex: Mariage de Léa & Paul, Afterwork..." class="input text-xs bg-slate-950" />
+            </div>
+            <div>
+              <label class="label text-xs">Taille du QR Code sur l'écran</label>
+              <select id="screenQrSizeSelect" class="input text-xs bg-slate-950">
+                <option value="compact">Compact (130px) - discret</option>
+                <option value="standard" selected>Standard (190px) - recommandé</option>
+                <option value="large">Grand (255px) - visible à distance</option>
+                <option value="giant">Géant (320px) - TV / Scène éloignée</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. Toggles de visibilité des composants -->
+          <div class="space-y-2 pt-2 border-t border-white/5">
+            <label class="label text-xs">Composants & Colonnes affichés sur le Grand Écran</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+              <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer">
+                <input type="checkbox" id="screenToggleNowPlaying" checked class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-slate-300">Titre en cours (NP)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer">
+                <input type="checkbox" id="screenToggleQr" checked class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-slate-300">Grand QR Code</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer">
+                <input type="checkbox" id="screenToggleQueue" checked class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-slate-300">File d'attente</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer">
+                <input type="checkbox" id="screenToggleHype" checked class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-slate-300">Hype Meter & Combos</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer">
+                <input type="checkbox" id="screenToggleReactions" checked class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-slate-300">Émojis flottants</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950/60 border border-white/5 cursor-pointer">
+                <input type="checkbox" id="screenToggleFooter" checked class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-slate-300">Titres récemment joués</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 4. Visualiseur audio & Ambiance de fond -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-white/5">
+            <div>
+              <label class="label text-xs">Visualiseur audio 3D</label>
               <select id="screenVisualizerSelect" class="input text-xs bg-slate-950">
                 <option value="cyber-spectrum">Spectre Cyber (Equalizer néon)</option>
                 <option value="radial-spectrum">Spectre Circulaire Néon (Halo central)</option>
@@ -993,11 +1257,45 @@
                 <option value="off">Désactivé</option>
               </select>
             </div>
-            <button type="button" id="btnApplyScreenVisualizer" class="btn btn-cyan btn-sm font-bold">Appliquer à l'écran</button>
+            <div>
+              <label class="label text-xs">Effet lumineux d'ambiance (Background FX)</label>
+              <select id="projectionVisualsMode" class="input text-xs bg-slate-950">
+                <option value="aurora">Aurora (doux & feutré)</option>
+                <option value="pulse">Pulse (rythmé club)</option>
+                <option value="strobe">Strobe (intense)</option>
+                <option value="spectrum">Spectrum (arc-en-ciel)</option>
+                <option value="nebula">Nebula (nuages spatiaux)</option>
+                <option value="laser">Laser (faisceaux balayants)</option>
+                <option value="vortex">Vortex (tourbillon)</option>
+                <option value="party">Party (combo automatique)</option>
+                <option value="dvd">DVD Bounce (vintage)</option>
+                <option value="bpm-sync">BPM Sync (pulsation au tempo)</option>
+              </select>
+            </div>
           </div>
+
+          <!-- Boutons d'action Studio -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
+            <button type="button" id="btnApplyScreenVisualizer" class="hidden"></button>
+            <button type="button" id="btnSaveProjectionVisuals" class="hidden"></button>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-0 cursor-pointer shrink-0">
+                <input type="checkbox" id="projectionVisualsToggle" class="sr-only" checked />
+                <span class="toggle-track"></span>
+              </label>
+              <span class="text-xs text-slate-400">Effets ambiants actifs</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" id="btnBroadcastScreenConfig" class="btn btn-primary btn-sm font-bold flex items-center gap-1.5 shadow-lg shadow-purple-500/25">
+                <span>⚡</span>
+                <span>Diffuser en Direct sur le Grand Écran</span>
+              </button>
+            </div>
+          </div>
+          <div id="screenBroadcastFeedback" class="hidden text-xs font-bold text-center py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">Configuration synchronisée en direct sur le Grand Écran !</div>
         </div>
 
-        <!-- Mode Karaoké -->
+        <!-- ── SECTION MODE KARAOKÉ & PAROLES (PRÉSERVÉE) ── -->
         <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
           <div class="flex items-start justify-between gap-4 mb-2">
             <div>
@@ -1026,48 +1324,13 @@
                 <input type="checkbox" id="karaokeAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
                 <span class="text-xs font-semibold text-slate-300">Activer auto dès que paroles dispo</span>
               </label>
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="projectionVisualsAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
+                <span class="text-xs text-slate-300">Varier auto l'ambiance par morceau</span>
+              </label>
             </div>
           </div>
           <button type="button" id="btnSaveKaraokeSettings" class="btn btn-sm btn-full font-bold mt-2 bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30">Enregistrer les paramètres Karaoké</button>
-        </div>
-
-        <!-- Effets visuels de projection -->
-        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
-          <div class="flex items-start justify-between gap-4 mb-2">
-            <div>
-              <p class="text-sm font-bold text-white flex items-center gap-2">
-                <span>🎆</span>
-                <span>Effets d'ambiance et lumières d'écran</span>
-              </p>
-              <p class="text-xs text-slate-400 mt-0.5">Animations colorées synchronisées sur le grand écran pour habiller la scène.</p>
-            </div>
-            <label class="flex items-center gap-0 cursor-pointer shrink-0">
-              <input type="checkbox" id="projectionVisualsToggle" class="sr-only" />
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end mt-3">
-            <div>
-              <label class="label text-xs">Ambiance visuelle</label>
-              <select id="projectionVisualsMode" class="input text-xs bg-slate-950">
-                <option value="aurora">Aurora (doux & feutré)</option>
-                <option value="pulse">Pulse (rythmé club)</option>
-                <option value="strobe">Strobe (intense)</option>
-                <option value="spectrum">Spectrum (arc-en-ciel)</option>
-                <option value="nebula">Nebula (nuages spatiaux)</option>
-                <option value="laser">Laser (faisceaux balayants)</option>
-                <option value="vortex">Vortex (tourbillon)</option>
-                <option value="party">Party (combo automatique)</option>
-                <option value="dvd">DVD Bounce (vintage)</option>
-                <option value="bpm-sync">BPM Sync (pulsation au tempo)</option>
-              </select>
-            </div>
-            <button type="button" id="btnSaveProjectionVisuals" class="btn btn-cyan btn-sm font-bold">Appliquer l'effet</button>
-          </div>
-          <label class="flex items-center gap-2 mt-3 cursor-pointer select-none">
-            <input type="checkbox" id="projectionVisualsAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
-            <span class="text-xs text-slate-300">Varier automatiquement l'effet à chaque changement de morceau</span>
-          </label>
         </div>
 
       </div>
@@ -1077,6 +1340,23 @@
       ════════════════════════════════════════════════════════════ -->
       <div id="tab-social" class="settings-tab-pane hidden space-y-4">
         
+        <!-- Contrôle Émojis & Réactions du Public -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-bold text-white flex items-center gap-2">
+                <span>🎉</span>
+                <span>Émojis & Réactions des Invités</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-0.5">Activez ou désactivez les émojis sur le smartphone des invités (Mode Sobre idéal pour mariages & événements corporate).</p>
+            </div>
+            <label class="flex items-center gap-0 cursor-pointer shrink-0">
+              <input type="checkbox" id="guestEmojisToggle" checked class="sr-only" />
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </div>
+
         <!-- Sondage Live Public -->
         <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
           <div class="flex items-center gap-2 mb-1">

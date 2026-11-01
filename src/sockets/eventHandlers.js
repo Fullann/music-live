@@ -215,6 +215,8 @@ const DJ_MESSAGE_TTL_MS = 5 * 60 * 1000;
 // Stockage en mémoire du mode visualiseur grand écran et de l'état Karaoké
 const screenVisualizerCache = new Map(); // eventId → 'cyber-spectrum' | 'nebula-3d' | 'neon-waveform' | 'bass-ripple' | 'off'
 const karaokeCache = new Map(); // eventId → { enabled: boolean, autoKaraoke: boolean, lyricsSize: string }
+const guestEmojisCache = new Map(); // eventId → boolean (true par défaut)
+const screenConfigCache = new Map(); // eventId → config object (presets & customization)
 
 // Stockage en mémoire des sessions de Mini Blind-Test Flash actif
 const activeBlindTests = new Map(); // eventId → { id, question, options, correctIndex, mysteryAudioUrl, durationSec, startTime, answers, timer, trackInfo }
@@ -463,6 +465,14 @@ function setupSocketHandlers(io) {
 
       const curKaraoke = karaokeCache.get(eventId) || { enabled: false, autoKaraoke: false, lyricsSize: "normal" };
       socket.emit("karaoke-mode-updated", curKaraoke);
+
+      // Configuration personnalisée grand écran & Émojis clients
+      const curScreenConfig = screenConfigCache.get(eventId) || null;
+      if (curScreenConfig) {
+        socket.emit("screen-config-updated", { config: curScreenConfig });
+      }
+      const curEmojis = guestEmojisCache.has(eventId) ? guestEmojisCache.get(eventId) : true;
+      socket.emit("guest-emojis-updated", { enabled: curEmojis });
 
       // Session Blind-Test Flash active si en cours
       const activeBt = activeBlindTests.get(eventId);
@@ -1443,6 +1453,12 @@ function setupSocketHandlers(io) {
           values.push(data.filterExplicit ? 1 : 0);
         }
 
+        if (data.guestEmojisEnabled !== undefined) {
+          const enabled = !!data.guestEmojisEnabled;
+          guestEmojisCache.set(eventId, enabled);
+          io.to(eventId).emit("guest-emojis-updated", { enabled });
+        }
+
         if (updates.length > 0) {
           values.push(eventId);
           await db.query(
@@ -1477,6 +1493,7 @@ function setupSocketHandlers(io) {
               ? parseInt(String(requestFreezeMinutes), 10)
               : undefined,
             filterExplicit: data.filterExplicit !== undefined ? !!data.filterExplicit : undefined,
+            guestEmojisEnabled: data.guestEmojisEnabled !== undefined ? !!data.guestEmojisEnabled : undefined,
             screenVisualizerMode: data.screenVisualizerMode !== undefined ? data.screenVisualizerMode : undefined,
             karaokeEnabled: data.karaokeEnabled !== undefined ? !!data.karaokeEnabled : undefined,
             karaokeAutoEnabled: data.karaokeAutoEnabled !== undefined ? !!data.karaokeAutoEnabled : undefined,
@@ -1648,6 +1665,17 @@ function setupSocketHandlers(io) {
       await logEventAction(eventId, perm, "set-karaoke-mode", null, payload);
     });
 
+    // Contrôle et personnalisation poussée du Grand Écran (Presets & Customisation)
+    socket.on("set-screen-config", async (data) => {
+      const { eventId, config } = data || {};
+      const perm = await verifyActionPermission(socket, eventId, "playback");
+      if (!perm) return;
+
+      screenConfigCache.set(eventId, config);
+      io.to(eventId).emit("screen-config-updated", { config });
+      await logEventAction(eventId, perm, "set-screen-config", null, { config });
+    });
+
     // Mini Blind-Test Flash: Démarrer un quiz musical
     socket.on("start-blind-test", async (data) => {
       const { eventId, question, options, correctIndex, mysteryAudioUrl, durationSec, trackInfo } = data || {};
@@ -1767,6 +1795,8 @@ module.exports.clearNowPlayingCache = (eventId) => {
   djMessageCache.delete(eventId);
   screenVisualizerCache.delete(eventId);
   karaokeCache.delete(eventId);
+  guestEmojisCache.delete(eventId);
+  screenConfigCache.delete(eventId);
   const bt = activeBlindTests.get(eventId);
   if (bt && bt.timer) clearTimeout(bt.timer);
   activeBlindTests.delete(eventId);

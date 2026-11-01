@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="/css/tailwind.min.css" />
   <link rel="stylesheet" href="/css/app.css" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
     * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    .font-syne { font-family: 'Syne', sans-serif; }
 
     body {
       background: #080810;
@@ -17,6 +18,82 @@
       overflow: hidden;
       height: 100vh;
       width: 100vw;
+    }
+
+    /* ── PALETTES & THÈMES PERSONNALISÉS GRAND ÉCRAN ──────── */
+    body.theme-gold-luxury {
+      background: radial-gradient(ellipse at center, #1a1508 0%, #080603 100%) !important;
+      color: #fef08a !important;
+    }
+    body.theme-gold-luxury #ambientBg {
+      background: radial-gradient(circle at 50% 50%, rgba(245,158,11,0.15) 0%, rgba(10,8,4,0.95) 100%) !important;
+    }
+    body.theme-gold-luxury #npCard,
+    body.theme-gold-luxury #qrCard,
+    body.theme-gold-luxury #queueCol,
+    body.theme-gold-luxury #hypeMeterContainer {
+      border-color: rgba(245, 158, 11, 0.35) !important;
+      box-shadow: 0 10px 40px rgba(245, 158, 11, 0.15) !important;
+    }
+
+    body.theme-club-laser {
+      background: radial-gradient(ellipse at center, #06181b 0%, #03080c 100%) !important;
+      color: #a7f3d0 !important;
+    }
+    body.theme-club-laser #ambientBg {
+      background: radial-gradient(circle at 50% 50%, rgba(16,185,129,0.18) 0%, rgba(3,8,12,0.95) 100%) !important;
+    }
+    body.theme-club-laser #npCard,
+    body.theme-club-laser #qrCard,
+    body.theme-club-laser #queueCol,
+    body.theme-club-laser #hypeMeterContainer {
+      border-color: rgba(16, 185, 129, 0.35) !important;
+      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.15) !important;
+    }
+
+    body.theme-sunset-fever {
+      background: radial-gradient(ellipse at center, #240b2b 0%, #0d0411 100%) !important;
+      color: #fbcfe8 !important;
+    }
+    body.theme-sunset-fever #ambientBg {
+      background: radial-gradient(circle at 50% 50%, rgba(217,70,239,0.18) 0%, rgba(13,4,17,0.95) 100%) !important;
+    }
+    body.theme-sunset-fever #npCard,
+    body.theme-sunset-fever #qrCard,
+    body.theme-sunset-fever #queueCol,
+    body.theme-sunset-fever #hypeMeterContainer {
+      border-color: rgba(236, 72, 153, 0.35) !important;
+      box-shadow: 0 10px 40px rgba(236, 72, 153, 0.18) !important;
+    }
+
+    body.theme-fire-energy {
+      background: radial-gradient(ellipse at center, #2b0b0b 0%, #110404 100%) !important;
+      color: #fecaca !important;
+    }
+    body.theme-fire-energy #ambientBg {
+      background: radial-gradient(circle at 50% 50%, rgba(239,68,68,0.2) 0%, rgba(17,4,4,0.95) 100%) !important;
+    }
+    body.theme-fire-energy #npCard,
+    body.theme-fire-energy #qrCard,
+    body.theme-fire-energy #queueCol,
+    body.theme-fire-energy #hypeMeterContainer {
+      border-color: rgba(239, 68, 68, 0.35) !important;
+      box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    body.theme-midnight-dark {
+      background: #020307 !important;
+      color: #e2e8f0 !important;
+    }
+    body.theme-midnight-dark #ambientBg {
+      background: #020307 !important;
+    }
+    body.theme-midnight-dark #npCard,
+    body.theme-midnight-dark #qrCard,
+    body.theme-midnight-dark #queueCol,
+    body.theme-midnight-dark #hypeMeterContainer {
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
     }
 
     /* ── Fond ambiant animé ───────────────────────────── */
@@ -650,6 +727,9 @@
 </head>
 <body>
 
+<!-- Aura d'ambiance périphérique Hype réactive -->
+<div id="hypeScreenAura" class="fixed inset-0 pointer-events-none transition-all duration-300 z-10" style="opacity:0"></div>
+
 <!-- Fond ambiant coloré selon la pochette -->
 <div id="ambientBg"></div>
 <div id="ambientFx"></div>
@@ -784,20 +864,24 @@
 </div>
 
 <!-- ── Hype Meter (Jauge d'Énergie Live Salle) ──────────────────── -->
-<div id="hypeMeterContainer" class="fixed bottom-5 left-6 z-30 flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-xl border border-white/15 shadow-2xl transition-all duration-300 select-none" style="background:rgba(15,15,28,0.85)">
-  <div class="relative flex items-center justify-center w-8 h-8 shrink-0">
-    <span id="hypeMeterIcon" class="text-xl">🔥</span>
+<div id="hypeMeterContainer" class="fixed bottom-5 left-6 z-30 flex items-center gap-3.5 px-4 py-3 rounded-2xl backdrop-blur-2xl border border-white/20 shadow-2xl transition-all duration-300 select-none" style="background:rgba(15,15,28,0.88);box-shadow:0 10px 30px rgba(0,0,0,0.5)">
+  <div class="relative flex items-center justify-center w-9 h-9 shrink-0">
+    <span id="hypeMeterIcon" class="text-2xl animate-bounce">🔥</span>
   </div>
-  <div class="flex flex-col gap-1 w-36 sm:w-44">
+  <div class="flex flex-col gap-1 w-44 sm:w-56">
     <div class="flex items-center justify-between text-[11px] font-black tracking-wider uppercase">
-      <span class="text-white/80 flex items-center gap-1.5">
-        Hype Meter
-        <span id="hypePulseDot" class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+      <span class="text-white flex items-center gap-1.5 font-syne">
+        HYPE METER
+        <span id="hypePulseDot" class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
       </span>
-      <span id="hypePercentLabel" class="text-amber-400 font-extrabold">0%</span>
+      <span id="hypePercentLabel" class="text-amber-400 font-extrabold text-xs">0%</span>
     </div>
-    <div class="w-full h-2 rounded-full overflow-hidden bg-white/10 p-[1px]">
-      <div id="hypeProgressBar" class="h-full rounded-full transition-all duration-300" style="width:0%;background:linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #f59e0b 100%);box-shadow:0 0 12px rgba(245,158,11,0.5)"></div>
+    <div class="w-full h-2.5 rounded-full overflow-hidden bg-white/10 p-[1px] relative shadow-inner">
+      <div id="hypeProgressBar" class="h-full rounded-full transition-all duration-300" style="width:0%;background:linear-gradient(90deg, #3b82f6 0%, #ec4899 50%, #f59e0b 100%);box-shadow:0 0 15px rgba(245,158,11,0.6)"></div>
+    </div>
+    <div class="flex items-center justify-between mt-0.5">
+      <span id="hypeStatusLabel" class="text-[10px] font-bold text-amber-300/90 tracking-wide truncate">Ambiance : Démarrage ⚡</span>
+      <span id="hypeComboPill" class="hidden px-2 py-0.5 rounded-full text-[9px] font-black uppercase text-white bg-gradient-to-r from-pink-500 to-purple-600 animate-pulse">COMBO x<span id="hypeComboCount">1</span></span>
     </div>
   </div>
 </div>
@@ -873,7 +957,7 @@
   <header id="header">
     <div class="flex items-center gap-4">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-widest mb-1" style="color:rgba(255,255,255,.35)">Soirée</p>
+        <p id="screenCustomTitleHeader" class="text-xs font-semibold uppercase tracking-widest mb-1" style="color:rgba(255,255,255,.35)">Soirée</p>
         <h1 id="eventName">Chargement…</h1>
       </div>
       <div class="live-pill">
@@ -2364,32 +2448,88 @@
   // ── Hype Meter & Pyrotechnie Visuelle ──
   let hypeEnergy = 0; // 0 à 100
   let isHypeMaxCelebration = false;
+  let hypeLastReactionTime = 0;
+  let hypeComboMultiplier = 1;
+  let hypeComboResetTimer = null;
 
   function updateHypeMeterUI() {
     const bar = document.getElementById("hypeProgressBar");
     const label = document.getElementById("hypePercentLabel");
     const icon = document.getElementById("hypeMeterIcon");
+    const statusLabel = document.getElementById("hypeStatusLabel");
+    const comboPill = document.getElementById("hypeComboPill");
+    const comboCount = document.getElementById("hypeComboCount");
+    const aura = document.getElementById("hypeScreenAura");
     if (!bar || !label) return;
 
     const clamped = Math.min(100, Math.max(0, Math.round(hypeEnergy)));
     bar.style.width = `${clamped}%`;
     label.textContent = `${clamped}%`;
 
-    if (clamped >= 80) {
+    // Aura lumineuse périphérique réactive sur tout l'écran
+    if (aura) {
+      if (clamped >= 80) {
+        aura.style.opacity = "1";
+        aura.style.boxShadow = `inset 0 0 ${40 + (clamped - 80) * 3}px rgba(236,72,153,${0.35 + (clamped - 80) * 0.02}), inset 0 0 ${80 + (clamped - 80) * 4}px rgba(245,158,11,0.25)`;
+      } else if (clamped >= 40) {
+        aura.style.opacity = `${((clamped - 40) / 40 * 0.8).toFixed(2)}`;
+        aura.style.boxShadow = `inset 0 0 45px rgba(168,85,247,0.3)`;
+      } else {
+        aura.style.opacity = "0";
+      }
+    }
+
+    // Affichage dynamique des combos de réactions du public
+    if (comboPill && comboCount) {
+      if (hypeComboMultiplier > 1) {
+        comboPill.classList.remove("hidden");
+        comboCount.textContent = hypeComboMultiplier;
+      } else {
+        comboPill.classList.add("hidden");
+      }
+    }
+
+    if (clamped >= 85) {
       if (icon) icon.textContent = "💥";
+      if (statusLabel) statusLabel.textContent = "SURCHAUFFE TOTALE 🔥💥";
       bar.style.background = "linear-gradient(90deg, #ec4899 0%, #f59e0b 50%, #ef4444 100%)";
-    } else if (clamped >= 40) {
+    } else if (clamped >= 60) {
       if (icon) icon.textContent = "🔥";
-      bar.style.background = "linear-gradient(90deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%)";
-    } else {
+      if (statusLabel) statusLabel.textContent = "Foule Déchaînée 🚀";
+      bar.style.background = "linear-gradient(90deg, #8b5cf6 0%, #ec4899 50%, #f59e0b 100%)";
+    } else if (clamped >= 35) {
       if (icon) icon.textContent = "⚡";
+      if (statusLabel) statusLabel.textContent = "Ambiance Électrique ⚡";
+      bar.style.background = "linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%)";
+    } else if (clamped >= 15) {
+      if (icon) icon.textContent = "🎵";
+      if (statusLabel) statusLabel.textContent = "Pression qui monte 🎶";
       bar.style.background = "linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%)";
+    } else {
+      if (icon) icon.textContent = "✨";
+      if (statusLabel) statusLabel.textContent = "Ambiance : Démarrage 🧊";
+      bar.style.background = "linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%)";
     }
   }
 
   function addHypeEnergy(points = 6) {
     if (isHypeMaxCelebration) return;
-    hypeEnergy = Math.min(100, hypeEnergy + points);
+    const now = Date.now();
+    if (now - hypeLastReactionTime < 2400) {
+      hypeComboMultiplier = Math.min(8, hypeComboMultiplier + 1);
+    } else {
+      hypeComboMultiplier = 1;
+    }
+    hypeLastReactionTime = now;
+
+    clearTimeout(hypeComboResetTimer);
+    hypeComboResetTimer = setTimeout(() => {
+      hypeComboMultiplier = 1;
+      updateHypeMeterUI();
+    }, 3500);
+
+    const bonus = Math.round(points * (1 + (hypeComboMultiplier - 1) * 0.4));
+    hypeEnergy = Math.min(100, hypeEnergy + bonus);
     updateHypeMeterUI();
 
     if (hypeEnergy >= 100) {
@@ -2626,6 +2766,96 @@
     profileBadge.classList.remove("hidden");
     profileBadge.classList.add("inline-flex");
   }
+
+  // ── Configuration et Presets Grand Écran (Full Customisation) ──
+  let activeScreenConfig = {};
+
+  function applyScreenCustomConfig(config) {
+    if (!config || typeof config !== "object") return;
+    activeScreenConfig = { ...activeScreenConfig, ...config };
+
+    // 1. Thème de couleur global
+    const themeClasses = [
+      "theme-gold-luxury", "theme-club-laser", "theme-sunset-fever",
+      "theme-fire-energy", "theme-midnight-dark", "theme-cyber-neon"
+    ];
+    themeClasses.forEach(cls => document.body.classList.remove(cls));
+    if (config.theme && themeClasses.includes(config.theme)) {
+      document.body.classList.add(config.theme);
+    }
+
+    // 2. Titre personnalisé / Sous-titre
+    const headerTitle = document.getElementById("screenCustomTitleHeader");
+    if (headerTitle && config.customTitle !== undefined) {
+      headerTitle.textContent = config.customTitle || "Soirée";
+    }
+
+    // 3. Masquage / Affichage des colonnes
+    const qrCol = document.getElementById("qrCol");
+    if (qrCol && config.hideQr !== undefined) {
+      qrCol.style.display = config.hideQr ? "none" : "";
+    }
+
+    const npCol = document.getElementById("nowPlayingCol");
+    if (npCol && config.hideNowPlaying !== undefined) {
+      npCol.style.display = config.hideNowPlaying ? "none" : "";
+    }
+
+    const queueCol = document.getElementById("queueCol");
+    if (queueCol && config.hideQueue !== undefined) {
+      queueCol.style.display = config.hideQueue ? "none" : "";
+    }
+
+    const footer = document.getElementById("footer");
+    if (footer && config.hideFooter !== undefined) {
+      footer.style.display = config.hideFooter ? "none" : "";
+    }
+
+    const hypeContainer = document.getElementById("hypeMeterContainer");
+    if (hypeContainer && config.hideHypeMeter !== undefined) {
+      hypeContainer.style.display = config.hideHypeMeter ? "none" : "";
+    }
+
+    const reactionsLayer = document.getElementById("floatingReactionsLayer");
+    if (reactionsLayer && config.hideReactions !== undefined) {
+      reactionsLayer.style.display = config.hideReactions ? "none" : "";
+    }
+
+    // 4. Taille du QR Code
+    const qrImg = document.getElementById("qrCode");
+    if (qrImg && config.qrSize) {
+      const sizes = {
+        compact: "130px",
+        standard: "190px",
+        large: "255px",
+        giant: "320px"
+      };
+      const sz = sizes[config.qrSize] || "190px";
+      qrImg.style.width = sz;
+      qrImg.style.height = sz;
+    }
+
+    // 5. Effet visuel ambiant de fond
+    const fxClasses = [
+      "fx-aurora", "fx-pulse", "fx-strobe", "fx-spectrum",
+      "fx-nebula", "fx-laser", "fx-vortex", "fx-party", "fx-bpm-sync", "fx-dvd"
+    ];
+    fxClasses.forEach(cls => document.body.classList.remove(cls));
+    if (config.backgroundFx && fxClasses.includes(config.backgroundFx)) {
+      document.body.classList.add("proj-fx-on", config.backgroundFx);
+    }
+
+    // 6. Mode visualiseur audio
+    if (config.visualizerMode && typeof setVisualizerMode === "function") {
+      setVisualizerMode(config.visualizerMode);
+    }
+  }
+
+  socket.on("screen-config-updated", (data) => {
+    if (data && data.config) {
+      applyScreenCustomConfig(data.config);
+    }
+  });
 
   // ── Initialisation immédiate des données au chargement ──
   loadData();
