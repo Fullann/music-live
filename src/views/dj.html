@@ -624,202 +624,267 @@
 
 <!-- Modal: Réglages de la soirée -->
 <div id="settingsPanel" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-  <div class="modal w-full max-w-2xl max-h-[90vh] flex flex-col">
-    <div class="flex items-center justify-between px-6 py-5 shrink-0 border-b border-white/10">
-      <div>
-        <h2 class="text-base font-extrabold text-white" style="font-family:'Syne', sans-serif">Paramètres de la soirée</h2>
-        <p class="text-xs text-slate-400">Configuration des votes, modération, sondages et effets visuels</p>
+  <div class="modal w-full max-w-3xl max-h-[92vh] flex flex-col bg-[#0a0e17] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+    
+    <!-- En-tête du modal -->
+    <div class="flex items-center justify-between px-6 py-4 shrink-0 border-b border-white/10 bg-slate-950/80">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <div>
+          <h2 class="text-base font-extrabold text-white tracking-wide" style="font-family:'Syne', sans-serif">Paramètres de la régie DJ</h2>
+          <p class="text-xs text-slate-400">Contrôle en direct de la diffusion, des règles de modération et des écrans</p>
+        </div>
       </div>
-      <button id="closeSettings" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
+      <button id="closeSettings" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition" title="Fermer">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <div class="p-6 space-y-6 overflow-y-auto flex-1 deck-scroll">
+    <!-- Onglets de navigation thématiques -->
+    <div class="flex items-center gap-1.5 px-6 py-2.5 border-b border-white/10 bg-slate-950/90 overflow-x-auto deck-scroll shrink-0">
+      <button type="button" class="settings-tab-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-purple-600 text-white shadow-lg shadow-purple-500/25 shrink-0" data-tab="tab-playback">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Diffusion & Spotify</span>
+      </button>
+      <button type="button" class="settings-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/5 shrink-0" data-tab="tab-requests">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Demandes & Règles</span>
+      </button>
+      <button type="button" class="settings-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/5 shrink-0" data-tab="tab-screen">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Grand Écran & Show</span>
+      </button>
+      <button type="button" class="settings-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/5 shrink-0" data-tab="tab-social">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Sondages & Cagnotte</span>
+      </button>
+      <button type="button" class="settings-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/5 shrink-0" data-tab="tab-team">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Équipe & Sécurité</span>
+      </button>
+    </div>
 
-      <!-- Demandes & Modération -->
-      <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Demandes & Modération</p>
+    <!-- Conteneur des onglets (Scrollable) -->
+    <div class="p-6 overflow-y-auto flex-1 deck-scroll">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+      <!-- ═══════════════════════════════════════════════════════════
+           ONGLET 1 : DIFFUSION & SPOTIFY
+      ════════════════════════════════════════════════════════════ -->
+      <div id="tab-playback" class="settings-tab-pane space-y-4">
+        
+        <!-- Playlist de secours Spotify -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-purple-500/30 transition">
+          <div class="flex items-start justify-between gap-3 mb-2">
             <div>
-              <p class="text-sm font-bold text-white">Votes</p>
-              <p class="text-xs text-slate-400 mt-0.5">Réactions et votes des invités</p>
+              <div class="flex items-center gap-2">
+                <span class="text-base">🛟</span>
+                <p class="text-sm font-bold text-white">Playlist de secours automatique (Fallback)</p>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Joue automatiquement un morceau aléatoire dès que la file d'attente est vide pour éviter tout blanc musical.</p>
             </div>
-            <label class="flex items-center gap-0 cursor-pointer shrink-0">
+            <span id="fallbackPlaylistBadge" class="hidden text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">Active</span>
+          </div>
+
+          <div class="mt-3 space-y-2">
+            <input type="text" id="fallbackPlaylistInput" class="input text-xs w-full font-mono bg-slate-950/80" placeholder="Lien ou URI Spotify (ex: https://open.spotify.com/playlist/...)" autocomplete="off" />
+            
+            <div id="fallbackPlaylistPreview" class="hidden rounded-xl p-3 bg-slate-950 border border-white/10">
+              <div class="flex items-center gap-3">
+                <img id="fallbackPlaylistPreviewImg" src="" alt="" class="w-12 h-12 rounded-lg object-cover shrink-0 border border-white/10 shadow" />
+                <div class="min-w-0 flex-1">
+                  <p id="fallbackPlaylistPreviewName" class="text-xs font-bold text-white truncate">Nom de la playlist</p>
+                  <p id="fallbackPlaylistPreviewMeta" class="text-[11px] text-slate-400 truncate mt-0.5"></p>
+                </div>
+                <a id="fallbackPlaylistPreviewLink" href="#" target="_blank" class="btn btn-ghost btn-sm text-xs border border-white/10 font-bold">Ouvrir Spotify</a>
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button id="btnSaveFallbackPlaylist" type="button" class="btn btn-primary btn-sm flex-1 font-bold">Enregistrer la playlist de secours</button>
+              <button id="btnClearFallbackPlaylist" type="button" class="btn btn-ghost btn-sm border border-white/10 hover:bg-rose-500/20 hover:text-rose-300" title="Retirer la playlist">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode d'enchaînement DJ -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-base">⚡</span>
+                <p class="text-sm font-bold text-white">Enchaînement direct DJ (Cut certifié sans blanc)</p>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Dès que le morceau actuel arrive à son terme, le titre suivant démarre instantanément grâce au watchdog temps réel.</p>
+            </div>
+            <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0">Standard Pro</span>
+          </div>
+          <div class="mt-2 p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 text-xs text-slate-300 leading-relaxed">
+            💡 <strong>Note technique :</strong> Les fondus croisés avec chevauchement ne sont pas autorisés par le Web SDK de Spotify (un seul flux audio chiffré DRM à la fois). L'enchaînement direct « cut » garantit zéro temps mort et un tempo dynamique sur la piste.
+          </div>
+        </div>
+
+        <!-- Système Anti-Veille Écran -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-base">👁️</span>
+                <p class="text-sm font-bold text-white">Protection anti-veille automatique (Screen Wake Lock)</p>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Maintient l'écran et les timers de régie actifs pour éviter toute coupure audio pendant le live.</p>
+            </div>
+            <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">Actif en continu</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════
+           ONGLET 2 : DEMANDES & RÈGLES DE MODÉRATION
+      ════════════════════════════════════════════════════════════ -->
+      <div id="tab-requests" class="settings-tab-pane hidden space-y-4">
+        
+        <!-- Grille des Toggles de base -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/10 flex items-start justify-between gap-3 hover:border-purple-500/30 transition">
+            <div>
+              <p class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>🔥</span>
+                <span>Votes du public</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-1">Permet aux invités d'upvoter les titres en attente.</p>
+            </div>
+            <label class="flex items-center gap-0 cursor-pointer shrink-0 mt-0.5">
               <input type="checkbox" id="votesToggle" class="sr-only" checked />
               <span class="toggle-track"></span>
             </label>
           </div>
 
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/10 flex items-start justify-between gap-3 hover:border-purple-500/30 transition">
             <div>
-              <p class="text-sm font-bold text-white">Doublons</p>
-              <p class="text-xs text-slate-400 mt-0.5">Autoriser le même titre plusieurs fois</p>
+              <p class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>🔁</span>
+                <span>Doublons autorisés</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-1">Autoriser ou refuser qu'un même titre soit proposé plusieurs fois.</p>
             </div>
-            <label class="flex items-center gap-0 cursor-pointer shrink-0">
+            <label class="flex items-center gap-0 cursor-pointer shrink-0 mt-0.5">
               <input type="checkbox" id="duplicatesToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
 
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/10 flex items-start justify-between gap-3 hover:border-purple-500/30 transition">
             <div>
-              <p class="text-sm font-bold text-white">Auto-accept</p>
-              <p class="text-xs text-slate-400 mt-0.5">Sans validation préalable du DJ</p>
+              <p class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>Validation automatique (Auto-accept)</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-1">Les demandes vont directement en file sans validation du DJ.</p>
             </div>
-            <label class="flex items-center gap-0 cursor-pointer shrink-0">
+            <label class="flex items-center gap-0 cursor-pointer shrink-0 mt-0.5">
               <input type="checkbox" id="autoAcceptToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
 
-          <div class="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-white/5">
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/10 flex items-start justify-between gap-3 hover:border-purple-500/30 transition">
             <div>
-              <p class="text-sm font-bold text-white">Filtre Explicite (Parental)</p>
-              <p class="text-xs text-slate-400 mt-0.5">Mariages et soirées familiales</p>
+              <p class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>🔞</span>
+                <span>Filtre explicite (Parental)</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-1">Bloque les titres explicites (idéal mariages et familles).</p>
             </div>
-            <label class="flex items-center gap-0 cursor-pointer shrink-0">
+            <label class="flex items-center gap-0 cursor-pointer shrink-0 mt-0.5">
               <input type="checkbox" id="filterExplicitToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
+
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <p class="text-sm font-bold text-white mb-3">Limitation des demandes par invité</p>
+        <!-- Quotas par invité -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-base">⏱️</span>
+            <p class="text-sm font-bold text-white">Quotas de demandes par invité</p>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Évite qu'un petit groupe d'invités ne sature la file d'attente à lui seul.</p>
           <div class="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <label class="label text-xs">Max demandes</label>
-              <input type="number" id="rateLimitMax" min="1" max="20" value="3" class="input text-xs" />
+              <label class="label text-xs">Maximum de morceaux</label>
+              <input type="number" id="rateLimitMax" min="1" max="20" value="3" class="input text-xs font-mono" />
             </div>
             <div>
-              <label class="label text-xs">Fenêtre (minutes)</label>
-              <input type="number" id="rateLimitWindow" min="5" max="60" value="15" class="input text-xs" />
+              <label class="label text-xs">Période glissante (minutes)</label>
+              <input type="number" id="rateLimitWindow" min="5" max="60" value="15" class="input text-xs font-mono" />
             </div>
           </div>
-          <button id="btnUpdateRateLimit" type="button" class="btn btn-primary btn-sm btn-full font-bold">Mettre à jour</button>
+          <button id="btnUpdateRateLimit" type="button" class="btn btn-primary btn-sm btn-full font-bold">Appliquer les quotas</button>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <p class="text-sm font-bold text-white">Anti-répétition des morceaux</p>
-          <p class="text-xs text-slate-400 mt-0.5 mb-3">Délai minimum avant de pouvoir redemander le même titre</p>
+        <!-- Anti-répétition des morceaux -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-base">🛑</span>
+            <p class="text-sm font-bold text-white">Anti-répétition des morceaux</p>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Délai minimum avant de pouvoir reproposer un titre qui a déjà été diffusé.</p>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
             <div>
-              <label class="label text-xs">Délai (minutes)</label>
-              <input type="number" id="repeatCooldownMinutes" min="0" max="240" value="0" class="input text-xs" placeholder="0 = désactivé" />
+              <label class="label text-xs">Délai de blocage (minutes)</label>
+              <input type="number" id="repeatCooldownMinutes" min="0" max="240" value="0" class="input text-xs font-mono" placeholder="0 = désactivé" />
             </div>
             <button type="button" id="btnSaveRepeatCooldown" class="btn btn-primary btn-sm font-bold">Enregistrer</button>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+        <!-- Gel d'urgence -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
           <div class="flex items-center justify-between gap-3 mb-2">
-            <p class="text-sm font-bold text-white">Mode urgence DJ (Gel temporaire)</p>
-            <span id="requestsFreezeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Demandes gelées</span>
+            <div class="flex items-center gap-2">
+              <span class="text-base">❄️</span>
+              <p class="text-sm font-bold text-white">Mode urgence DJ (Gel temporaire des demandes)</p>
+            </div>
+            <span id="requestsFreezeBadge" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Demandes gelées</span>
           </div>
-          <p class="text-xs text-slate-400 mb-3">Gèle temporairement les nouvelles demandes (les votes restent actifs).</p>
+          <p class="text-xs text-slate-400 mb-3">Bloque temporairement les nouveaux ajouts (discours, gâteau, repas) sans toucher aux votes déjà en cours.</p>
           <div class="grid grid-cols-3 gap-2">
-            <button id="btnFreeze5" type="button" class="btn btn-ghost btn-sm font-semibold">5 min</button>
-            <button id="btnFreeze10" type="button" class="btn btn-ghost btn-sm font-semibold">10 min</button>
-            <button id="btnFreezeOff" type="button" class="btn btn-primary btn-sm font-bold">Désactiver</button>
+            <button id="btnFreeze5" type="button" class="btn btn-ghost btn-sm font-semibold border border-white/10">Geler 5 min</button>
+            <button id="btnFreeze10" type="button" class="btn btn-ghost btn-sm font-semibold border border-white/10">Geler 10 min</button>
+            <button id="btnFreezeOff" type="button" class="btn btn-primary btn-sm font-bold">Réactiver tout</button>
           </div>
         </div>
+
       </div>
 
-      <!-- Sondages Live -->
-      <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">Sondage Live Public</p>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div id="livePollSection" class="hidden mb-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="text-xs font-bold text-emerald-300">⚡ Sondage en cours</span>
-              <button id="btnClosePoll" type="button" class="btn btn-danger btn-sm text-xs py-1">Clôturer</button>
-            </div>
-            <div id="livePollResults" class="space-y-1.5 text-xs"></div>
-          </div>
-          <div class="space-y-2.5">
+      <!-- ═══════════════════════════════════════════════════════════
+           ONGLET 3 : GRAND ÉCRAN & SHOW
+      ════════════════════════════════════════════════════════════ -->
+      <div id="tab-screen" class="settings-tab-pane hidden space-y-4">
+        
+        <!-- Animation Visualiseur Audio -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-start justify-between gap-4 mb-2">
             <div>
-              <label class="label text-xs">Question du sondage</label>
-              <input type="text" id="pollQuestionInput" placeholder="Ex: Quel style pour la prochaine heure ?" class="input text-xs" />
+              <p class="text-sm font-bold text-white flex items-center gap-2">
+                <span>✨</span>
+                <span>Animation Visualiseur Audio (Grand Écran)</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-0.5">Animations interactives diffusées sur le grand écran du public (/qrspectre).</p>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="pollOption1" placeholder="Option 1" class="input text-xs" />
-              <input type="text" id="pollOption2" placeholder="Option 2" class="input text-xs" />
-              <input type="text" id="pollOption3" placeholder="Option 3 (optionnel)" class="input text-xs" />
-              <input type="text" id="pollOption4" placeholder="Option 4 (optionnel)" class="input text-xs" />
-            </div>
-            <button id="btnLaunchPoll" type="button" class="btn btn-success btn-sm btn-full font-bold">Lancer le sondage en direct</button>
+            <span id="screenVisualizerCurrentBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30 shrink-0">Spectre Cyber</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Dons & Cagnotte -->
-      <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">Dons & Cagnotte</p>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end mt-3">
             <div>
-              <p class="text-sm font-bold text-white">Activer les dons</p>
-              <p class="text-xs text-slate-400 mt-0.5">Affiche un bouton de don chez les invités</p>
-            </div>
-            <label class="flex items-center gap-0 cursor-pointer shrink-0">
-              <input type="checkbox" id="donationsEnabledToggle" class="sr-only" />
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-          <div class="space-y-2.5">
-            <div>
-              <label class="label text-xs">Lien de paiement / cagnotte (Lydia, Paypal...)</label>
-              <input type="url" id="donationsUrlInput" placeholder="https://..." class="input text-xs" />
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="label text-xs">Objectif (€)</label>
-                <input type="number" id="donationsTargetInput" min="0" value="0" class="input text-xs" />
-              </div>
-              <div>
-                <label class="label text-xs">Récolté (€)</label>
-                <input type="number" id="donationsRaisedTotalInput" min="0" value="0" class="input text-xs" />
-              </div>
-            </div>
-            <button id="btnSaveDonation" type="button" class="btn btn-primary btn-sm btn-full font-bold">Enregistrer les réglages de dons</button>
-            <div id="donationSaveFeedback" class="hidden text-xs font-bold text-center py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">Réglages sauvegardés !</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Message de Fin -->
-      <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Message de Fin</p>
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <p class="text-xs text-slate-400 mb-2">Affiché aux invités quand la soirée est clôturée</p>
-          <textarea id="thankYouMessage" rows="2" class="input resize-none mb-3 text-xs" placeholder="Merci d'avoir participé ! On espère que vous avez passé un excellent moment."></textarea>
-          <div class="flex justify-end gap-2">
-            <button id="btnResetMessage" type="button" class="btn btn-ghost btn-sm font-semibold">Réinitialiser</button>
-            <button id="btnSaveMessage" type="button" class="btn btn-primary btn-sm font-bold">Enregistrer</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Projection & Scène -->
-      <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider text-cyan-400 font-mono">Lecture & Effets Écran</p>
-
-        <!-- Animation Visualiseur -->
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-start justify-between gap-4 mb-3">
-            <div>
-              <p class="text-sm font-bold text-white">Animation Visualiseur Audio (Grand Écran)</p>
-              <p class="text-xs text-slate-400 mt-0.5">Animations interactives canvas sur /event/:id/qrspectre</p>
-            </div>
-            <span id="screenVisualizerCurrentBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30">Spectre Cyber</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
-            <div>
-              <label class="label text-xs">Style d'animation</label>
-              <select id="screenVisualizerSelect" class="input text-xs">
+              <label class="label text-xs">Style de visualisation</label>
+              <select id="screenVisualizerSelect" class="input text-xs bg-slate-950">
                 <option value="cyber-spectrum">Spectre Cyber (Equalizer néon)</option>
                 <option value="radial-spectrum">Spectre Circulaire Néon (Halo central)</option>
                 <option value="nebula-3d">Nébuleuse 3D (Étoiles orbitales)</option>
@@ -833,13 +898,14 @@
         </div>
 
         <!-- Mode Karaoké -->
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-start justify-between gap-4 mb-3">
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-start justify-between gap-4 mb-2">
             <div>
-              <p class="text-sm font-bold text-white flex items-center gap-1.5">
-                <span>🎤 Mode Karaoké & Paroles Synchronisées</span>
+              <p class="text-sm font-bold text-white flex items-center gap-2">
+                <span>🎤</span>
+                <span>Mode Karaoké & Paroles Synchronisées</span>
               </p>
-              <p class="text-xs text-slate-400 mt-0.5">Affichage grand format des paroles défilantes en direct</p>
+              <p class="text-xs text-slate-400 mt-0.5">Affiche les paroles défilantes en temps réel sur TV ou projecteur.</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="karaokeRemoteToggle" class="sr-only" />
@@ -848,152 +914,232 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-white/5">
             <div>
-              <label class="label text-xs">Taille des paroles</label>
-              <select id="karaokeLyricsSizeSelect" class="input text-xs">
+              <label class="label text-xs">Taille d'affichage des paroles</label>
+              <select id="karaokeLyricsSizeSelect" class="input text-xs bg-slate-950">
                 <option value="normal">Normale</option>
                 <option value="large">Grande (recommandé TV)</option>
-                <option value="xl">Extra Large (Projecteur)</option>
+                <option value="xl">Extra Large (Projecteur salle)</option>
               </select>
             </div>
             <div class="flex flex-col justify-end">
               <label class="flex items-center gap-2 cursor-pointer select-none pb-2">
                 <input type="checkbox" id="karaokeAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
-                <span class="text-xs font-semibold text-slate-300">Auto-Karaoké dès que dispo</span>
+                <span class="text-xs font-semibold text-slate-300">Activer auto dès que paroles dispo</span>
               </label>
             </div>
           </div>
-          <button type="button" id="btnSaveKaraokeSettings" class="btn btn-sm btn-full font-bold mt-2 bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30">Appliquer les réglages Karaoké</button>
+          <button type="button" id="btnSaveKaraokeSettings" class="btn btn-sm btn-full font-bold mt-2 bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30">Enregistrer les paramètres Karaoké</button>
         </div>
 
         <!-- Effets visuels de projection -->
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-start justify-between gap-4 mb-3">
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-start justify-between gap-4 mb-2">
             <div>
-              <p class="text-sm font-bold text-white">Effets visuels de projection</p>
-              <p class="text-xs text-slate-400 mt-0.5">Animations colorées synchronisées sur l'écran public</p>
+              <p class="text-sm font-bold text-white flex items-center gap-2">
+                <span>🎆</span>
+                <span>Effets d'ambiance et lumières d'écran</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-0.5">Animations colorées synchronisées sur le grand écran pour habiller la scène.</p>
             </div>
             <label class="flex items-center gap-0 cursor-pointer shrink-0">
               <input type="checkbox" id="projectionVisualsToggle" class="sr-only" />
               <span class="toggle-track"></span>
             </label>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end">
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 items-end mt-3">
             <div>
-              <label class="label text-xs">Style d'effet</label>
-              <select id="projectionVisualsMode" class="input text-xs">
-                <option value="aurora">Aurora (doux)</option>
-                <option value="pulse">Pulse (rythmé)</option>
+              <label class="label text-xs">Ambiance visuelle</label>
+              <select id="projectionVisualsMode" class="input text-xs bg-slate-950">
+                <option value="aurora">Aurora (doux & feutré)</option>
+                <option value="pulse">Pulse (rythmé club)</option>
                 <option value="strobe">Strobe (intense)</option>
                 <option value="spectrum">Spectrum (arc-en-ciel)</option>
-                <option value="nebula">Nebula (nuages mouvants)</option>
-                <option value="laser">Laser (balayage)</option>
+                <option value="nebula">Nebula (nuages spatiaux)</option>
+                <option value="laser">Laser (faisceaux balayants)</option>
                 <option value="vortex">Vortex (tourbillon)</option>
-                <option value="party">Party (combo auto)</option>
-                <option value="dvd">DVD Bounce (rebond)</option>
-                <option value="bpm-sync">BPM Sync (réactif au tempo)</option>
+                <option value="party">Party (combo automatique)</option>
+                <option value="dvd">DVD Bounce (vintage)</option>
+                <option value="bpm-sync">BPM Sync (pulsation au tempo)</option>
               </select>
             </div>
-            <button type="button" id="btnSaveProjectionVisuals" class="btn btn-cyan btn-sm font-bold">Appliquer</button>
+            <button type="button" id="btnSaveProjectionVisuals" class="btn btn-cyan btn-sm font-bold">Appliquer l'effet</button>
           </div>
           <label class="flex items-center gap-2 mt-3 cursor-pointer select-none">
             <input type="checkbox" id="projectionVisualsAutoPerTrack" class="w-4 h-4 rounded text-purple-600 focus:ring-0" />
-            <span class="text-xs text-slate-300">Changer automatiquement d'effet à chaque musique</span>
+            <span class="text-xs text-slate-300">Varier automatiquement l'effet à chaque changement de morceau</span>
           </label>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-center justify-between mb-1">
-            <p class="text-sm font-bold text-white">Crossfade (Fondu enchaîné)</p>
-            <span id="crossfadeValue" class="text-xs font-bold text-purple-400 font-mono">0 s</span>
-          </div>
-          <input type="range" id="crossfadeSlider" min="0" max="12" step="1" value="0" class="w-full mt-2" />
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-center justify-between mb-1">
-            <p class="text-sm font-bold text-white">Playlist de secours Spotify</p>
-            <span id="fallbackPlaylistBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Active</span>
-          </div>
-          <p class="text-xs text-slate-400 mb-3">Joue un titre aléatoire quand la queue est vide.</p>
-          <input type="text" id="fallbackPlaylistInput" class="input mb-2 text-xs" placeholder="URL ou URI playlist Spotify..." autocomplete="off" />
-          <div id="fallbackPlaylistPreview" class="hidden mb-2 rounded-xl p-2.5 bg-slate-900 border border-white/5">
-            <div class="flex items-center gap-2.5">
-              <img id="fallbackPlaylistPreviewImg" src="" alt="" class="w-10 h-10 rounded-lg object-cover shrink-0" />
-              <div class="min-w-0 flex-1">
-                <p id="fallbackPlaylistPreviewName" class="text-xs font-bold text-white truncate">Playlist</p>
-                <p id="fallbackPlaylistPreviewMeta" class="text-[10px] text-slate-400 truncate"></p>
-              </div>
-              <a id="fallbackPlaylistPreviewLink" href="#" target="_blank" class="btn btn-ghost btn-sm text-xs">Ouvrir</a>
-            </div>
-          </div>
-          <div class="flex gap-2">
-            <button id="btnSaveFallbackPlaylist" type="button" class="btn btn-primary btn-sm flex-1 font-bold">Enregistrer</button>
-            <button id="btnClearFallbackPlaylist" type="button" class="btn btn-ghost btn-sm" title="Retirer la playlist">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-        </div>
       </div>
 
-      <!-- Équipe & Sécurité -->
-      <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wider text-rose-400 font-mono">Équipe & Sécurité</p>
+      <!-- ═══════════════════════════════════════════════════════════
+           ONGLET 4 : SONDAGES & CAGNOTTE
+      ════════════════════════════════════════════════════════════ -->
+      <div id="tab-social" class="settings-tab-pane hidden space-y-4">
+        
+        <!-- Sondage Live Public -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-base">📊</span>
+            <p class="text-sm font-bold text-white">Sondage public en direct</p>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Faites voter la salle sur leur téléphone (ex: style musical pour la prochaine heure).</p>
 
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+          <div id="livePollSection" class="hidden mb-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-bold text-emerald-300">⚡ Sondage en cours sur les téléphones</span>
+              <button id="btnClosePoll" type="button" class="btn btn-danger btn-sm text-xs py-1">Clôturer le vote</button>
+            </div>
+            <div id="livePollResults" class="space-y-1.5 text-xs"></div>
+          </div>
+
+          <div class="space-y-2.5">
+            <div>
+              <label class="label text-xs">Question du sondage</label>
+              <input type="text" id="pollQuestionInput" placeholder="Ex: Quel style pour la suite ?" class="input text-xs bg-slate-950" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="text" id="pollOption1" placeholder="Option 1 (ex: Années 90)" class="input text-xs bg-slate-950" />
+              <input type="text" id="pollOption2" placeholder="Option 2 (ex: Électro / House)" class="input text-xs bg-slate-950" />
+              <input type="text" id="pollOption3" placeholder="Option 3 (optionnel)" class="input text-xs bg-slate-950" />
+              <input type="text" id="pollOption4" placeholder="Option 4 (optionnel)" class="input text-xs bg-slate-950" />
+            </div>
+            <button id="btnLaunchPoll" type="button" class="btn btn-success btn-sm btn-full font-bold">Lancer le sondage en direct</button>
+          </div>
+        </div>
+
+        <!-- Dons & Cagnotte -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-start justify-between gap-4 mb-2">
+            <div>
+              <p class="text-sm font-bold text-white flex items-center gap-2">
+                <span>☕</span>
+                <span>Dons, Pourboires & Cagnotte</span>
+              </p>
+              <p class="text-xs text-slate-400 mt-0.5">Affiche un bouton de contribution sur le smartphone des invités.</p>
+            </div>
+            <label class="flex items-center gap-0 cursor-pointer shrink-0">
+              <input type="checkbox" id="donationsEnabledToggle" class="sr-only" />
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+          <div class="space-y-2.5 mt-3">
+            <div>
+              <label class="label text-xs">Lien direct de cagnotte (Lydia, PayPal.me, Leetchi...)</label>
+              <input type="url" id="donationsUrlInput" placeholder="https://paypal.me/votre-nom" class="input text-xs bg-slate-950" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label text-xs">Objectif facultatif (€)</label>
+                <input type="number" id="donationsTargetInput" min="0" value="0" class="input text-xs font-mono bg-slate-950" />
+              </div>
+              <div>
+                <label class="label text-xs">Montant déjà récolté (€)</label>
+                <input type="number" id="donationsRaisedTotalInput" min="0" value="0" class="input text-xs font-mono bg-slate-950" />
+              </div>
+            </div>
+            <button id="btnSaveDonation" type="button" class="btn btn-primary btn-sm btn-full font-bold">Enregistrer les dons</button>
+            <div id="donationSaveFeedback" class="hidden text-xs font-bold text-center py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300">Réglages sauvegardés !</div>
+          </div>
+        </div>
+
+        <!-- Message de Fin -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-base">👋</span>
+            <p class="text-sm font-bold text-white">Message de clôture de soirée</p>
+          </div>
+          <p class="text-xs text-slate-400 mb-2">Affiché sur l'écran des invités dès que vous clôturez la soirée.</p>
+          <textarea id="thankYouMessage" rows="2" class="input resize-none mb-3 text-xs bg-slate-950" placeholder="Merci d'avoir participé ! On espère que vous avez passé un excellent moment."></textarea>
+          <div class="flex justify-end gap-2">
+            <button id="btnResetMessage" type="button" class="btn btn-ghost btn-sm font-semibold border border-white/10">Réinitialiser par défaut</button>
+            <button id="btnSaveMessage" type="button" class="btn btn-primary btn-sm font-bold">Enregistrer le message</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════
+           ONGLET 5 : ÉQUIPE & SÉCURITÉ
+      ════════════════════════════════════════════════════════════ -->
+      <div id="tab-team" class="settings-tab-pane hidden space-y-4">
+        
+        <!-- Accès Co-DJ -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-base">🎧</span>
+            <p class="text-sm font-bold text-white">Délégation d'accès & Co-DJ</p>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Permet à un second DJ de vous assister depuis sa tablette ou son téléphone.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 mb-2">
+            <select id="coDjRoleSelect" class="input text-xs bg-slate-950">
+              <option value="moderation">Modération uniquement (validation des demandes)</option>
+              <option value="queue_message">File d'attente + messages live</option>
+              <option value="playback">Contrôle complet de lecture Spotify</option>
+            </select>
+            <button id="btnGenerateCoDjLink" type="button" class="btn btn-primary btn-sm font-bold">Générer un lien</button>
+          </div>
+          <div id="coDjLinksList" class="space-y-1 text-xs text-slate-400">
+            <p>Aucun lien co-DJ actif</p>
+          </div>
+        </div>
+
+        <!-- Lien Modérateur Direct -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🛡️</span>
+              <p class="text-sm font-bold text-white">Accès modérateur invité (Témoin, Organisateur)</p>
+            </div>
+            <span id="modBadgeActive" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Actif</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Lien direct permettant à un organisateur de trier et valider les titres sans avoir accès à vos réglages.</p>
+          <div id="modLinkBox" class="hidden space-y-2">
+            <div class="flex gap-2">
+              <input id="modLinkInput" type="text" readonly class="input text-xs font-mono flex-1 cursor-text bg-slate-950" />
+              <button id="btnCopyModLink" type="button" class="btn btn-ghost btn-sm shrink-0 font-bold border border-white/10">Copier</button>
+            </div>
+            <button id="btnRevokeModToken" type="button" class="btn btn-danger btn-sm btn-full font-bold">Révoquer le lien modérateur</button>
+          </div>
+          <button id="btnGenerateModToken" type="button" class="btn btn-primary btn-sm btn-full font-bold">Créer un lien modérateur</button>
+        </div>
+
+        <!-- Invités bloqués -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
           <div class="flex items-center justify-between gap-3 mb-2">
-            <p class="text-sm font-bold text-white">Invités bloqués</p>
-            <span id="bannedCount" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-white/10 text-white">0</span>
+            <div class="flex items-center gap-2">
+              <span class="text-base">🚫</span>
+              <p class="text-sm font-bold text-white">Invités bannis ou temporairement bloqués</p>
+            </div>
+            <span id="bannedCount" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-white/10 text-white border border-white/10">0</span>
           </div>
           <div id="bannedList" class="space-y-1.5 text-xs text-slate-400">
             <p>Aucun invité bloqué</p>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <p class="text-sm font-bold text-white mb-1">Mode co-DJ / Modérateurs</p>
-          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 mb-2">
-            <select id="coDjRoleSelect" class="input text-xs">
-              <option value="moderation">Modération seulement</option>
-              <option value="queue_message">Queue + message</option>
-              <option value="playback">Lecture Spotify</option>
-            </select>
-            <button id="btnGenerateCoDjLink" type="button" class="btn btn-primary btn-sm font-bold">Générer lien</button>
-          </div>
-          <div id="coDjLinksList" class="space-y-1 text-xs text-slate-400">
-            <p>Aucun lien co-DJ</p>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
+        <!-- Journal des actions -->
+        <div class="p-5 rounded-2xl bg-slate-900/70 border border-white/10">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-bold text-white">Lien modérateur direct</p>
-            <span id="modBadgeActive" class="hidden text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Actif</span>
-          </div>
-          <div id="modLinkBox" class="hidden space-y-2">
-            <div class="flex gap-2">
-              <input id="modLinkInput" type="text" readonly class="input text-xs font-mono flex-1 cursor-text" />
-              <button id="btnCopyModLink" type="button" class="btn btn-ghost btn-sm shrink-0 font-bold">Copier</button>
+            <div class="flex items-center gap-2">
+              <span class="text-base">📜</span>
+              <p class="text-sm font-bold text-white">Journal d'audit des actions</p>
             </div>
-            <button id="btnRevokeModToken" type="button" class="btn btn-danger btn-sm btn-full font-bold">Révoquer</button>
+            <button id="btnRefreshActionLogs" type="button" class="btn btn-ghost btn-sm text-xs border border-white/10 font-bold">Actualiser</button>
           </div>
-          <button id="btnGenerateModToken" type="button" class="btn btn-primary btn-sm btn-full font-bold">Générer un lien modérateur</button>
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-900/60 border border-white/5">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-bold text-white">Journal des actions</p>
-            <button id="btnRefreshActionLogs" type="button" class="btn btn-ghost btn-sm text-xs">Rafraîchir</button>
-          </div>
-          <div id="actionLogsList" class="space-y-1 text-xs max-h-36 overflow-y-auto text-slate-400">
+          <div id="actionLogsList" class="space-y-1 text-xs max-h-36 overflow-y-auto text-slate-400 deck-scroll">
             <p>Aucune action récente</p>
           </div>
         </div>
+
       </div>
 
     </div>
     
-    <div class="px-6 py-4 shrink-0 border-t border-white/10">
-      <button id="closeSettingsBottom" type="button" class="btn btn-ghost btn-full font-bold">Fermer les réglages</button>
+    <!-- Pied du modal -->
+    <div class="px-6 py-3.5 shrink-0 border-t border-white/10 bg-slate-950/80 flex items-center justify-between">
+      <span class="text-xs text-slate-400">Toutes les modifications sont appliquées instantanément.</span>
+      <button id="closeSettingsBottom" type="button" class="btn btn-primary btn-sm px-6 font-bold shadow-lg shadow-purple-500/20">Terminé</button>
     </div>
   </div>
 </div>
@@ -1317,6 +1463,31 @@
 </div>
 
 <span id="spotifyStatus" class="hidden"></span>
-<script src="/js/dj-console.js?v=2.2.0" defer></script>
+<script>
+  // Gestion fluide des onglets dans les paramètres de la régie DJ
+  document.addEventListener("DOMContentLoaded", () => {
+    const tabButtons = document.querySelectorAll(".settings-tab-btn");
+    const tabPanes = document.querySelectorAll(".settings-tab-pane");
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-tab");
+
+        tabButtons.forEach((b) => {
+          b.classList.remove("bg-purple-600", "text-white", "shadow-lg", "shadow-purple-500/25", "active");
+          b.classList.add("text-slate-400", "hover:text-white", "hover:bg-white/5");
+        });
+
+        btn.classList.add("bg-purple-600", "text-white", "shadow-lg", "shadow-purple-500/25", "active");
+        btn.classList.remove("text-slate-400", "hover:text-white", "hover:bg-white/5");
+
+        tabPanes.forEach((pane) => pane.classList.add("hidden"));
+        const activePane = document.getElementById(targetId);
+        if (activePane) activePane.classList.remove("hidden");
+      });
+    });
+  });
+</script>
+<script src="/js/dj-console.js?v=2.2.3" defer></script>
 </body>
 </html>
