@@ -301,10 +301,11 @@
       // ── Fin de piste -> Auto-play robuste ──
       const wasPlaying = lastPlayerState && !lastPlayerState.paused;
       const isNowPaused = state.paused;
+      const isSameTrack = lastPlayerState && lastPlayerState.trackId === track.id;
+
       const reachedEnd =
-        state.position === 0 ||
-        (state.duration > 0 && state.position >= state.duration - 2000) ||
-        (lastPlayerState && lastPlayerState.duration > 0 && lastPlayerState.position >= lastPlayerState.duration - 2500) ||
+        (isSameTrack && state.duration > 0 && state.position >= state.duration - 2000) ||
+        (isSameTrack && lastPlayerState.duration > 0 && lastPlayerState.position >= lastPlayerState.duration - 2500) ||
         (lastPlayerState && state.track_window?.previous_tracks?.some((t) => t.id === lastPlayerState.trackId));
 
       const isTrackEnded = wasPlaying && isNowPaused && reachedEnd;
@@ -390,11 +391,18 @@
         return;
       }
 
+      const hasTrack = !!state.track_window?.current_track;
+      const trackFinished = state.duration > 0 && state.position >= state.duration - 1500;
+
       if (state.paused) {
-        if (state.position === 0 || (state.duration > 0 && state.position >= state.duration - 1500)) {
+        // Si aucun morceau n'est présent OU si le morceau actuel est arrivé au bout
+        if (!hasTrack || trackFinished) {
           if (queue.length > 0) return playNextInQueue();
           if (fallbackPlaylistUri) return playFallbackTrack();
+          return;
         }
+
+        // Le morceau est présent (même à 0s) : on lance la lecture !
         await spotifyPlayer.resume().catch(async () => {
           await fetch(`/api/spotify/resume/${eventId}`, {
             method: "POST",
@@ -402,6 +410,18 @@
             body: JSON.stringify({ device_id: deviceId }),
           });
         });
+
+        // Déblocage automatique si le lecteur reste figé à position 0 (bug EME/Widevine)
+        setTimeout(async () => {
+          try {
+            const check = await spotifyPlayer?.getCurrentState();
+            if (check && check.paused && check.position === 0) {
+              console.log("[togglePlayPause] Déblocage position 0 via micro-seek 150ms...");
+              await spotifyPlayer.seek(150);
+              await spotifyPlayer.resume().catch(() => {});
+            }
+          } catch {}
+        }, 400);
       } else {
         await spotifyPlayer.pause().catch(async () => {
           await fetch(`/api/spotify/pause/${eventId}`, {
@@ -1772,6 +1792,30 @@
       throw new Error(data.error || `Erreur HTTP ${response.status}`);
     }
     hideSpotifyError();
+
+    // Auto-déblocage au lancement :
+    // Si le Web Playback SDK charge la piste mais reste figé en pause à 0ms (bug EME/Widevine),
+    // on surveille l'état après 800ms et on force la reprise / micro-seek sans intervention du DJ.
+    setTimeout(async () => {
+      try {
+        if (!spotifyPlayer) return;
+        const state = await spotifyPlayer.getCurrentState();
+        if (state && state.paused && state.track_window?.current_track?.uri === uri) {
+          console.log("[_startPlayback] Morceau chargé mais en pause, reprise automatique...");
+          await spotifyPlayer.resume().catch(() => {});
+          setTimeout(async () => {
+            const recheck = await spotifyPlayer?.getCurrentState();
+            if (recheck && recheck.paused && recheck.position === 0) {
+              console.log("[_startPlayback] Déblocage position 0 via micro-seek 150ms...");
+              await spotifyPlayer.seek(150);
+              await spotifyPlayer.resume().catch(() => {});
+            }
+          }, 350);
+        }
+      } catch (e) {
+        console.warn("[_startPlayback] Watchdog auto-play:", e);
+      }
+    }, 800);
   }
 
   // Attend que player_state_changed confirme le chargement d'un URI donné (max 3 s).
@@ -2122,7 +2166,7 @@
     showToast(fallbackPlaylistUri ? "Playlist de secours enregistrée" : "Playlist de secours retirée");
 
     // Lancer automatiquement si la queue est vide et rien ne joue
-    if (fallbackPlaylistUri && queue.length === 0 && (!isPlaying || currentPosition === 0)) {
+    if (fallbackPlaylistUri && queue.length === 0 && !isPlaying && !currentPlayingUri) {
       tryStartFallback();
     }
   }
