@@ -1189,11 +1189,14 @@ function setupSocketHandlers(io) {
       await logEventAction(eventId, perm, "dj-message", null, { message: cleanMessage.slice(0, 120) });
     });
 
-    // ── Réaction émoji en direct du public avec Batching Haute Concurrence ──
+    // ── Réaction en direct du public avec Batching Haute Concurrence ──
     socket.on("live-reaction", async (data) => {
       const { eventId, reaction, senderName, count } = data || {};
       if (!eventId || !reaction) return;
-      const allowedEmojis = ["🔥", "❤️", "🎉", "🚀", "👏", "⚡", "🤩", "💃", "🕺", "🍻", "💯"];
+      const allowedReactions = ["fire", "heart", "party", "rocket", "clap", "energy", "🔥", "❤️", "🎉", "🚀", "👏", "⚡", "🤩", "💃", "🕺", "🍻", "💯"];
+      const cleanReaction = allowedReactions.includes(reaction) ? reaction : "fire";
+      const cleanSender = String(senderName || "").slice(0, 24).trim();
+      const cleanCount = Math.min(10, Math.max(1, parseInt(count, 10) || 1));
       queueLiveReactionBatch(io, eventId, cleanReaction, cleanSender, cleanCount);
     });
 

@@ -467,7 +467,7 @@
       pending:  { text: "En attente du DJ", bg: "var(--amber-dim)", color: "var(--amber)", dot: "var(--amber)" },
       accepted: {
         text: myRequestData.position === 1
-          ? "🎵 Prochaine chanson !"
+          ? "Prochaine chanson !"
           : `Acceptée — pos. ${myRequestData.position || "?"} (~${calcWait()} min)`,
         bg: myRequestData.position === 1 ? "var(--accent-dim, #4f46e533)" : "var(--green-dim)",
         color: myRequestData.position === 1 ? "var(--accent)" : "var(--green)",
@@ -630,7 +630,7 @@
     stopTitleBlink();
     let blink = true;
     blinkInterval = setInterval(() => {
-      document.title = blink ? `✓ Acceptée ! — ${songName}` : BASE_TITLE;
+      document.title = blink ? `Acceptée ! — ${songName}` : BASE_TITLE;
       blink = !blink;
     }, 900);
     // Arrêter après 20 s ou quand l'onglet redevient visible
@@ -661,15 +661,15 @@
     const icon = document.getElementById("myTrackAlertIcon");
 
     if (type === "next") {
-      if (title) title.textContent = "🔥 C'EST TON TOUR !";
+      if (title) title.textContent = "C'EST TON TOUR !";
       if (desc) desc.textContent = `"${songName}" est la prochaine sur la piste ! Prépare-toi !`;
-      if (icon) icon.textContent = "🔥";
+      if (icon) icon.innerHTML = '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
       banner.style.background = "radial-gradient(circle at 10% 50%, rgba(234,88,12,0.35) 0%, rgba(245,158,11,0.2) 60%, var(--bg-surface) 100%)";
       banner.style.borderColor = "rgba(245,158,11,0.5)";
     } else if (type === "playing") {
-      if (title) title.textContent = "🎉 SUR LA PISTE EN CE MOMENT !";
+      if (title) title.textContent = "SUR LA PISTE EN CE MOMENT !";
       if (desc) desc.textContent = `Ton morceau "${songName}" passe en live ! Profite !`;
-      if (icon) icon.textContent = "🎉";
+      if (icon) icon.innerHTML = '<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
       banner.style.background = "radial-gradient(circle at 10% 50%, rgba(139,92,246,0.35) 0%, rgba(236,72,153,0.25) 60%, var(--bg-surface) 100%)";
       banner.style.borderColor = "rgba(168,85,247,0.5)";
     }
@@ -737,7 +737,7 @@
     stopTitleBlink();
     let blink = true;
     blinkInterval = setInterval(() => {
-      document.title = blink ? `🎵 C'est ton tour ! — ${songName}` : BASE_TITLE;
+      document.title = blink ? `C'est ton tour ! — ${songName}` : BASE_TITLE;
       blink = !blink;
     }, 700);
     setTimeout(stopTitleBlink, 15000);
@@ -754,7 +754,7 @@
 
     // Toast visuel persistant (disparaît en 6s)
     const t = document.getElementById("toast");
-    t.innerHTML = `🎵 Ta chanson est la prochaine !`;
+    t.textContent = "Ta chanson est la prochaine !";
     t.style.background = "var(--accent)";
     t.classList.remove("hidden");
     clearTimeout(t._nextTimer);
@@ -765,7 +765,7 @@
     showTrackAlertBanner("playing", songName);
     if (navigator.vibrate) navigator.vibrate([200]);
     stopTitleBlink();
-    document.title = `♪ En train de jouer — ${songName}`;
+    document.title = `En train de jouer — ${songName}`;
     setTimeout(() => { document.title = BASE_TITLE; }, 5000);
   }
 
@@ -1297,6 +1297,15 @@
   }, 1000);
 
   // ── Moteur de Réactions Émojis en Direct ─────────────────
+  const USER_REACTION_BADGES = {
+    fire: `<span class="inline-flex items-center justify-center p-2 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-400/30 shadow-lg shadow-amber-500/20"><svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M12 2c-2 4-5 6-5 10a7 7 0 0 0 14 0c0-4-3-6-5-10a4 4 0 0 1-4 0z"/></svg></span>`,
+    heart: `<span class="inline-flex items-center justify-center p-2 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-400/30 shadow-lg shadow-rose-500/20"><svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>`,
+    party: `<span class="inline-flex items-center justify-center p-2 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-400/30 shadow-lg shadow-purple-500/20"><svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>`,
+    rocket: `<span class="inline-flex items-center justify-center p-2 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-400/30 shadow-lg shadow-indigo-500/20"><svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M13.13 2.188a1 1 0 0 0-.26-.188C11.83 1.48 9.5 2.5 8 4c-2 2-3 5-3 8l3 3c3 0 6-1 8-3 1.5-1.5 2.52-3.83 2-4.87a1 1 0 0 0-.19-.26l-4.68-4.68zM5 14l-2 5 5-2-3-3z"/></svg></span>`,
+    clap: `<span class="inline-flex items-center justify-center p-2 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 shadow-lg shadow-emerald-500/20"><svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></span>`,
+    energy: `<span class="inline-flex items-center justify-center p-2 rounded-2xl bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 shadow-lg shadow-yellow-500/20"><svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>`
+  };
+
   const userReactionsLayer = document.getElementById("userFloatingReactionsLayer");
   function spawnUserFloatingReaction(emoji) {
     if (!userReactionsLayer) return;
@@ -1315,7 +1324,8 @@
     el.style.fontSize = "32px";
     el.style.left = "0px";
     el.style.top = "0px";
-    el.innerHTML = `<span class="drop-shadow-lg">${emoji}</span>`;
+    const iconMarkup = USER_REACTION_BADGES[emoji] || `<span class="font-bold text-white">${emoji}</span>`;
+    el.innerHTML = `<div class="drop-shadow-lg">${iconMarkup}</div>`;
     userReactionsLayer.appendChild(el);
     setTimeout(() => el.remove(), 3400);
   }
@@ -1388,7 +1398,7 @@
     ctx.font = "bold 28px 'Plus Jakarta Sans', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🎵  MUSIC LIVE", W / 2, 175);
+    ctx.fillText("MUSIC LIVE", W / 2, 175);
     ctx.restore();
 
     // 4. Titre de célébration
@@ -1400,7 +1410,7 @@
     const eventTitle = document.getElementById("eventName")?.textContent || "Soirée Live";
     ctx.fillStyle = "#a78bfa";
     ctx.font = "600 34px 'Plus Jakarta Sans', sans-serif";
-    ctx.fillText(`Ce soir à la ${eventTitle} 🔥`, W / 2, 350);
+    ctx.fillText(`Ce soir à la ${eventTitle}`, W / 2, 350);
 
     // 5. Pochette Album avec coins arrondis et ombre
     const artSize = 620;
@@ -1477,7 +1487,7 @@
     ctx.font = "bold 26px 'Plus Jakarta Sans', sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(`✨ Demandé par ${userName}`, W / 2, 1322);
+    ctx.fillText(`Demandé par ${userName}`, W / 2, 1322);
     ctx.restore();
 
     // 8. Onde sonore égaliseur décorative
@@ -1532,7 +1542,7 @@
         try {
           await navigator.share({
             title: "Ma musique sur Music Live",
-            text: "J'ai fait jouer ma musique ce soir sur Music Live ! 🎵",
+            text: "J'ai fait jouer ma musique ce soir sur Music Live !",
             files: [file],
           });
           return;
@@ -1652,10 +1662,10 @@
     if (!feedbackEl) return;
     feedbackEl.classList.remove("hidden");
     if (ack.isCorrect) {
-      feedbackEl.textContent = "🎯 Bien joué ! Bonne réponse enregistrée !";
+      feedbackEl.textContent = "Bien joué ! Bonne réponse enregistrée !";
       feedbackEl.className = "w-full py-2.5 px-3 rounded-xl text-xs font-black mb-3 bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-lg";
     } else {
-      feedbackEl.textContent = "❌ Aïe, ce n'est pas le bon titre !";
+      feedbackEl.textContent = "Aïe, ce n'est pas le bon titre !";
       feedbackEl.className = "w-full py-2.5 px-3 rounded-xl text-xs font-black mb-3 bg-red-500/25 text-red-300 border border-red-500/50";
     }
   });
@@ -1688,11 +1698,11 @@
     if (feedbackEl) {
       feedbackEl.classList.remove("hidden");
       if (myWin) {
-        feedbackEl.textContent = `🏆 Podium ! Tu es rang #${myWin.rank} en ${myWin.timeSec}s ! 🎉`;
+        feedbackEl.textContent = `Podium ! Tu es rang #${myWin.rank} en ${myWin.timeSec}s !`;
         feedbackEl.className = "w-full py-3 px-3 rounded-xl text-xs font-black mb-3 bg-amber-500/30 text-amber-200 border-2 border-amber-400 shadow-xl";
       } else {
         const trackTitle = results.trackInfo?.title || "Ce morceau";
-        feedbackEl.textContent = `🎶 C'était bien : ${trackTitle}`;
+        feedbackEl.textContent = `C'était bien : ${trackTitle}`;
       }
     }
 

@@ -94,7 +94,7 @@
           </div>
           <a id="btnOpenSpotifyPlaylist" href="#" target="_blank" rel="noopener noreferrer"
              class="px-4 py-2.5 rounded-xl font-mono-code font-bold text-xs uppercase tracking-wider text-black bg-[#1DB954] hover:bg-[#1ed760] transition shrink-0 shadow-lg active:scale-98">
-            Écouter 🎧
+            Écouter
           </a>
         </div>
       </div>
@@ -106,11 +106,11 @@
           <div class="relative shrink-0">
             <img id="topTrackImg" src="" alt="" class="w-12 h-12 rounded-xl object-cover hidden shadow-md border border-white/10" />
             <div id="topTrackPlaceholder" class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl border border-yellow-500/30 bg-yellow-500/10 text-yellow-400">
-              👑
+              #1
             </div>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-mono-code text-[10px] font-extrabold uppercase tracking-wider text-yellow-400">👑 Titre Numéro 1</p>
+            <p class="font-mono-code text-[10px] font-extrabold uppercase tracking-wider text-yellow-400">Titre Numéro 1</p>
             <p id="topTrackName" class="font-grotesk font-black text-sm text-white truncate">—</p>
             <p id="topTrackArtist" class="font-mono-code text-xs text-neutral-400 truncate">—</p>
           </div>
@@ -118,11 +118,11 @@
 
         <!-- Top Artist -->
         <div id="topArtistCard" class="stat-chip rounded-2xl p-4 flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shrink-0 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
-            🎤
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-base shrink-0 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+            TOP
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-mono-code text-[10px] font-extrabold uppercase tracking-wider text-cyan-400">🎤 Artiste Plébiscité</p>
+            <p class="font-mono-code text-[10px] font-extrabold uppercase tracking-wider text-cyan-400">Artiste Plébiscité</p>
             <p id="topArtistName" class="font-grotesk font-black text-sm text-white truncate">—</p>
             <p id="topArtistCount" class="font-mono-code text-xs text-neutral-400 truncate">—</p>
           </div>
@@ -248,7 +248,7 @@
       if (navigator.share) {
         navigator.share({
           title: `Souvenir — ${title}`,
-          text: `Découvre le récap et la playlist de la soirée ${title} sur Music Live ! 🎵`,
+          text: `Découvre le récap et la playlist de la soirée ${title} sur Music Live !`,
           url,
         }).catch(() => {});
       } else {

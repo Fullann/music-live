@@ -54,22 +54,22 @@ function getHarmonicMatch(currentCamelot, candidateCamelot) {
 
   // Même clé Camelot -> Mix parfait
   if (curNum === candNum && curLet === candLet) {
-    return { label: "✨ Mix Parfait", type: "perfect", color: "#10b981", bg: "rgba(16,185,129,0.18)" };
+    return { label: "Mix Parfait", type: "perfect", color: "#10b981", bg: "rgba(16,185,129,0.18)" };
   }
 
   // Même numéro, lettre opposée -> Relatif Majeur / Mineur
   if (curNum === candNum && curLet !== candLet) {
-    return { label: "🎶 Relatif", type: "relative", color: "#8b5cf6", bg: "rgba(139,92,246,0.18)" };
+    return { label: "Relatif", type: "relative", color: "#8b5cf6", bg: "rgba(139,92,246,0.18)" };
   }
 
   // Voisins harmoniques (+1 ou -1 modulo 12 sur même lettre, ex 8A <-> 7A ou 9A)
   const diff = (candNum - curNum + 12) % 12;
   if (curLet === candLet) {
     if (diff === 1 || diff === 11) {
-      return { label: "🎶 Harmonique", type: "harmonic", color: "#06b6d4", bg: "rgba(6,182,212,0.18)" };
+      return { label: "Harmonique", type: "harmonic", color: "#06b6d4", bg: "rgba(6,182,212,0.18)" };
     }
     if (diff === 2) {
-      return { label: "⚡ Boost +2", type: "boost", color: "#f59e0b", bg: "rgba(245,158,11,0.18)" };
+      return { label: "Boost +2", type: "boost", color: "#f59e0b", bg: "rgba(245,158,11,0.18)" };
     }
   }
   return null;

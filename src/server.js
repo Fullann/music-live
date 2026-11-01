@@ -415,14 +415,19 @@ app.get("/api/events/:eventId/co-dj-links", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT id FROM events WHERE id = ? AND dj_id = ?", [eventId, req.session.djId]);
     if (rows.length === 0) return res.status(403).json({ error: "Accès refusé" });
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
     const [links] = await db.query(
-      `SELECT id, role, label, created_at
+      `SELECT id, role, token, label, created_at
        FROM co_dj_tokens
        WHERE event_id = ? AND revoked_at IS NULL
        ORDER BY created_at DESC`,
       [eventId],
     );
-    return res.json({ links });
+    const enrichedLinks = links.map((l) => ({
+      ...l,
+      url: `${baseUrl}/mod/${eventId}?token=${l.token}`,
+    }));
+    return res.json({ links: enrichedLinks });
   } catch (err) {
     console.error("Erreur co-dj-links:", err);
     return res.status(500).json({ error: "Erreur serveur" });

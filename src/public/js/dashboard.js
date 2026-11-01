@@ -351,7 +351,7 @@ function renderActiveEvents(events) {
           <div>
             <div class="flex items-center gap-2 mb-1.5">
               <span class="badge shrink-0" style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.3)">
-                🟡 Planifiée
+                Planifiée
               </span>
               <h3 class="font-extrabold text-lg truncate" style="color:var(--text-primary)">${event.name}</h3>
             </div>
@@ -474,7 +474,7 @@ function renderTopSongs(songs) {
         </thead>
         <tbody class="divide-y" style="border-color:var(--border)">
           ${songs.slice(0, 10).map((song, i) => {
-            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `<span class="badge badge-neutral text-xs font-mono">#${i + 1}</span>`;
+            const medal = `<span class="badge badge-neutral text-xs font-mono">#${i + 1}</span>`;
             return `
             <tr class="hover:bg-white/[0.02] transition">
               <td class="py-4 px-5 text-center font-bold text-base">${medal}</td>
@@ -484,7 +484,7 @@ function renderTopSongs(songs) {
                 <span class="badge badge-green">${song.play_count}</span>
               </td>
               <td class="py-4 px-5 text-center font-bold" style="color:var(--amber)">
-                ★ ${(parseFloat(song.avg_upvotes) || 0).toFixed(1)}
+                ${(parseFloat(song.avg_upvotes) || 0).toFixed(1)}
               </td>
             </tr>`;
           }).join("")}

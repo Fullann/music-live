@@ -180,7 +180,7 @@
   }
 
   async function reconnectSpotifyPlayer(isSilent = false) {
-    if (!isSilent) showToast("🔄 Reconnexion au lecteur Spotify…", "info");
+    if (!isSilent) showToast("Reconnexion au lecteur Spotify…", "info");
     try {
       const res = await fetch(`/api/spotify/token/${eventId}`);
       const data = await res.json();
@@ -191,7 +191,7 @@
         try { await spotifyPlayer.disconnect(); } catch {}
         const connected = await spotifyPlayer.connect();
         if (connected) {
-          if (!isSilent) showToast("✅ Lecteur Spotify reconnecté !", "success");
+          if (!isSilent) showToast("Lecteur Spotify reconnecté !", "success");
           hideSpotifyError();
         }
       } else {
@@ -199,7 +199,7 @@
       }
     } catch (err) {
       console.error("Erreur lors de la reconnexion Spotify:", err);
-      if (!isSilent) showToast("⚠️ Impossible de reconnecter Spotify — vérifiez votre réseau", "error");
+      if (!isSilent) showToast("Impossible de reconnecter Spotify — vérifiez votre réseau", "error");
     }
   }
 
@@ -562,7 +562,7 @@
     const btn = document.getElementById("btnExportSpotifyPlaylist");
     const orig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin text-xs">⏳</span> Création…`;
+    btn.innerHTML = `<span class="animate-spin text-xs">...</span> Création…`;
     try {
       const csrf = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] || "";
       const res = await fetch(`/api/spotify/export-playlist/${eventId}`, {
@@ -571,7 +571,7 @@
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast(`🎵 Playlist Spotify créée (${data.totalTracks} titres) !`);
+        showToast(`Playlist Spotify créée (${data.totalTracks} titres) !`);
         openSpotifyExportModal(data.playlistUrl, data.totalTracks);
       } else {
         showToast(data.error || "Erreur lors de la création de la playlist", "error");
@@ -791,7 +791,7 @@
     const isKaraoke = !!currentKaraokeState.enabled;
     if (statusBadge) {
       if (isKaraoke) {
-        statusBadge.textContent = "🎤 Karaoké En Direct";
+        statusBadge.textContent = "Karaoké En Direct";
         statusBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase bg-purple-500/25 text-purple-200 border border-purple-400/50 shadow-sm animate-pulse";
       } else {
         statusBadge.textContent = "Mode QR Standard";
@@ -895,7 +895,7 @@
       lyricsSize: currentKaraokeState.lyricsSize,
     });
     updateKaraokeUI({ enabled: nextEnabled });
-    showToast(nextEnabled ? "🎤 Karaoké activé sur le grand écran" : "🎤 Karaoké désactivé", "info");
+    showToast(nextEnabled ? "Karaoké activé sur le grand écran" : "Karaoké désactivé", "info");
   });
 
   // Clic sur bouton rapide Visualiseur (cycle des animations)
@@ -1323,16 +1323,19 @@
       const list = document.getElementById("coDjLinksList");
       const links = data.links || [];
       if (!links.length) {
-        list.innerHTML = `<p style="color:var(--text-muted)">Aucun lien co-DJ</p>`;
+        list.innerHTML = `<p class="text-xs text-slate-500 italic">Aucun lien co-DJ actif</p>`;
         return;
       }
       list.innerHTML = links.map((l) => `
-        <div class="flex items-center justify-between gap-2 p-2 rounded-lg" style="background:var(--bg-surface);border:1px solid var(--border)">
-          <div class="min-w-0">
-            <p class="truncate font-medium">${l.label || "Lien co-DJ"}</p>
-            <p style="color:var(--text-muted)">${l.role}</p>
+        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl" style="background:var(--bg-surface);border:1px solid var(--border)">
+          <div class="min-w-0 flex-1">
+            <p class="truncate font-bold text-xs text-white">${l.label || "Lien co-DJ"}</p>
+            <p class="text-[11px]" style="color:var(--text-muted)">Rôle : ${l.role}</p>
           </div>
-          <button class="btn btn-ghost btn-sm" data-revoke-co-dj="${l.id}">Révoquer</button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            ${l.url ? `<button type="button" class="btn btn-ghost btn-sm text-xs font-bold text-purple-400 hover:text-purple-300 border border-purple-500/30" data-copy-co-dj="${l.url}">Copier</button>` : ""}
+            <button type="button" class="btn btn-ghost btn-sm text-xs font-bold text-rose-400 hover:text-rose-300" data-revoke-co-dj="${l.id}">Révoquer</button>
+          </div>
         </div>
       `).join("");
     } catch (err) {
@@ -1372,8 +1375,19 @@
       });
       const data = await res.json();
       if (data.modUrl) {
+        const box = document.getElementById("coDjGeneratedBox");
+        const input = document.getElementById("coDjGeneratedInput");
+        const feedback = document.getElementById("coDjCopyFeedback");
+        if (box && input) {
+          input.value = data.modUrl;
+          box.classList.remove("hidden");
+        }
         await navigator.clipboard.writeText(data.modUrl);
-        showToast("Lien co-DJ généré et copié");
+        if (feedback) {
+          feedback.classList.remove("hidden");
+          setTimeout(() => feedback.classList.add("hidden"), 3500);
+        }
+        showToast("Lien co-DJ généré et copié dans le presse-papier !");
       }
       loadCoDjLinks();
     } catch (err) {
@@ -1381,7 +1395,29 @@
     }
   });
 
+  document.getElementById("btnCopyGeneratedCoDjLink")?.addEventListener("click", async () => {
+    const input = document.getElementById("coDjGeneratedInput");
+    const feedback = document.getElementById("coDjCopyFeedback");
+    if (input && input.value) {
+      await navigator.clipboard.writeText(input.value);
+      if (feedback) {
+        feedback.classList.remove("hidden");
+        setTimeout(() => feedback.classList.add("hidden"), 3000);
+      }
+      showToast("Lien co-DJ copié !");
+    }
+  });
+
   document.getElementById("coDjLinksList")?.addEventListener("click", async (e) => {
+    const copyBtn = e.target.closest("button[data-copy-co-dj]");
+    if (copyBtn) {
+      const url = copyBtn.dataset.copyCoDj;
+      if (url) {
+        await navigator.clipboard.writeText(url);
+        showToast("Lien co-DJ copié dans le presse-papier !");
+      }
+      return;
+    }
     const btn = e.target.closest("button[data-revoke-co-dj]");
     if (!btn) return;
     try {
@@ -1889,10 +1925,10 @@
 
   async function playTrack(uri, requestId) {
     if (!deviceId) {
-      showToast("🔄 Connexion au lecteur Spotify…", "info");
+      showToast("Connexion au lecteur Spotify…", "info");
       await reconnectSpotifyPlayer(true);
       if (!deviceId) {
-        showToast("⚠️ Lecteur Spotify non prêt — réessayez dans 2 secondes", "error");
+        showToast("Lecteur Spotify non prêt — réessayez dans 2 secondes", "error");
         return;
       }
     }
@@ -2245,7 +2281,7 @@
   function getHarmonicMatch(currentCamelot, candidateCamelot) {
     if (!currentCamelot || !candidateCamelot) return null;
     if (currentCamelot === candidateCamelot) {
-      return { label: "✨ Mix Parfait", color: "#10b981", bg: "rgba(16,185,129,0.18)" };
+      return { label: "Mix Parfait", color: "#10b981", bg: "rgba(16,185,129,0.18)" };
     }
     const curNum = parseInt(currentCamelot.slice(0, -1), 10);
     const curLet = currentCamelot.slice(-1);
@@ -2254,17 +2290,17 @@
 
     // Relatif Majeur / Mineur (même numéro, lettre opposée : ex 8A <-> 8B)
     if (curNum === candNum && curLet !== candLet) {
-      return { label: "🎶 Relatif", color: "#8b5cf6", bg: "rgba(139,92,246,0.18)" };
+      return { label: "Relatif", color: "#8b5cf6", bg: "rgba(139,92,246,0.18)" };
     }
 
     // Voisins harmoniques (+1 ou -1 modulo 12 sur même lettre, ex 8A <-> 7A ou 9A)
     const diff = (candNum - curNum + 12) % 12;
     if (curLet === candLet) {
       if (diff === 1 || diff === 11) {
-        return { label: "🎶 Harmonique", color: "#06b6d4", bg: "rgba(6,182,212,0.18)" };
+        return { label: "Harmonique", color: "#06b6d4", bg: "rgba(6,182,212,0.18)" };
       }
       if (diff === 2) {
-        return { label: "⚡ Boost +2", color: "#f59e0b", bg: "rgba(245,158,11,0.18)" };
+        return { label: "Boost +2", color: "#f59e0b", bg: "rgba(245,158,11,0.18)" };
       }
     }
     return null;
@@ -2395,14 +2431,14 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm font-extrabold truncate flex items-center gap-1.5" style="color:var(--text-primary)">
               <span class="truncate">${request.song_name}</span>
-              <span class="lyrics-badge ${hasLrc ? "inline-flex" : "hidden"} items-center justify-center w-5 h-5 rounded-md text-[11px] bg-purple-500/25 text-purple-300 border border-purple-500/40 shrink-0" data-lyrics-key="${lyricsKey}" title="Paroles karaoké synchronisées disponibles (LRCLIB)">🎤</span>
+              <span class="lyrics-badge ${hasLrc ? "inline-flex" : "hidden"} items-center justify-center px-1.5 py-0.5 rounded-md text-[10px] font-black bg-purple-500/25 text-purple-300 border border-purple-500/40 shrink-0" data-lyrics-key="${lyricsKey}" title="Paroles karaoké synchronisées disponibles (LRCLIB)">LRC</span>
             </p>
             <p class="text-xs truncate font-medium mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
             <div class="flex flex-wrap items-center gap-2 mt-1">
               <span class="text-[11px] font-semibold" style="color:var(--text-muted)">Demandé par <span style="color:var(--text-secondary)">${request.user_name}</span></span>
               ${isKaraokeReq ? `
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-200 border border-purple-400/60 shadow-lg shadow-purple-500/20 animate-pulse" title="L'invité a demandé un micro pour chanter sur scène">
-                  <span class="text-xs">🎤</span> Demande Karaoké
+                  Micro Karaoké
                 </span>
               ` : ""}
               <span class="badge badge-accent text-[10px] font-mono">~${totalWaitMin} min</span>
@@ -2459,11 +2495,11 @@
     const alertTx = document.getElementById("emptyQueueAlertText");
     const wasLow  = _prevQueueLen >= 0 && _prevQueueLen > 1;
     if (queue.length === 0) {
-      alertTx.textContent = "⚠ File vide — plus aucune chanson en attente !";
+      alertTx.textContent = "File vide — plus aucune chanson en attente !";
       alert.classList.remove("hidden");
       if (wasLow) playAlertBeep();
     } else if (queue.length === 1) {
-      alertTx.textContent = "⚠ File presque vide — il ne reste plus qu'une chanson";
+      alertTx.textContent = "File presque vide — il ne reste plus qu'une chanson";
       alert.classList.remove("hidden");
       if (wasLow) playAlertBeep();
     } else {
@@ -2524,7 +2560,7 @@
               harmonicCardClass = "hover:bg-emerald-500/10";
               harmonicSuggestionBadge = `
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm" title="Transition harmonique recommandée par rapport au titre en cours">
-                  ✨ Transition Idéale (${match.label}${bpmDiff !== null ? ` · Δ${bpmDiff} BPM` : ""})
+                  Transition Idéale (${match.label}${bpmDiff !== null ? ` · Δ${bpmDiff} BPM` : ""})
                 </span>
               `;
             }
@@ -2545,14 +2581,14 @@
         <div class="flex-1 min-w-0">
           <p class="text-sm font-extrabold truncate flex items-center gap-1.5" style="color:var(--text-primary)">
             <span class="truncate">${request.song_name}</span>
-            <span class="lyrics-badge ${hasLrc ? "inline-flex" : "hidden"} items-center justify-center w-5 h-5 rounded-md text-[11px] bg-purple-500/25 text-purple-300 border border-purple-500/40 shrink-0" data-lyrics-key="${lyricsKey}" title="Paroles karaoké synchronisées disponibles (LRCLIB)">🎤</span>
+            <span class="lyrics-badge ${hasLrc ? "inline-flex" : "hidden"} items-center justify-center px-1.5 py-0.5 rounded-md text-[10px] font-black bg-purple-500/25 text-purple-300 border border-purple-500/40 shrink-0" data-lyrics-key="${lyricsKey}" title="Paroles karaoké synchronisées disponibles (LRCLIB)">LRC</span>
           </p>
           <p class="text-xs truncate font-medium mt-0.5" style="color:var(--text-secondary)">${request.artist}</p>
           <div class="flex flex-wrap items-center gap-2 mt-1">
             <span class="text-[11px]" style="color:var(--text-muted)">Par <span style="color:var(--text-secondary)">${request.user_name}</span></span>
             ${isKaraokeReq ? `
               <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-200 border border-purple-400/60 shadow-lg shadow-purple-500/20 animate-pulse" title="L'invité a demandé un micro pour chanter sur scène">
-                <span class="text-xs">🎤</span> Demande Karaoké
+                Micro Karaoké
               </span>
             ` : ""}
             ${harmonicSuggestionBadge}
@@ -2889,7 +2925,7 @@
       if (btnToggle) {
         btnToggle.classList.add("bg-amber-500/30", "border-amber-400", "text-amber-200");
       }
-      showToast("🛡️ Mode Secours activé — sonorisation locale autonome !", "warning");
+      showToast("Mode Secours activé — sonorisation locale autonome !", "warning");
     } catch (e) {
       console.error("Erreur lancement secours hors-ligne:", e);
     }
@@ -3096,7 +3132,7 @@
       e.preventDefault();
       // Gel d'urgence 5 min
       socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 5 });
-      showToast("❄️ Gel d'urgence 5 min activé (Touche F)");
+      showToast("Gel d'urgence 5 min activé (Touche F)");
     } else if (e.key.toLowerCase() === "s") {
       e.preventDefault();
       document.getElementById("showSettings")?.click();
@@ -3142,7 +3178,7 @@
         const nameEl = document.getElementById("djMidiName");
         if (inputs.length > 0) {
           if (statusEl) statusEl.classList.remove("hidden");
-          if (nameEl) nameEl.textContent = `🎛️ MIDI : ${inputs[0].name || "Connecté"}`;
+          if (nameEl) nameEl.textContent = `MIDI : ${inputs[0].name || "Connecté"}`;
         } else {
           if (statusEl) statusEl.classList.add("hidden");
         }
@@ -3170,39 +3206,39 @@
           switch (padIndex) {
             case 0: // PAD 1: Play/Pause
               togglePlayPause();
-              showToast("🎛️ MIDI PAD 1 : Play/Pause");
+              showToast("MIDI PAD 1 : Play/Pause");
               break;
             case 1: // PAD 2: Accepter 1er
               if (pendingRequests.length > 0) {
                 acceptRequest(pendingRequests[0].id);
-                showToast("🎛️ MIDI PAD 2 : Demande acceptée");
+                showToast("MIDI PAD 2 : Demande acceptée");
               }
               break;
             case 2: // PAD 3: Refuser 1er
               if (pendingRequests.length > 0) {
                 rejectRequest(pendingRequests[0].id);
-                showToast("🎛️ MIDI PAD 3 : Demande refusée");
+                showToast("MIDI PAD 3 : Demande refusée");
               }
               break;
             case 3: // PAD 4: Titre suivant
               document.getElementById("btnNext")?.click();
-              showToast("🎛️ MIDI PAD 4 : Titre Suivant");
+              showToast("MIDI PAD 4 : Titre Suivant");
               break;
             case 4: // PAD 5: Titre précédent
               document.getElementById("btnPrevious")?.click();
-              showToast("🎛️ MIDI PAD 5 : Titre Précédent");
+              showToast("MIDI PAD 5 : Titre Précédent");
               break;
             case 5: // PAD 6: Gel d'urgence 5 min
               socket.emit("update-event-settings", { eventId, requestFreezeMinutes: 5 });
-              showToast("🎛️ MIDI PAD 6 : ❄️ Gel 5 min");
+              showToast("MIDI PAD 6 : Gel 5 min");
               break;
             case 6: // PAD 7: Ouvrir message
               document.getElementById("showMessagePanel")?.click();
-              showToast("🎛️ MIDI PAD 7 : Message");
+              showToast("MIDI PAD 7 : Message");
               break;
             case 7: // PAD 8: Tout accepter
               document.getElementById("btnAcceptAllPending")?.click();
-              showToast("🎛️ MIDI PAD 8 : Tout accepter");
+              showToast("MIDI PAD 8 : Tout accepter");
               break;
           }
         };
@@ -3251,12 +3287,12 @@
     if (state === "offline") {
       banner.style.background = "rgba(239, 68, 68, 0.25)";
       banner.style.color = "#fca5a5";
-      text.textContent = message || "📶 Mode Hors-Ligne — Connexion perdue. Vos données locales sont actives sans freeze.";
+      text.textContent = message || "Mode Hors-Ligne — Connexion perdue. Vos données locales sont actives sans freeze.";
       banner.classList.remove("hidden");
     } else if (state === "online") {
       banner.style.background = "rgba(16, 185, 129, 0.25)";
       banner.style.color = "#6ee7b7";
-      text.textContent = message || "✨ Reconnecté au serveur ! Synchronisation en cours...";
+      text.textContent = message || "Reconnecté au serveur ! Synchronisation en cours...";
       banner.classList.remove("hidden");
       setTimeout(() => banner.classList.add("hidden"), 3000);
     } else {
@@ -3320,7 +3356,7 @@
         }
       });
 
-      blindTestTrackSelect.innerHTML = `<option value="auto">🎲 Aléatoire intelligent (${eligibleTracks.length} morceaux dispo)</option>` +
+      blindTestTrackSelect.innerHTML = `<option value="auto">Aléatoire intelligent (${eligibleTracks.length} morceaux dispo)</option>` +
         eligibleTracks.map((t) => `
           <option value="${encodeURIComponent(JSON.stringify({ song_name: t.song_name, artist: t.artist, preview_url: t.preview_url || "", image_url: t.image_url || "" }))}">
             ${t.song_name} — ${t.artist}
@@ -3423,7 +3459,7 @@
     btnStopBlindTest?.classList.remove("hidden");
     blindTestLiveStatus?.classList.remove("hidden");
     if (blindTestCorrectHint) {
-      blindTestCorrectHint.textContent = `🎯 Réponse (#${correctIndex + 1}) : ${finalOptions[correctIndex]}`;
+      blindTestCorrectHint.textContent = `Réponse (#${correctIndex + 1}) : ${finalOptions[correctIndex]}`;
     }
     if (blindTestVotesCount) blindTestVotesCount.textContent = "0 réponse enregistrée";
 
@@ -3464,7 +3500,7 @@
     const winners = Array.isArray(data.winners) ? data.winners : [];
     if (winners.length > 0) {
       const topWin = winners[0];
-      showToast(`🏆 Gagnant Blind-Test : ${topWin.userName} en ${topWin.timeSec}s !`);
+      showToast(`Gagnant Blind-Test : ${topWin.userName} en ${topWin.timeSec}s !`);
     } else {
       showToast("Blind-Test terminé : aucun gagnant cette fois-ci.");
     }
@@ -3583,6 +3619,37 @@
     });
   }
 
+  let djActiveCustomModules = [];
+
+  function renderDjActiveCustomModules() {
+    const list = document.getElementById("djActiveCustomModulesList");
+    if (!list) return;
+    if (djActiveCustomModules.length === 0) {
+      list.innerHTML = `<p class="text-xs text-slate-500 italic">Aucun module personnalisé actif.</p>`;
+      return;
+    }
+    list.innerHTML = djActiveCustomModules.map((m, idx) => `
+      <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-black/40 border border-white/10 text-xs">
+        <div class="min-w-0 flex-1">
+          <span class="font-bold text-purple-300 uppercase text-[10px]">[${m.type === "image" ? "Image" : "Texte"}]</span>
+          <span class="text-white truncate ml-1.5">${m.type === "image" ? (m.content.slice(0, 32) + "...") : m.content}</span>
+        </div>
+        <button type="button" class="text-rose-400 hover:text-rose-300 font-bold px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-[11px] transition" data-del-dj-mod="${idx}">
+          Supprimer
+        </button>
+      </div>
+    `).join("");
+
+    list.querySelectorAll("[data-del-dj-mod]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.delDjMod, 10);
+        djActiveCustomModules.splice(idx, 1);
+        renderDjActiveCustomModules();
+        broadcastStudioScreenConfig();
+      });
+    });
+  }
+
   // Lecture des valeurs courantes du studio
   function getCurrentStudioScreenConfig() {
     return {
@@ -3597,6 +3664,7 @@
       hideFooter: !document.getElementById("screenToggleFooter")?.checked,
       visualizerMode: document.getElementById("screenVisualizerSelect")?.value || "cyber-spectrum",
       backgroundFx: document.getElementById("projectionVisualsMode")?.value || "aurora",
+      customModules: djActiveCustomModules,
     };
   }
 
@@ -3633,6 +3701,10 @@
     if (fxSelect && cfg.backgroundFx) {
       fxSelect.value = cfg.backgroundFx;
     }
+    if (Array.isArray(cfg.customModules)) {
+      djActiveCustomModules = [...cfg.customModules];
+      renderDjActiveCustomModules();
+    }
   }
 
   // Diffuser la configuration actuelle en direct sur le Grand Écran
@@ -3655,11 +3727,75 @@
       feedback.classList.remove("hidden");
       setTimeout(() => feedback.classList.add("hidden"), 3000);
     }
-    showToast("Ambiance diffusée en direct sur le Grand Écran ⚡", "success");
+    showToast("Ambiance diffusée en direct sur le Grand Écran", "success");
   }
 
   document.getElementById("btnBroadcastScreenConfig")?.addEventListener("click", () => {
     broadcastStudioScreenConfig();
+  });
+
+  // Mode Studio Visuel Grand Écran (Drag & Drop en direct)
+  document.getElementById("btnOpenStudioEditor")?.addEventListener("click", () => {
+    window.open(`/event/${eventId}/qr?edit=1`, "_blank");
+  });
+
+  // Ajout de modules personnalisés depuis la console DJ
+  document.getElementById("btnDjAddTextModule")?.addEventListener("click", () => {
+    const input = document.getElementById("djCustomTextInput");
+    const val = input?.value?.trim();
+    if (!val) {
+      showToast("Veuillez saisir un texte ou annonce", "error");
+      return;
+    }
+    djActiveCustomModules.push({
+      id: "mod-txt-" + Date.now(),
+      type: "text",
+      content: val,
+      left: "35%",
+      top: "30%",
+      width: "30%",
+      height: "18%",
+      zIndex: 20
+    });
+    if (input) input.value = "";
+    renderDjActiveCustomModules();
+    broadcastStudioScreenConfig();
+    showToast("Module texte diffusé sur l'écran !", "success");
+  });
+
+  document.getElementById("btnDjAddImageModule")?.addEventListener("click", () => {
+    const input = document.getElementById("djCustomImageUrlInput");
+    const val = input?.value?.trim();
+    if (!val) {
+      showToast("Veuillez saisir l'URL d'une image", "error");
+      return;
+    }
+    djActiveCustomModules.push({
+      id: "mod-img-" + Date.now(),
+      type: "image",
+      content: val,
+      left: "65%",
+      top: "10%",
+      width: "25%",
+      height: "25%",
+      zIndex: 20
+    });
+    if (input) input.value = "";
+    renderDjActiveCustomModules();
+    broadcastStudioScreenConfig();
+    showToast("Image ou logo diffusé sur l'écran !", "success");
+  });
+
+  document.getElementById("btnDjResetCanvasLayout")?.addEventListener("click", () => {
+    if (confirm("Réinitialiser tous les blocs de l'écran à leur disposition initiale ?")) {
+      djActiveCustomModules = [];
+      renderDjActiveCustomModules();
+      socket.emit("set-screen-config", {
+        eventId,
+        config: { ...getCurrentStudioScreenConfig(), layout: null, customModules: [] }
+      });
+      showToast("Disposition de l'écran réinitialisée !", "info");
+    }
   });
 
   // Gestion des Presets personnalisés du DJ dans localStorage
@@ -3706,10 +3842,10 @@
         </div>
         <div class="flex items-center gap-2">
           <button type="button" class="btn btn-sm btn-primary flex-1 text-xs font-bold btn-load-custom-preset" data-custom-id="${p.id}">
-            Charger ⚡
+            Charger
           </button>
           <button type="button" class="btn btn-sm btn-ghost border border-red-500/30 text-red-400 hover:bg-red-500/20 px-2.5 text-xs font-bold btn-del-custom-preset" data-custom-id="${p.id}" title="Supprimer ce preset">
-            ✕
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
